@@ -1,4 +1,4 @@
-package com.bazinga.controller;
+package com.bazinga.repaly.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
