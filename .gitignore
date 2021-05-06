@@ -1,0 +1,9 @@
+.idea
+*.iml
+jdbc.properties
+.classpath
+.project
+.settings/
+target/
+*/disconf/download
+**/node_modules/**

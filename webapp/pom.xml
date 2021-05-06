@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.bazinga</groupId>
+		<artifactId>replay</artifactId>
+		<version>1.0</version>
+	</parent>
+
+	<artifactId>replay-webapp</artifactId>
+	<packaging>war</packaging>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.bazinga</groupId>
+			<artifactId>replay-process</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+
+	</dependencies>
+	
+	<build>
+		<finalName>capital</finalName>
+		<plugins>
+			<!-- 排除 node 依赖包 required:Maven	3.0,JDK	1.7 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.2.2</version>
+				<configuration>
+					<warSourceExcludes>**/node_modules/</warSourceExcludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<configuration>
+					<stopKey>STOP</stopKey>
+					<stopPort>8099</stopPort>
+					<stopWait>5</stopWait>
+					<scanIntervalSeconds>5</scanIntervalSeconds>
+					<httpConnector>
+						<port>8090</port>
+					</httpConnector>
+					<scanTargets>
+						<scanTarget>${project.basedir}/src/main</scanTarget>
+						<scanTarget>${project.basedir}/src/test</scanTarget>
+					</scanTargets>
+					<webAppConfig>
+						<contextPath>/</contextPath>
+					</webAppConfig>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>9.4.8.v20180619</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

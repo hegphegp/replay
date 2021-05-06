@@ -1,0 +1,45 @@
+1.涨幅达到 6% 监控行情
+2.封单打到60万股  触发下单
+
+撤单
+1 先定位买一队列中自己位置
+2 我前面的单子累计撤单>150000股;
+3 下单后10秒判断买一的股数 <5%;
+
+  1亿到3亿 3%
+  3  -8   2%
+  1亿以下  5%
+
+
+
+
+SET_JVM_Xms=2688m
+SET_JVM_Xmx=2688m
+SET_JVM_Xmn=1344m
+SET_JVM_Xss=256k
+SET_JVM_SurvivorRatio=10
+SET_JVM_InitialCodeCacheSize=128m
+SET_JVM_ReservedCodeCacheSize=256m
+SET_JVM_MetaspaceSize=256m
+SET_JVM_MaxMetaspaceSize=256m
+SET_JVM_CMSInitiatingOccupancyFraction=80
+SET_JVM_CMSMaxAbortablePrecleanTime=5000
+SET_JVM_MaxDirectMemorySize=256m
+SET_JVM_HeapDumpPath=/data/www/temp/dump.hprof
+SET_JVM_Xloggc=/data/www/temp/gc.log
+JAVA_OPTS="$JAVA_OPTS
+-server
+-Xms${SET_JVM_Xms} -Xmx${SET_JVM_Xmx} -Xmn${SET_JVM_Xmn}
+-Xss${SET_JVM_Xss}
+-XX:SurvivorRatio=${SET_JVM_SurvivorRatio}
+-XX:InitialCodeCacheSize=${SET_JVM_InitialCodeCacheSize} -XX:ReservedCodeCacheSize=${SET_JVM_ReservedCodeCacheSize}
+-XX:MetaspaceSize=${SET_JVM_MetaspaceSize} -XX:MaxMetaspaceSize=${SET_JVM_MaxMetaspaceSize}
+-XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=${SET_JVM_CMSInitiatingOccupancyFraction}
+-XX:+CMSScavengeBeforeRemark  -XX:CMSMaxAbortablePrecleanTime=${SET_JVM_CMSMaxAbortablePrecleanTime}
+-XX:MaxDirectMemorySize=${SET_JVM_MaxDirectMemorySize}
+-verbose:gc
+-XX:+PrintGCDetails
+-XX:+PrintGCDateStamps
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=${SET_JVM_HeapDumpPath}
+-Xloggc:${SET_JVM_Xloggc}"
