@@ -31,6 +31,7 @@
         <version.junit>4.12</version.junit>
         <version.commons-digester>2.0</version.commons-digester>
         <version.lombok>1.18.2</version.lombok>
+        <version.jna>5.0.0</version.jna>
     </properties>
     <dependencies>
         <!-- springframework -->
@@ -190,6 +191,12 @@
             <version>${version.commons-collections4}</version>
         </dependency>
 
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>${version.jna}</version>
+        </dependency>
+
         <!-- mybatis -->
         <dependency>
             <groupId>org.mybatis</groupId>
@@ -236,7 +243,11 @@
             <artifactId>druid</artifactId>
             <version>${version.druid}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.6.0</version>
+        </dependency>
         <!-- junit -->
         <dependency>
             <groupId>junit</groupId>
