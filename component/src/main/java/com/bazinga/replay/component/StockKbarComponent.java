@@ -131,7 +131,7 @@ public class StockKbarComponent {
         query.addOrderBy("kbar_date", Sort.SortType.DESC);
         List<StockKbar> stockKbarList = stockKbarService.listByCondition(query);
         if (CollectionUtils.isEmpty(stockKbarList)) {
-            initAndSaveKbarData(stockCode, stockName, 750);
+            initAndSaveKbarData(stockCode, stockName, 50);
         } else {
             String kbarDate = stockKbarList.get(0).getKbarDate();
             TradeDatePoolQuery trateDateQuery = new TradeDatePoolQuery();

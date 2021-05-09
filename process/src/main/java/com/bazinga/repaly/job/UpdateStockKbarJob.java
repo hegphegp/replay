@@ -13,5 +13,8 @@ public class UpdateStockKbarJob {
     @Autowired
     private StockKbarComponent stockKbarComponent;
 
+    public void execute(){
 
+        stockKbarComponent.batchUpdateDaily();
+    }
 }
