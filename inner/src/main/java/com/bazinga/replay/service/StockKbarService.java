@@ -62,4 +62,6 @@ public interface StockKbarService {
      * @param record 更新参数
      */
     int updateByUniqueKey(StockKbar record);
+
+    void deleteByStockCode(String stockCode);
 }
