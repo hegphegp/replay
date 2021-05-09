@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bazinga.replay.dao.StockPlankDailyDAO">
+
+    <resultMap id="BaseResultMap" type="com.bazinga.replay.model.StockPlankDaily">
+        <id column="id" jdbcType="BIGINT"  property="id" />
+        <result column="stock_code" jdbcType="VARCHAR" property="stockCode"/>
+        <result column="stock_name" jdbcType="VARCHAR" property="stockName"/>
+        <result column="trade_date" jdbcType="TIMESTAMP" property="tradeDate"/>
+        <result column="plank_type" jdbcType="TINYINT" property="plankType"/>
+        <result column="end_status" jdbcType="TINYINT" property="endStatus"/>
+        <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+
+    <sql id="Base_Column_List">
+        id,
+            stock_code,
+            stock_name,
+            trade_date,
+            plank_type,
+            end_status,
+            insert_time,
+            create_time,
+            update_time
+        </sql>
+
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from stock_plank_daily
+        where id = #{id}
+    </select>
+
+
+    <insert id="insert" parameterType="com.bazinga.replay.model.StockPlankDaily" useGeneratedKeys="true" keyProperty="id">
+        insert into stock_plank_daily (<include refid="Base_Column_List" />)
+        values(
+        #{id, jdbcType=BIGINT},
+            #{stockCode, jdbcType=VARCHAR},
+            #{stockName, jdbcType=VARCHAR},
+            #{tradeDate, jdbcType=TIMESTAMP},
+            #{plankType, jdbcType=TINYINT},
+            #{endStatus, jdbcType=TINYINT},
+            #{insertTime, jdbcType=TIMESTAMP},
+            #{createTime, jdbcType=TIMESTAMP},
+            #{updateTime, jdbcType=TIMESTAMP}
+            )
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.bazinga.replay.model.StockPlankDaily">
+        update stock_plank_daily
+        <set>
+            <if test="stockCode != null">
+                stock_code = #{stockCode, jdbcType=VARCHAR},
+            </if>
+            <if test="stockName != null">
+                stock_name = #{stockName, jdbcType=VARCHAR},
+            </if>
+            <if test="tradeDate != null">
+                trade_date = #{tradeDate, jdbcType=TIMESTAMP},
+            </if>
+            <if test="plankType != null">
+                plank_type = #{plankType, jdbcType=TINYINT},
+            </if>
+            <if test="endStatus != null">
+                end_status = #{endStatus, jdbcType=TINYINT},
+            </if>
+            <if test="insertTime != null">
+                insert_time = #{insertTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime, jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id} limit 1
+    </update>
+
+    <sql id="Equal_Where_List">
+        <if test="stockCode != null">
+            and stock_code = #{stockCode, jdbcType=VARCHAR}
+        </if>
+        <if test="stockName != null">
+            and stock_name = #{stockName, jdbcType=VARCHAR}
+        </if>
+        <if test="plankType != null">
+            and plank_type = #{plankType, jdbcType=TINYINT}
+        </if>
+        <if test="endStatus != null">
+            and end_status = #{endStatus, jdbcType=TINYINT}
+        </if>
+    </sql>
+
+    <sql id="Range_Where_List">
+        <if test="tradeDateFrom != null">
+            <![CDATA[
+            and trade_date >= #{tradeDateFrom, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
+        <if test="tradeDateTo != null">
+            <![CDATA[
+            and trade_date <= #{tradeDateTo, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
+        <if test="insertTimeFrom != null">
+            <![CDATA[
+            and insert_time >= #{insertTimeFrom, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
+        <if test="insertTimeTo != null">
+            <![CDATA[
+            and insert_time <= #{insertTimeTo, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
+        <if test="createTimeFrom != null">
+            <![CDATA[
+            and create_time >= #{createTimeFrom, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
+        <if test="createTimeTo != null">
+            <![CDATA[
+            and create_time <= #{createTimeTo, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
+        <if test="updateTimeFrom != null">
+            <![CDATA[
+            and update_time >= #{updateTimeFrom, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
+        <if test="updateTimeTo != null">
+            <![CDATA[
+            and update_time <= #{updateTimeTo, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
+    </sql>
+
+    <sql id="GtLastMaxId_Where">
+        <if test="lastMaxId != null and lastMaxId > 0">
+            and id > #{lastMaxId}
+        </if>
+    </sql>
+
+    <sql id="Order_By">
+        <if test="sorts != null and sorts.size > 0">
+            ORDER BY
+            <foreach collection="sorts" item="sortItem" separator=",">
+                ${sortItem.column} ${sortItem.type.message}
+            </foreach>
+        </if>
+    </sql>
+
+    <select id="selectByCondition" parameterType="com.bazinga.replay.query.StockPlankDailyQuery" resultMap="BaseResultMap">
+        select
+            <include refid="Base_Column_List"/>
+        from stock_plank_daily
+        <where>
+            <include refid="Equal_Where_List"/>
+            <include refid="Range_Where_List"/>
+            <include refid="GtLastMaxId_Where" />
+        </where>
+        <include refid="Order_By"/>
+        <if test="limit > 0">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="countByCondition" parameterType="com.bazinga.replay.query.StockPlankDailyQuery" resultType="java.lang.Integer">
+        select count(1)
+        from stock_plank_daily
+        <where>
+            <include refid="Equal_Where_List"/>
+            <include refid="Range_Where_List"/>
+        </where>
+    </select>
+
+
+</mapper>
