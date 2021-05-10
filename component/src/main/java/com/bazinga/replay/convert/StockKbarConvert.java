@@ -1,4 +1,4 @@
-package com.bazinga.replay.dto;
+package com.bazinga.replay.convert;
 
 
 import com.bazinga.constant.SymbolConstants;

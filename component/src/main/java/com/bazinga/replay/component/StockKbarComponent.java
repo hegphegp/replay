@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.bazinga.base.Sort;
 import com.bazinga.replay.dto.AdjFactorDTO;
-import com.bazinga.replay.dto.StockKbarConvert;
+import com.bazinga.replay.convert.StockKbarConvert;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.CirculateInfoAll;
 import com.bazinga.replay.model.StockKbar;
