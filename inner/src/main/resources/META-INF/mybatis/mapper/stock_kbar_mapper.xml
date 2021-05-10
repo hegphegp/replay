@@ -61,6 +61,10 @@
         where unique_key = #{uniqueKey} limit 1
     </select>
 
+    <delete id="deleteByStockCode" parameterType="java.lang.String">
+        delete from stock_kbar where stock_code = #{stockCode, jdbcType=VARCHAR}
+    </delete>
+
     <update id="updateByUniqueKey" parameterType="com.bazinga.replay.model.StockKbar">
         update stock_kbar
         <set>

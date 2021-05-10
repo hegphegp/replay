@@ -69,4 +69,9 @@ public class StockKbarServiceImpl implements StockKbarService {
         Assert.notNull(record, "待更新记录不能为空");
         return stockKbarDAO.updateByUniqueKey(record);
     }
+
+    @Override
+    public void deleteByStockCode(String stockCode) {
+        stockKbarDAO.deleteByStockCode(stockCode);
+    }
 }

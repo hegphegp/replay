@@ -62,5 +62,9 @@ public interface StockKbarDAO {
      * @param record 更新参数
      */
     int updateByUniqueKey(StockKbar record);
-
+    /**
+     * 根据股票代码删除 k线数据
+     * @param stockCode 股票代码
+     */
+    void deleteByStockCode(String stockCode);
 }

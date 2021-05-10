@@ -131,7 +131,7 @@ public class StockKbarComponent {
         query.addOrderBy("kbar_date", Sort.SortType.DESC);
         List<StockKbar> stockKbarList = stockKbarService.listByCondition(query);
         if (CollectionUtils.isEmpty(stockKbarList)) {
-            initAndSaveKbarData(stockCode, stockName, 750);
+            initAndSaveKbarData(stockCode, stockName, 50);
         } else {
             String kbarDate = stockKbarList.get(0).getKbarDate();
             TradeDatePoolQuery trateDateQuery = new TradeDatePoolQuery();
@@ -188,7 +188,7 @@ public class StockKbarComponent {
                     log.info("更新K线数据 完成 stockCode ={}", stockCode);
                 } else {
                     log.info("复权因子发生变更 stockCode ={}", stockCode);
-                   // stockKbarService.deleteByStockCode(stockCode);
+                    stockKbarService.deleteByStockCode(stockCode);
                     initAndSaveKbarData(stockCode, stockName, 500);
                 }
             }
@@ -212,7 +212,7 @@ public class StockKbarComponent {
             query.setStockCode(item.getStock());
             int count = stockKbarService.countByCondition(query);
             if (count == 0) {
-                initAndSaveKbarData(item.getStock(), item.getStockName(), 750);
+                initAndSaveKbarData(item.getStock(), item.getStockName(), 2);
             }
         });
     }

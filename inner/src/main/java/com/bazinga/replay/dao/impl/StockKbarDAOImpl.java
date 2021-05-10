@@ -67,4 +67,11 @@ public class StockKbarDAOImpl extends SqlSessionDaoSupport implements StockKbarD
     public int updateByUniqueKey(StockKbar record) {
         return this.getSqlSession().update( MAPPER_NAME + ".updateByUniqueKey", record);
     }
-}
+
+    @Override
+    public void deleteByStockCode(String stockCode) {
+        this.getSqlSession().delete( MAPPER_NAME + ".deleteByStockCode", stockCode);
+    }
+
+
+ }
