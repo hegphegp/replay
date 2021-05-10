@@ -41,4 +41,16 @@ public enum PlankTypeEnum {
         this.desc = desc;
     }
 
+    public static PlankTypeEnum getByCode(Integer code){
+        if(code==null){
+            return null;
+        }
+        for (PlankTypeEnum plankTypeEnum:PlankTypeEnum.values()){
+            if(plankTypeEnum.getCode()==code){
+                return plankTypeEnum;
+            }
+        }
+        return null;
+    }
+
 }
