@@ -1,5 +1,6 @@
 package com.bazinga.test;
 
+import com.bazinga.replay.component.NewStockComponent;
 import com.bazinga.replay.component.StockPlankDailyComponent;
 import com.bazinga.util.DateUtil;
 import com.tradex.enums.KCate;
@@ -25,8 +26,11 @@ import java.util.Date;
 public class BaseTestCase {
     @Autowired
     private StockPlankDailyComponent stockPlankDailyComponent;
+    @Autowired
+    private NewStockComponent newStockComponent;
     @Test
     public void test1() {
-        stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
+        //stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
+        newStockComponent.catchNewStock();
     }
 }

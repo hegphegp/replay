@@ -19,6 +19,8 @@
 
         <task:scheduled ref="stockPlankDailyJob" method="execute" cron="00 40 15 * * ?"/>
 
+        <task:scheduled ref="newStockJob" method="execute" cron="00 40 15 * * ?"/>
+
     </task:scheduled-tasks>
 
 </beans>
