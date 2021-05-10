@@ -27,6 +27,6 @@ public class BaseTestCase {
     private StockPlankDailyComponent stockPlankDailyComponent;
     @Test
     public void test1() {
-        stockPlankDailyComponent.stockPlankDailyStatistic(DateUtil.parseDate("2021-05-07 17:00:00",DateUtil.DEFAULT_FORMAT));
+        stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
     }
 }
