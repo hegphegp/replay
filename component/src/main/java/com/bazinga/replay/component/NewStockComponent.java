@@ -2,12 +2,17 @@ package com.bazinga.replay.component;
 
 
 
+import com.bazinga.enums.MarketTypeEnum;
 import com.bazinga.replay.convert.CiculateInfoDTOConvert;
 import com.bazinga.replay.convert.KBarDTOConvert;
 import com.bazinga.replay.dto.CirculateInfoDTO;
 import com.bazinga.replay.dto.KBarDTO;
+import com.bazinga.replay.model.CirculateInfo;
 import com.bazinga.replay.model.NewStock;
+import com.bazinga.replay.query.CirculateInfoQuery;
+import com.bazinga.replay.service.CirculateInfoService;
 import com.bazinga.replay.service.NewStockService;
+import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
 import com.tradex.enums.ExchangeId;
 import com.tradex.enums.KCate;
@@ -28,6 +33,8 @@ import java.util.List;
 public class NewStockComponent {
     @Autowired
     private NewStockService newStockService;
+    @Autowired
+    private CirculateInfoService circulateInfoService;
 
     public void catchNewStock(){
         for (int i = 0;i<=30;i++) {
@@ -163,6 +170,21 @@ public class NewStockComponent {
         newStock.setMarketDate(marketDate);
         newStock.setCreateTime(new Date());
         newStockService.save(newStock);
+        CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
+        circulateInfoQuery.setStockCode(stockCode);
+        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
+        if(CollectionUtils.isEmpty(circulateInfos)&& MarketUtil.isMain(stockCode)){
+            CirculateInfo circulateInfo = new CirculateInfo();
+            circulateInfo.setStockCode(stockCode);
+            circulateInfo.setStockName(stockName);
+            circulateInfo.setCirculate(100000000l);
+            circulateInfo.setCirculateZ(100000000l);
+            circulateInfo.setCreateTime(new Date());
+            circulateInfo.setMarketType(MarketTypeEnum.GENERAL.getCode());
+            circulateInfo.setStockType(0);
+            circulateInfoService.save(circulateInfo);
+            log.info("添加新股数据stockCode：{}",stockCode);
+        }
 
     }
 
