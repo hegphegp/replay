@@ -32,6 +32,8 @@
         <version.commons-digester>2.0</version.commons-digester>
         <version.lombok>1.18.2</version.lombok>
         <version.jna>5.0.0</version.jna>
+        <version.poi>3.16</version.poi>
+        <version.commons-io>2.6</version.commons-io>
     </properties>
     <dependencies>
         <!-- springframework -->
@@ -272,6 +274,44 @@
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.11.3</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${version.poi}</version>
+
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${version.poi}</version>
+
+
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml-schemas</artifactId>
+            <version>${version.poi}</version>
+
+        </dependency>
+        <!--<dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-excelant</artifactId>
+            <version>${version.poi}</version>
+        </dependency>-->
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${version.commons-io}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xuxueli</groupId>
+            <artifactId>xxl-excel</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

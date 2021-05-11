@@ -181,7 +181,7 @@ public class NewStockComponent {
             circulateInfo.setCirculateZ(100000000l);
             circulateInfo.setCreateTime(new Date());
             circulateInfo.setMarketType(MarketTypeEnum.GENERAL.getCode());
-            circulateInfo.setStockType(0);
+            circulateInfo.setStockType(1);
             circulateInfoService.save(circulateInfo);
             log.info("添加新股数据stockCode：{}",stockCode);
         }
