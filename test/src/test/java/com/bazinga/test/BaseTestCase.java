@@ -33,8 +33,8 @@ public class BaseTestCase {
     private SynInfoComponent synInfoComponent;
     @Test
     public void test1() {
-        //stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
-        newStockComponent.catchNewStock();
+        stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
+        //newStockComponent.catchNewStock();
     }
 
     @Test

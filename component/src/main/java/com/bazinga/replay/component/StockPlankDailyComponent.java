@@ -6,6 +6,7 @@ import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.convert.KBarDTOConvert;
 import com.bazinga.replay.dto.KBarDTO;
 import com.bazinga.replay.dto.PlankTypeDTO;
+import com.bazinga.replay.model.CirculateInfo;
 import com.bazinga.replay.model.CirculateInfoAll;
 import com.bazinga.replay.model.StockPlankDaily;
 import com.bazinga.replay.query.CirculateInfoAllQuery;
@@ -40,7 +41,7 @@ public class StockPlankDailyComponent {
     @Autowired
     private StockPlankDailyService stockPlankDailyService;
     @Autowired
-    private CirculateInfoAllComponent circulateInfoAllComponent;
+    private CirculateInfoComponent circulateInfoComponent;
     @Autowired
     private CommonComponent commonComponent;
 
@@ -51,15 +52,15 @@ public class StockPlankDailyComponent {
             return;
         }
         date = DateTimeUtils.getDate000000(date);
-        List<CirculateInfoAll> circulateInfoAlls = circulateInfoAllComponent.getMainAndGrowth();
-        for (CirculateInfoAll circulateInfoAll:circulateInfoAlls){
-            String stockCode = circulateInfoAll.getStock();
-            String stockName = circulateInfoAll.getStockName();
+        List<CirculateInfo> circulateInfos = circulateInfoComponent.getMainAndGrowth();
+        for (CirculateInfo circulateInfo:circulateInfos){
+            String stockCode = circulateInfo.getStockCode();
+            String stockName = circulateInfo.getStockName();
             try {
-                /*if (!stockCode.equals("605180")) {
+                /*if (!stockCode.equals("605117")) {
                     continue;
                 }*/
-                List<KBarDTO> stockKBars = getStockKBars(circulateInfoAll);
+                List<KBarDTO> stockKBars = getStockKBars(circulateInfo);
                 log.info("复盘数据 k线数据 stockCode:{} stockName:{} kbars:{}", stockCode, stockName, JSONObject.toJSONString(stockKBars));
                 if (CollectionUtils.isEmpty(stockKBars)) {
                     log.info("复盘数据 没有获取到k线数据 stockCode:{} stockName:{}", stockCode, stockName);
@@ -69,7 +70,7 @@ public class StockPlankDailyComponent {
                     log.info("复盘数据 没有获取到当日k线数据 stockCode:{} stockName:{}", stockCode, stockName);
                     continue;
                 }
-                PlankTypeDTO plankTypeDTO = continuePlankTypeDto(stockKBars, circulateInfoAll);
+                PlankTypeDTO plankTypeDTO = continuePlankTypeDto(stockKBars, circulateInfo);
                 PlankTypeEnum plankTypeEnum = getPlankTypeEnum(plankTypeDTO);
                 if (plankTypeEnum == null) {
                     log.info("复盘数据 没有板 stockCode:{} stockName:{}", stockCode, stockName);
@@ -117,7 +118,7 @@ public class StockPlankDailyComponent {
 
 
     //判断连板天数
-    public PlankTypeDTO continuePlankTypeDto(List<KBarDTO> kbars, CirculateInfoAll circulateInfo){
+    public PlankTypeDTO continuePlankTypeDto(List<KBarDTO> kbars, CirculateInfo circulateInfo){
         PlankTypeDTO plankTypeDTO = new PlankTypeDTO();
         plankTypeDTO.setPlank(false);
         plankTypeDTO.setEndPlank(false);
@@ -134,8 +135,8 @@ public class StockPlankDailyComponent {
         for (KBarDTO kBarDTO:reverse){
             i++;
             if(preEndPrice!=null) {
-                boolean highPlank = PriceUtil.isUpperPrice(circulateInfo.getStock(), preHighPrice,kBarDTO.getEndPrice());
-                boolean endPlank = PriceUtil.isUpperPrice(circulateInfo.getStock(), preEndPrice,kBarDTO.getEndPrice());
+                boolean highPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preHighPrice,kBarDTO.getEndPrice());
+                boolean endPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preEndPrice,kBarDTO.getEndPrice());
                 if(i==2){
                     if(highPlank){
                         plankTypeDTO.setPlank(highPlank);
@@ -171,11 +172,11 @@ public class StockPlankDailyComponent {
     }
 
 
-    public List<KBarDTO> getStockKBars(CirculateInfoAll circulateInfo){
+    public List<KBarDTO> getStockKBars(CirculateInfo circulateInfo){
         try {
-            DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, circulateInfo.getStock(), 0, 50);
+            DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, circulateInfo.getStockCode(), 0, 50);
             List<KBarDTO> kbars = KBarDTOConvert.convertKBar(dataTable);
-            List<KBarDTO> list = deleteNewStockTimes(kbars, 50, circulateInfo.getStock());
+            List<KBarDTO> list = deleteNewStockTimes(kbars, 50, circulateInfo.getStockCode());
             return list;
         }catch (Exception e){
             return null;
