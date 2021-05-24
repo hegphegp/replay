@@ -41,4 +41,6 @@ public class BaseTestCase {
     public void test2() {
         synInfoComponent.synCirculateInfo();
     }
+
+
 }

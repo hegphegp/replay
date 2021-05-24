@@ -14,7 +14,6 @@ public class UpdateStockKbarJob {
     private StockKbarComponent stockKbarComponent;
 
     public void execute(){
-
         stockKbarComponent.batchUpdateDaily();
     }
 }
