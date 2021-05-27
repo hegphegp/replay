@@ -221,9 +221,9 @@ public class StockKbarComponent {
     }
 
     public static void main(String[] args) {
-      //  Map<String, AdjFactorDTO> adjFactorList = getAdjFactorMap("688278", "");
-        Map<String, String> notices = getNotices("600198", "20210129");
-        System.out.println(JSONObject.toJSONString(notices));
+        Map<String, AdjFactorDTO> adjFactorList = getAdjFactorMap("600095", "20210525");
+      //  Map<String, String> notices = getNotices("600095", "20210525");
+        System.out.println(JSONObject.toJSONString(adjFactorList));
     }
 
     public static Map<String,String> getNotices(String stockCode, String kbarDate ){
@@ -274,7 +274,7 @@ public class StockKbarComponent {
         String tsStockCode = stockCode.startsWith("6") ? stockCode + ".SH" : stockCode + ".SZ";
         paramsdate.put("ts_code", tsStockCode);
         if (StringUtils.isNotBlank(kbarDateFrom)) {
-            paramsdate.put("start_date", tsStockCode);
+            paramsdate.put("start_date", kbarDateFrom);
         }
         paramMap.put("params", paramsdate);
         paramMap.put("fields", "trade_date,adj_factor");
