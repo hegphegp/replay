@@ -26,7 +26,7 @@
 	</dependencies>
 	
 	<build>
-		<finalName>capital</finalName>
+		<finalName>replay</finalName>
 		<plugins>
 			<!-- 排除 node 依赖包 required:Maven	3.0,JDK	1.7 -->
 			<plugin>

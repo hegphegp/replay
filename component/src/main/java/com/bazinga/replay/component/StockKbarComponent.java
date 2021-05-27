@@ -8,13 +8,16 @@ import com.bazinga.base.Sort;
 import com.bazinga.replay.dto.AdjFactorDTO;
 import com.bazinga.replay.convert.StockKbarConvert;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
+import com.bazinga.replay.model.CirculateInfo;
 import com.bazinga.replay.model.CirculateInfoAll;
 import com.bazinga.replay.model.StockKbar;
 import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.CirculateInfoAllQuery;
+import com.bazinga.replay.query.CirculateInfoQuery;
 import com.bazinga.replay.query.StockKbarQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.CirculateInfoAllService;
+import com.bazinga.replay.service.CirculateInfoService;
 import com.bazinga.replay.service.StockKbarService;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateFormatUtils;
@@ -55,7 +58,7 @@ public class StockKbarComponent {
     private TransactionTemplate transactionTemplate;
 
     @Autowired
-    private CirculateInfoAllService circulateInfoAllService;
+    private CirculateInfoService circulateInfoService;
 
     @Autowired
     private HistoryTransactionDataComponent historyTransactionDataComponent;
@@ -197,22 +200,22 @@ public class StockKbarComponent {
     }
 
     public void batchUpdateDaily() {
-        CirculateInfoAllQuery circulateInfoQuery = new CirculateInfoAllQuery();
+        CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
         //circulateInfoQuery.setMarketType(MarketTypeEnum.GENERAL.getCode());
-        List<CirculateInfoAll> circulateInfos = circulateInfoAllService.listByCondition(circulateInfoQuery);
+        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
         circulateInfos.forEach(item -> {
-            updateKbarDataDaily(item.getStock(), item.getStockName());
+            updateKbarDataDaily(item.getStockCode(), item.getStockName());
         }); }
 
     public void batchKbarDataInit() {
-        CirculateInfoAllQuery circulateInfoQuery = new CirculateInfoAllQuery();
-        List<CirculateInfoAll> circulateInfos = circulateInfoAllService.listByCondition(circulateInfoQuery);
+        CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
+        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
         circulateInfos.forEach(item -> {
             StockKbarQuery query = new StockKbarQuery();
-            query.setStockCode(item.getStock());
+            query.setStockCode(item.getStockCode());
             int count = stockKbarService.countByCondition(query);
             if (count == 0) {
-                initAndSaveKbarData(item.getStock(), item.getStockName(), 2);
+                initAndSaveKbarData(item.getStockCode(), item.getStockName(), 2);
             }
         });
     }
