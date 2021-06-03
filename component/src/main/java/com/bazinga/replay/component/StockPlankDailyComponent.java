@@ -10,9 +10,12 @@ import com.bazinga.replay.dto.PlankTypeDTO;
 import com.bazinga.replay.model.CirculateInfo;
 import com.bazinga.replay.model.CirculateInfoAll;
 import com.bazinga.replay.model.StockPlankDaily;
+import com.bazinga.replay.model.StockRehabilitation;
 import com.bazinga.replay.query.CirculateInfoAllQuery;
+import com.bazinga.replay.query.StockPlankDailyQuery;
 import com.bazinga.replay.service.CirculateInfoAllService;
 import com.bazinga.replay.service.StockPlankDailyService;
+import com.bazinga.replay.service.StockRehabilitationService;
 import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
@@ -48,6 +51,8 @@ public class StockPlankDailyComponent {
     private CommonComponent commonComponent;
     @Autowired
     private StockKbarComponent stockKbarComponent;
+    @Autowired
+    private StockRehabilitationService stockRehabilitationService;
 
 
     public void stockPlankDailyStatistic(Date date){
@@ -146,6 +151,13 @@ public class StockPlankDailyComponent {
                     if(factor!=null) {
                         endPrice = endPrice.multiply(factor).setScale(2, BigDecimal.ROUND_HALF_UP);
                     }
+                    //添加到除权未板池
+                    if(i==2&&factor!=null){
+                        boolean highPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preHighPrice,endPrice);
+                        if(!highPlank){
+                            saveStockRehabilitation(circulateInfo.getStockCode(),circulateInfo.getStockName(),preDate);
+                        }
+                    }
                 }
                 boolean highPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preHighPrice,endPrice);
                 boolean endPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preEndPrice,endPrice);
@@ -182,6 +194,24 @@ public class StockPlankDailyComponent {
         plankTypeDTO.setBeforePlanks(before);
         plankTypeDTO.setSpace(space);
         return plankTypeDTO;
+    }
+    public void saveStockRehabilitation(String stockCode,String stockName,Date tradeDate){
+        Date preTradeDate = commonComponent.preTradeDate(tradeDate);
+        StockPlankDailyQuery query = new StockPlankDailyQuery();
+        query.setStockCode(stockCode);
+        query.setTradeDateFrom(DateTimeUtils.getDate000000(preTradeDate));
+        query.setTradeDateTo(DateTimeUtils.getDate235959(preTradeDate));
+        List<StockPlankDaily> stockPlankDailies = stockPlankDailyService.listByCondition(query);
+        int plankTypes = 0;
+        if(!CollectionUtils.isEmpty(stockPlankDailies)){
+            plankTypes = stockPlankDailies.get(0).getPlankType();
+        }
+        StockRehabilitation stockRehabilitation = new StockRehabilitation();
+        stockRehabilitation.setStockCode(stockCode);
+        stockRehabilitation.setStockName(stockName);
+        stockRehabilitation.setTradeDateStamp(DateUtil.format(tradeDate,DateUtil.yyyy_MM_dd));
+        stockRehabilitation.setYesterdayPlankType(plankTypes);
+        stockRehabilitationService.save(stockRehabilitation);
     }
 
 
