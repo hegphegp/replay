@@ -221,7 +221,7 @@ public class StockKbarComponent {
     }
 
     public static void main(String[] args) {
-        Map<String, AdjFactorDTO> adjFactorList = getAdjFactorMap("600095", "20210525");
+        Map<String, AdjFactorDTO> adjFactorList = getAdjFactorMap("600095", "20210522");
       //  Map<String, String> notices = getNotices("600095", "20210525");
         System.out.println(JSONObject.toJSONString(adjFactorList));
     }

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.bazinga.enums.PlankTypeEnum;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.convert.KBarDTOConvert;
+import com.bazinga.replay.dto.AdjFactorDTO;
 import com.bazinga.replay.dto.KBarDTO;
 import com.bazinga.replay.dto.PlankTypeDTO;
 import com.bazinga.replay.model.CirculateInfo;
@@ -29,6 +30,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -44,6 +46,8 @@ public class StockPlankDailyComponent {
     private CirculateInfoComponent circulateInfoComponent;
     @Autowired
     private CommonComponent commonComponent;
+    @Autowired
+    private StockKbarComponent stockKbarComponent;
 
 
     public void stockPlankDailyStatistic(Date date){
@@ -57,7 +61,7 @@ public class StockPlankDailyComponent {
             String stockCode = circulateInfo.getStockCode();
             String stockName = circulateInfo.getStockName();
             try {
-                /*if (!stockCode.equals("605117")) {
+                /*if (!stockCode.equals("603787")) {
                     continue;
                 }*/
                 List<KBarDTO> stockKBars = getStockKBars(circulateInfo);
@@ -128,6 +132,7 @@ public class StockPlankDailyComponent {
         List<KBarDTO> reverse = Lists.reverse(kbars);
         BigDecimal preEndPrice = null;
         BigDecimal preHighPrice = null;
+        Date preDate = null;
         int space = 0;
         int current = 0;
         int before = 0;
@@ -135,8 +140,15 @@ public class StockPlankDailyComponent {
         for (KBarDTO kBarDTO:reverse){
             i++;
             if(preEndPrice!=null) {
-                boolean highPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preHighPrice,kBarDTO.getEndPrice());
-                boolean endPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preEndPrice,kBarDTO.getEndPrice());
+                BigDecimal endPrice = kBarDTO.getEndPrice();
+                if(i==2||i==3){
+                    BigDecimal factor = getFactor(circulateInfo.getStockCode(), preDate);
+                    if(factor!=null) {
+                        endPrice = endPrice.multiply(factor).setScale(2, BigDecimal.ROUND_HALF_UP);
+                    }
+                }
+                boolean highPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preHighPrice,endPrice);
+                boolean endPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preEndPrice,endPrice);
                 if(i==2){
                     if(highPlank){
                         plankTypeDTO.setPlank(highPlank);
@@ -164,6 +176,7 @@ public class StockPlankDailyComponent {
             }
             preEndPrice = kBarDTO.getEndPrice();
             preHighPrice = kBarDTO.getHighestPrice();
+            preDate  = kBarDTO.getDate();
         }
         plankTypeDTO.setPlanks(current);
         plankTypeDTO.setBeforePlanks(before);
@@ -218,6 +231,23 @@ public class StockPlankDailyComponent {
             return list;
         }
         return datas;
+    }
+
+
+    public BigDecimal getFactor(String stockCode,Date tradeDate){
+        Date preTradeDate = commonComponent.preTradeDate(tradeDate);
+        String fromDate = DateUtil.format(preTradeDate, DateUtil.yyyyMMdd);
+        Map<String, AdjFactorDTO> adjFactorMap = stockKbarComponent.getAdjFactorMap(stockCode, fromDate);
+        AdjFactorDTO adjFactorDTO = adjFactorMap.get(DateUtil.format(tradeDate, DateUtil.yyyyMMdd));
+        AdjFactorDTO preAdjFactorDTO = adjFactorMap.get(DateUtil.format(preTradeDate, DateUtil.yyyyMMdd));
+        if(adjFactorDTO==null||preAdjFactorDTO==null||adjFactorDTO.getAdjFactor()==null||preAdjFactorDTO.getAdjFactor()==null){
+            return null;
+        }
+        if(adjFactorDTO.getAdjFactor().equals(preAdjFactorDTO.getAdjFactor())){
+            return null;
+        }
+        BigDecimal factor = preAdjFactorDTO.getAdjFactor().divide(adjFactorDTO.getAdjFactor(), 4, BigDecimal.ROUND_HALF_UP);
+        return factor;
     }
 
 
