@@ -34,7 +34,7 @@ public class BaseTestCase {
     @Test
     public void test1() {
         stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
-        //newStockComponent.catchNewStock();
+        newStockComponent.catchNewStock();
         //stockPlankDailyComponent.saveStockRehabilitation("002319","letonggufen",new Date());
     }
 
