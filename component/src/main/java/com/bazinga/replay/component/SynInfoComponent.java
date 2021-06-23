@@ -49,7 +49,7 @@ public class SynInfoComponent {
      * 同步板块信息
      */
     public   void synBlockInfo() throws IOException {
-        File file = new File(Conf.get("block.dir"));
+        File file = new File("D:/circulate/gn_block.txt");
         List<String> list = FileUtils.readLines(file, "GBK");
         list.forEach(item -> {
             String[] contents = item.split("\t");
