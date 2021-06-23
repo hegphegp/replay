@@ -9,6 +9,7 @@ package com.bazinga.constant;
  */
 public interface SymbolConstants {
 
+    String EQUAL = "=";
     /**
      * 英文逗号
      */

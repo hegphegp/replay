@@ -21,4 +21,13 @@ public class SynTest extends BaseTestCase {
             log.error(e.getMessage(),e);
         }
     }
+
+    @Test
+    public void testThs(){
+        try {
+            synInfoComponent.synThsBlockInfo();
+        } catch (IOException e) {
+            log.error(e.getMessage(),e);
+        }
+    }
 }
