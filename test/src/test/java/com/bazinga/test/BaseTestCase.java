@@ -1,8 +1,10 @@
 package com.bazinga.test;
 
 import com.bazinga.replay.component.NewStockComponent;
+import com.bazinga.replay.component.PlankExchangeDailyComponent;
 import com.bazinga.replay.component.StockPlankDailyComponent;
 import com.bazinga.replay.component.SynInfoComponent;
+import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
 import com.tradex.enums.KCate;
 import com.tradex.model.suport.DataTable;
@@ -31,6 +33,8 @@ public class BaseTestCase {
     private NewStockComponent newStockComponent;
     @Autowired
     private SynInfoComponent synInfoComponent;
+    @Autowired
+    private PlankExchangeDailyComponent plankExchangeDailyComponent;
     @Test
     public void test1() {
         stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
@@ -41,6 +45,12 @@ public class BaseTestCase {
     @Test
     public void test2() {
         synInfoComponent.synCirculateInfo();
+    }
+
+
+    @Test
+    public void test3() {
+        plankExchangeDailyComponent.plankExchangeDaily(new Date());
     }
 
 
