@@ -1,30 +1,32 @@
 package com.bazinga.replay.component;
 
+import com.alibaba.fastjson.JSONObject;
+import com.bazinga.constant.SymbolConstants;
 import com.bazinga.exception.BusinessException;
 import com.bazinga.replay.dto.CirculateInfoExcelDTO;
-import com.bazinga.replay.model.BlockInfo;
-import com.bazinga.replay.model.BlockStockDetail;
-import com.bazinga.replay.model.CirculateInfo;
+import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.BlockInfoQuery;
 import com.bazinga.replay.query.CirculateInfoQuery;
-import com.bazinga.replay.service.BlockInfoService;
-import com.bazinga.replay.service.BlockStockDetailService;
-import com.bazinga.replay.service.CirculateInfoService;
+import com.bazinga.replay.service.*;
 import com.bazinga.util.CommonUtil;
 import com.bazinga.util.Excel2JavaPojoUtil;
 import com.bazinga.util.MarketUtil;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.tradex.util.Conf;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author yunshan
@@ -44,12 +46,78 @@ public class SynInfoComponent {
     @Autowired
     private BlockStockDetailService blockStockDetailService;
 
+    @Autowired
+    private ThsBlockStockDetailService thsBlockStockDetailService;
 
+    @Autowired
+    private ThsBlockInfoService thsBlockInfoService;
+
+    public void synThsBlockInfo() throws IOException {
+        File file = new File("D:/circulate/block_conception.ini");
+        List<String> list = FileUtils.readLines(file, "GBK");
+        log.info(JSONObject.toJSONString(list));
+        int blockIndex = 0;
+        int detailIndex = 0;
+
+        Map<String,String> blockInfoMap = Maps.newHashMap();
+        Map<String,String> blockDetailMap = Maps.newHashMap();
+        for (int i = 0; i < list.size(); i++) {
+            if("[BLOCK_NAME_MAP_TABLE]".equals(list.get(i))){
+                blockIndex = i;
+            }
+            if("[BLOCK_STOCK_CONTEXT]".equals(list.get(i))){
+                detailIndex = i;
+            }
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if(i>blockIndex && i< detailIndex){
+                String blockString = list.get(i);
+                String[] blockMapStr = blockString.split(SymbolConstants.EQUAL);
+                String mapValue = blockMapStr.length==2 ? blockMapStr[1] : "";
+                blockInfoMap.put(blockMapStr[0],mapValue);
+            }
+            if(i > detailIndex){
+                String detailString = list.get(i);
+                String[] detailMapStr = detailString.split(SymbolConstants.EQUAL);
+                String mapValue = detailMapStr.length==2? detailMapStr[1]:"";
+                blockDetailMap.put(detailMapStr[0],mapValue);
+            }
+        }
+        log.info("板块数据{}",JSONObject.toJSONString(blockInfoMap));
+        for (Map.Entry<String, String> entry : blockInfoMap.entrySet()) {
+            String detailString = blockDetailMap.get(entry.getKey());
+            if(StringUtils.isEmpty(detailString)){
+                continue;
+            }
+            String[] detailArr = detailString.split(SymbolConstants.COMMA);
+            Set<String> detailSet = Sets.newHashSet(detailArr);
+            ThsBlockInfo blockInfo = new ThsBlockInfo();
+            blockInfo.setBlockCode(entry.getKey());
+            blockInfo.setBlockName(entry.getValue());
+            blockInfo.setTotalCount(detailSet.size());
+            thsBlockInfoService.save(blockInfo);
+            for (String detail : detailSet) {
+                ThsBlockStockDetail thsBlockStockDetail = new ThsBlockStockDetail();
+                thsBlockStockDetail.setBlockCode(entry.getKey());
+                thsBlockStockDetail.setBlockName(entry.getValue());
+                thsBlockStockDetail.setStockCode(  detail.split(":")[1]);
+                CirculateInfoQuery query = new CirculateInfoQuery();
+                query.setStockCode(thsBlockStockDetail.getStockCode());
+                List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(query);
+                if(CollectionUtils.isEmpty(circulateInfos)){
+                    thsBlockStockDetail.setStockName("");
+                }else {
+                    thsBlockStockDetail.setStockName(circulateInfos.get(0).getStockName());
+                }
+                thsBlockStockDetailService.save(thsBlockStockDetail);
+            }
+        }
+    }
     /**
      * 同步板块信息
      */
     public   void synBlockInfo() throws IOException {
-        File file = new File(Conf.get("block.dir"));
+        File file = new File("D:/circulate/gn_block.txt");
         List<String> list = FileUtils.readLines(file, "GBK");
         list.forEach(item -> {
             String[] contents = item.split("\t");
