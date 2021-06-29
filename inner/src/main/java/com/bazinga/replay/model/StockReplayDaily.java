@@ -96,6 +96,8 @@ public class StockReplayDaily implements Serializable {
      */
     private Integer beautifulPlankStatus;
 
+    private Integer openPlankStatus;
+
     /**
      * 平均溢价
      *

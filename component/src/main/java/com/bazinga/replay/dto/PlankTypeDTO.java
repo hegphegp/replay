@@ -11,6 +11,7 @@ public class PlankTypeDTO {
     boolean isPlank;
     boolean isEndPlank;
     boolean isBeautifulPlank;
+    boolean openPlankStatus;
     Date insertTime;
     int beforePlanks;
     int planks;

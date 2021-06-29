@@ -40,7 +40,7 @@ public class BaseTestCase {
         newStockComponent.catchNewStock();*/
         //stockPlankDailyComponent.saveStockRehabilitation("002319","letonggufen",new Date());
         stockReplayDailyComponent.stockReplayDaily(new Date());
-        stockReplayDailyComponent.calPreDateAvgPrice(new Date());
+        //stockReplayDailyComponent.calPreDateAvgPrice(new Date());
     }
 
     @Test

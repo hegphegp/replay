@@ -87,7 +87,7 @@ public class StockReplayDailyComponent {
                 avgPrice = PriceUtil.getPricePercentRate(kBar.getStartPrice().subtract(preKbar.getEndPrice()), preKbar.getEndPrice());
             }else {
                 Float avgPriceValue = currentDayTransactionDataComponent.calAveragePrice(data);
-                float pricePercentRate = PriceUtil.getPricePercentRate(avgPriceValue - preKbar.getEndPrice().floatValue(), preKbar.getEndPrice().floatValue());
+                float pricePercentRate = PriceUtil.getPricePercentRate(avgPriceValue - preKbar.getHighestPrice().floatValue(), preKbar.getHighestPrice().floatValue());
                 avgPrice = new BigDecimal(pricePercentRate).setScale(2,BigDecimal.ROUND_HALF_UP);
             }
             daily.setSellAvg(avgPrice);
@@ -135,14 +135,17 @@ public class StockReplayDailyComponent {
                     daily.setTradeDate(date);
                     int endPlankStatus = plankTypeDTO.isEndPlank() ? 1 : 0;
                     daily.setEndStatus(endPlankStatus);
-                    int beautifulPlankStatus = plankTypeDTO.isBeautifulPlank()?1:0;
-                    daily.setBeautifulPlankStatus(beautifulPlankStatus);
-                    daily.setInsertTime(plankTypeDTO.getInsertTime());
-                    getStockPlankType(daily,plankTypeDTO);
-                    if(daily.getId()==null) {
-                        stockReplayDailyService.save(daily);
-                    }else {
-                        stockReplayDailyService.updateById(daily);
+                    int openPlankStatus = plankTypeDTO.isOpenPlankStatus() ? 1 : 0;
+                    daily.setOpenPlankStatus(openPlankStatus);
+                    if(!plankTypeDTO.isBeautifulPlank()) {
+                        daily.setBeautifulPlankStatus(0);
+                        daily.setInsertTime(plankTypeDTO.getInsertTime());
+                        getStockPlankType(daily, plankTypeDTO);
+                        if (daily.getId() == null) {
+                            stockReplayDailyService.save(daily);
+                        } else {
+                            stockReplayDailyService.updateById(daily);
+                        }
                     }
                 }
             }catch (Exception e){
@@ -240,6 +243,7 @@ public class StockReplayDailyComponent {
         BigDecimal preEndPrice = null;
         BigDecimal preHighPrice = null;
         BigDecimal preLowerPrice = null;
+        BigDecimal preOpenPrice = null;
         Date preDate = null;
         int space = 0;
         int current = 0;
@@ -251,8 +255,10 @@ public class StockReplayDailyComponent {
                 BigDecimal endPrice = kBarDTO.getEndPrice();
                 boolean highPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preHighPrice,endPrice);
                 boolean endPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preEndPrice,endPrice);
+                boolean openPlank = PriceUtil.isUpperPrice(circulateInfo.getStockCode(), preOpenPrice,endPrice);
                 if(i==2){
                     if(highPlank){
+                        plankTypeDTO.setOpenPlankStatus(openPlank);
                         if(preLowerPrice.equals(preHighPrice)){
                             plankTypeDTO.setBeautifulPlank(true);
                             plankTypeDTO.setThirdSecondTransactionIsPlank(true);
@@ -299,6 +305,7 @@ public class StockReplayDailyComponent {
             preHighPrice = kBarDTO.getHighestPrice();
             preLowerPrice = kBarDTO.getLowestPrice();
             preDate = kBarDTO.getDate();
+            preOpenPrice = kBarDTO.getStartPrice();
         }
         plankTypeDTO.setPlanks(current);
         plankTypeDTO.setBeforePlanks(before);
