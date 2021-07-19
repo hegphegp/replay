@@ -85,6 +85,7 @@ public class StockPlankDailyComponent {
                     log.info("复盘数据 没有板 stockCode:{} stockName:{}", stockCode, stockName);
                     continue;
                 }
+                beforeRate(plankTypeDTO,stockKBars,DateUtil.format(date,DateUtil.yyyy_MM_dd));
                 saveStockPlankDaily(stockCode,stockName,date,plankTypeDTO,plankTypeEnum);
             }catch (Exception e){
                 log.info("复盘数据 异常 stockCode:{} stockName:{} e：{}", stockCode, stockName,e);
@@ -103,9 +104,50 @@ public class StockPlankDailyComponent {
         }else{
             daily.setEndStatus(0);
         }
+        daily.setBeforeRateFive(plankTypeDTO.getBeforeRate5());
+        daily.setBeforeRateTen(plankTypeDTO.getBeforeRate10());
+        daily.setBeforeRateFifteen(plankTypeDTO.getBeforeRate15());
+        daily.setExchangeQuantity(plankTypeDTO.getExchangeQuantity());
         daily.setTradeDate(date);
         daily.setCreateTime(new Date());
         stockPlankDailyService.save(daily);
+    }
+
+
+    public void beforeRate(PlankTypeDTO plankTypeDTO, List<KBarDTO> kbars,String tradeDateStr){
+        List<KBarDTO> reverse = Lists.reverse(kbars);
+        int i = 0;
+        boolean flag = false;
+        BigDecimal endPrice = null;
+        for (KBarDTO kBarDTO:reverse){
+            if(flag){
+                i++;
+            }
+            if(i==1){
+                endPrice = kBarDTO.getEndPrice();
+            }
+            if(i==6){
+                BigDecimal rate = PriceUtil.getPricePercentRate(endPrice.subtract(kBarDTO.getEndPrice()), kBarDTO.getEndPrice());
+                plankTypeDTO.setBeforeRate5(rate);
+            }
+
+            if(i==11){
+                BigDecimal rate = PriceUtil.getPricePercentRate(endPrice.subtract(kBarDTO.getEndPrice()), kBarDTO.getEndPrice());
+                plankTypeDTO.setBeforeRate10(rate);
+            }
+
+            if(i==16){
+                BigDecimal rate = PriceUtil.getPricePercentRate(endPrice.subtract(kBarDTO.getEndPrice()), kBarDTO.getEndPrice());
+                plankTypeDTO.setBeforeRate15(rate);
+            }
+            if(i>16){
+                return;
+            }
+            if(kBarDTO.getDateStr().equals(tradeDateStr)){
+                flag = true;
+                plankTypeDTO.setExchangeQuantity(kBarDTO.getTotalExchange()*100);
+            }
+        }
     }
 
     public PlankTypeEnum getPlankTypeEnum(PlankTypeDTO plankTypeDTO){

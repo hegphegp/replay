@@ -36,11 +36,12 @@ public class BaseTestCase {
     private StockReplayDailyComponent stockReplayDailyComponent;
     @Test
     public void test1() {
-        /*stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
-        newStockComponent.catchNewStock();*/
-        //stockPlankDailyComponent.saveStockRehabilitation("002319","letonggufen",new Date());
         stockReplayDailyComponent.stockReplayDaily(new Date());
-        //stockReplayDailyComponent.calPreDateAvgPrice(new Date());
+        stockReplayDailyComponent.calPreDateAvgPrice(new Date());
+        stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
+        newStockComponent.catchNewStock();
+        plankExchangeDailyComponent.plankExchangeDaily(new Date());
+
     }
 
     @Test

@@ -10,6 +10,10 @@
         <result column="plank_type" jdbcType="TINYINT" property="plankType"/>
         <result column="end_status" jdbcType="TINYINT" property="endStatus"/>
         <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime"/>
+        <result column="before_rate_five" jdbcType="DECIMAL" property="beforeRateFive"/>
+        <result column="before_rate_ten" jdbcType="DECIMAL" property="beforeRateTen"/>
+        <result column="before_rate_fifteen" jdbcType="DECIMAL" property="beforeRateFifteen"/>
+        <result column="exchange_quantity" jdbcType="BIGINT"  property="exchangeQuantity" />
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
@@ -23,6 +27,10 @@
             plank_type,
             end_status,
             insert_time,
+            before_rate_five,
+            before_rate_ten,
+            before_rate_fifteen,
+            exchange_quantity,
             create_time,
             update_time
         </sql>
@@ -46,6 +54,10 @@
             #{plankType, jdbcType=TINYINT},
             #{endStatus, jdbcType=TINYINT},
             #{insertTime, jdbcType=TIMESTAMP},
+            #{beforeRateFive, jdbcType=DECIMAL},
+            #{beforeRateTen, jdbcType=DECIMAL},
+            #{beforeRateFifteen, jdbcType=DECIMAL},
+            #{exchangeQuantity, jdbcType=BIGINT},
             #{createTime, jdbcType=TIMESTAMP},
             #{updateTime, jdbcType=TIMESTAMP}
             )
@@ -71,6 +83,18 @@
             </if>
             <if test="insertTime != null">
                 insert_time = #{insertTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="beforeRateFive != null">
+                before_rate_five = #{beforeRateFive, jdbcType=DECIMAL},
+            </if>
+            <if test="beforeRateTen != null">
+                before_rate_ten = #{beforeRateTen, jdbcType=DECIMAL},
+            </if>
+            <if test="beforeRateFifteen != null">
+                before_rate_fifteen = #{beforeRateFifteen, jdbcType=DECIMAL},
+            </if>
+            <if test="exchangeQuantity != null">
+                exchange_quantity = #{exchangeQuantity, jdbcType=BIGINT},
             </if>
             <if test="createTime != null">
                 create_time = #{createTime, jdbcType=TIMESTAMP},

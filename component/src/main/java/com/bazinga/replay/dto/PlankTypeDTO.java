@@ -17,4 +17,9 @@ public class PlankTypeDTO {
     int planks;
     int all;
     int space;
+
+    BigDecimal beforeRate5;
+    BigDecimal beforeRate10;
+    BigDecimal beforeRate15;
+    Long exchangeQuantity;
 }

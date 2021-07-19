@@ -1,5 +1,6 @@
 package com.bazinga.replay.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Date;
 import java.util.Date;
@@ -77,6 +78,11 @@ public class StockPlankDaily implements Serializable {
      * @是否索引   NO
      */
     private Date insertTime;
+
+    private BigDecimal beforeRateFive;
+    private BigDecimal beforeRateTen;
+    private BigDecimal beforeRateFifteen;
+    private Long exchangeQuantity;
 
     /**
      * 
