@@ -84,6 +84,10 @@ public class StockPlankDaily implements Serializable {
     private BigDecimal beforeRateFifteen;
     private Long exchangeQuantity;
 
+    private BigDecimal max100PriceScale;
+    private BigDecimal max100AvgPriceScale;
+    private BigDecimal min15PriceScale;
+
     /**
      * 
      *

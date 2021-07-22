@@ -69,6 +69,10 @@ public class StockPlankDailyQuery extends PagingQuery implements Serializable {
     private BigDecimal beforeRateFifteen;
     private Long exchangeQuantity;
 
+    private BigDecimal max100PriceScale;
+    private BigDecimal max100AvgPriceScale;
+    private BigDecimal min15PriceScale;
+
     /**
      *  开始
      */

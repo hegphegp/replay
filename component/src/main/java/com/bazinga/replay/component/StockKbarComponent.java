@@ -211,11 +211,12 @@ public class StockKbarComponent {
         CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
         circulateInfos.forEach(item -> {
+            System.out.println(item.getStockCode());
             StockKbarQuery query = new StockKbarQuery();
             query.setStockCode(item.getStockCode());
             int count = stockKbarService.countByCondition(query);
             if (count == 0) {
-                initAndSaveKbarData(item.getStockCode(), item.getStockName(), 2);
+                initAndSaveKbarData(item.getStockCode(), item.getStockName(), 100);
             }
         });
     }

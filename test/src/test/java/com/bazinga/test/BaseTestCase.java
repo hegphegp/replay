@@ -34,6 +34,8 @@ public class BaseTestCase {
     private PlankExchangeDailyComponent plankExchangeDailyComponent;
     @Autowired
     private StockReplayDailyComponent stockReplayDailyComponent;
+    @Autowired
+    private StockKbarComponent stockKbarComponent;
     @Test
     public void test1() {
         stockReplayDailyComponent.stockReplayDaily(new Date());
@@ -41,6 +43,10 @@ public class BaseTestCase {
         stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
         newStockComponent.catchNewStock();
         plankExchangeDailyComponent.plankExchangeDaily(new Date());
+        //stockKbarComponent.batchKbarDataInit();
+        stockKbarComponent.batchUpdateDaily();
+        stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(new Date());
+        stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(new Date());
 
     }
 

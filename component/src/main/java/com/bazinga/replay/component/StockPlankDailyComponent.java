@@ -1,19 +1,19 @@
 package com.bazinga.replay.component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.bazinga.base.Sort;
 import com.bazinga.enums.PlankTypeEnum;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.convert.KBarDTOConvert;
 import com.bazinga.replay.dto.AdjFactorDTO;
 import com.bazinga.replay.dto.KBarDTO;
 import com.bazinga.replay.dto.PlankTypeDTO;
-import com.bazinga.replay.model.CirculateInfo;
-import com.bazinga.replay.model.CirculateInfoAll;
-import com.bazinga.replay.model.StockPlankDaily;
-import com.bazinga.replay.model.StockRehabilitation;
+import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.CirculateInfoAllQuery;
+import com.bazinga.replay.query.StockKbarQuery;
 import com.bazinga.replay.query.StockPlankDailyQuery;
 import com.bazinga.replay.service.CirculateInfoAllService;
+import com.bazinga.replay.service.StockKbarService;
 import com.bazinga.replay.service.StockPlankDailyService;
 import com.bazinga.replay.service.StockRehabilitationService;
 import com.bazinga.util.DateTimeUtils;
@@ -53,6 +53,10 @@ public class StockPlankDailyComponent {
     private StockKbarComponent stockKbarComponent;
     @Autowired
     private StockRehabilitationService stockRehabilitationService;
+    @Autowired
+    private StockKbarService stockKbarService;
+    @Autowired
+    private HistoryTransactionDataComponent historyTransactionDataComponent;
 
 
     public void stockPlankDailyStatistic(Date date){
@@ -321,6 +325,88 @@ public class StockPlankDailyComponent {
         BigDecimal factor = preAdjFactorDTO.getAdjFactor().divide(adjFactorDTO.getAdjFactor(), 4, BigDecimal.ROUND_HALF_UP);
         return factor;
     }
+
+
+    public void calMax100DaysPriceForTwoPlank(Date date){
+        StockPlankDailyQuery query = new StockPlankDailyQuery();
+        query.setTradeDateFrom(DateTimeUtils.getDate000000(date));
+        query.setTradeDateTo(DateTimeUtils.getDate235959(date));
+        List<StockPlankDaily> stockPlankDailies = stockPlankDailyService.listByCondition(query);
+        for (StockPlankDaily stockPlankDaily:stockPlankDailies){
+            try {
+                StockKbarQuery stockKbarQuery = new StockKbarQuery();
+                stockKbarQuery.setStockCode(stockPlankDaily.getStockCode());
+                stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
+                stockKbarQuery.setLimit(100);
+                List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
+                String dateStr = DateUtil.format(date, DateUtil.yyyyMMdd);
+                StockKbar highKbar = null;
+                StockKbar currentDayKbar = null;
+                for (StockKbar kbar : stockKbars) {
+                    if (!kbar.getKbarDate().equals(dateStr)) {
+                        if (highKbar == null || kbar.getAdjHighPrice().compareTo(highKbar.getAdjHighPrice()) == 1) {
+                            highKbar = kbar;
+                        }
+                    } else {
+                        currentDayKbar = kbar;
+                    }
+                }
+                if (highKbar != null && currentDayKbar != null) {
+                    BigDecimal twoPlankUpperPrice = PriceUtil.calUpperPrice(stockPlankDaily.getStockCode(), currentDayKbar.getClosePrice());
+                    BigDecimal max100PriceScale = twoPlankUpperPrice.divide(highKbar.getAdjHighPrice(), 2, BigDecimal.ROUND_HALF_UP);
+                    stockPlankDaily.setMax100PriceScale(max100PriceScale);
+                    BigDecimal avgPrice = historyTransactionDataComponent.calAvgPrice(stockPlankDaily.getStockCode(), DateUtil.parseDate(highKbar.getKbarDate(), DateUtil.yyyyMMdd));
+                    if (avgPrice != null) {
+                        BigDecimal adjAvgPrice = avgPrice.multiply(highKbar.getAdjHighPrice().divide(highKbar.getHighPrice(), 2, BigDecimal.ROUND_HALF_UP));
+                        BigDecimal max100AvgPriceScale = twoPlankUpperPrice.divide(adjAvgPrice, 2, BigDecimal.ROUND_HALF_UP);
+                        stockPlankDaily.setMax100AvgPriceScale(max100AvgPriceScale);
+                    }
+                    stockPlankDailyService.updateById(stockPlankDaily);
+                }
+            }catch (Exception e){
+                log.error(e.getMessage(),e);
+            }
+        }
+
+    }
+
+    public void calMin15DaysPriceForTwoPlank(Date date){
+        StockPlankDailyQuery query = new StockPlankDailyQuery();
+        query.setTradeDateFrom(DateTimeUtils.getDate000000(date));
+        query.setTradeDateTo(DateTimeUtils.getDate235959(date));
+        List<StockPlankDaily> stockPlankDailies = stockPlankDailyService.listByCondition(query);
+        for (StockPlankDaily stockPlankDaily:stockPlankDailies){
+            try {
+                StockKbarQuery stockKbarQuery = new StockKbarQuery();
+                stockKbarQuery.setStockCode(stockPlankDaily.getStockCode());
+                stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
+                stockKbarQuery.setLimit(16);
+                List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
+                String dateStr = DateUtil.format(date, DateUtil.yyyyMMdd);
+                StockKbar lowKbar = null;
+                StockKbar currentDayKbar = null;
+                for (StockKbar kbar : stockKbars) {
+                    if (!kbar.getKbarDate().equals(dateStr)) {
+                        if (lowKbar == null || kbar.getAdjLowPrice().compareTo(lowKbar.getAdjLowPrice()) == 1) {
+                            lowKbar = kbar;
+                        }
+                    } else {
+                        currentDayKbar = kbar;
+                    }
+                }
+                if (lowKbar != null && currentDayKbar != null) {
+                    BigDecimal twoPlankUpperPrice = PriceUtil.calUpperPrice(stockPlankDaily.getStockCode(), currentDayKbar.getClosePrice());
+                    BigDecimal min15PriceScale = twoPlankUpperPrice.divide(lowKbar.getAdjLowPrice(), 2, BigDecimal.ROUND_HALF_UP);
+                    stockPlankDaily.setMin15PriceScale(min15PriceScale);
+                    stockPlankDailyService.updateById(stockPlankDaily);
+                }
+            }catch (Exception e){
+                log.error(e.getMessage(),e);
+            }
+        }
+
+    }
+
 
 
 }
