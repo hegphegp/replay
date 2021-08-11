@@ -8,6 +8,7 @@
         <result column="stock_name" jdbcType="VARCHAR" property="stockName"/>
         <result column="trade_date" jdbcType="TIMESTAMP" property="tradeDate"/>
         <result column="plank_type" jdbcType="TINYINT" property="plankType"/>
+        <result column="plank_sign" jdbcType="TINYINT" property="plankSign"/>
         <result column="end_status" jdbcType="TINYINT" property="endStatus"/>
         <result column="insert_time" jdbcType="TIMESTAMP" property="insertTime"/>
         <result column="before_rate_five" jdbcType="DECIMAL" property="beforeRateFive"/>
@@ -28,6 +29,7 @@
             stock_name,
             trade_date,
             plank_type,
+            plank_sign,
             end_status,
             insert_time,
             before_rate_five,
@@ -58,6 +60,7 @@
             #{stockName, jdbcType=VARCHAR},
             #{tradeDate, jdbcType=TIMESTAMP},
             #{plankType, jdbcType=TINYINT},
+            #{plankSign, jdbcType=TINYINT},
             #{endStatus, jdbcType=TINYINT},
             #{insertTime, jdbcType=TIMESTAMP},
             #{beforeRateFive, jdbcType=DECIMAL},
@@ -86,6 +89,9 @@
             </if>
             <if test="plankType != null">
                 plank_type = #{plankType, jdbcType=TINYINT},
+            </if>
+            <if test="plankSign != null">
+                plank_sign = #{plankSign, jdbcType=TINYINT},
             </if>
             <if test="endStatus != null">
                 end_status = #{endStatus, jdbcType=TINYINT},
@@ -133,6 +139,9 @@
         </if>
         <if test="plankType != null">
             and plank_type = #{plankType, jdbcType=TINYINT}
+        </if>
+        <if test="plankSign != null">
+            and plank_sign = #{plankSign, jdbcType=TINYINT}
         </if>
         <if test="endStatus != null">
             and end_status = #{endStatus, jdbcType=TINYINT}

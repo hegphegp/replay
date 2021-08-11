@@ -63,6 +63,8 @@ public class StockPlankDaily implements Serializable {
      */
     private Integer plankType;
 
+    private Integer plankSign;
+
     /**
      * 0 尾盘炸板  1 尾盘封住
      *

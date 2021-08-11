@@ -48,6 +48,7 @@ public class StockPlankDailyQuery extends PagingQuery implements Serializable {
      * 1 首板  2 2板  3 3板  4 4板  5 5板以上
      */
     private Integer plankType;
+    private Integer plankSign;
 
     /**
      * 0 尾盘炸板  1 尾盘封住
