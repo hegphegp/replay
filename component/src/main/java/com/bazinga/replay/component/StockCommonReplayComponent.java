@@ -50,6 +50,7 @@ public class StockCommonReplayComponent {
                 return;
             }
             Date preTradeDate = commonComponent.preTradeDate(currentDate);
+            String currentKbarDate = DateUtil.format(currentDate,DateUtil.yyyyMMdd);
             for (CirculateInfo circulateInfo : circulateInfos) {
                 DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, circulateInfo.getStockCode(), 0, 2);
                 List<KBarDTO> kBarDTOS = KBarDTOConvert.convertKBar(dataTable);
@@ -60,7 +61,7 @@ public class StockCommonReplayComponent {
                         List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData(circulateInfo.getStockCode(), currentDate);
                         List<ThirdSecondTransactionDataDTO> list = historyTransactionDataComponent.getPreOneHourData(data);
                         Float averagePrice = historyTransactionDataComponent.calAveragePrice(list);
-                        String uniqueKey = circulateInfo.getStockCode() + SymbolConstants.UNDERLINE + kBarDTO.getDateStr();
+                        String uniqueKey = circulateInfo.getStockCode() + SymbolConstants.UNDERLINE + currentKbarDate;
                         StockCommonReplay byUniqueKey = stockCommonReplayService.getByUniqueKey(uniqueKey);
                         if(byUniqueKey == null){
 
@@ -68,7 +69,7 @@ public class StockCommonReplayComponent {
                             stockCommonReplay.setStockCode(circulateInfo.getStockCode());
                             stockCommonReplay.setStockName(circulateInfo.getStockName());
                             stockCommonReplay.setAvgPre1Price(new BigDecimal(averagePrice.toString()));
-                            stockCommonReplay.setKbarDate(kBarDTO.getDateStr());
+                            stockCommonReplay.setKbarDate(currentKbarDate);
                             stockCommonReplay.setUniqueKey(uniqueKey);
                             stockCommonReplay.setAvgPre1Rate(PriceUtil.getPricePercentRate(new BigDecimal(averagePrice.toString()).subtract(closePrice),closePrice));
                             stockCommonReplayService.save(stockCommonReplay);
