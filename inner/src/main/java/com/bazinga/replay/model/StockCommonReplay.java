@@ -81,6 +81,11 @@ public class StockCommonReplay implements Serializable {
      */
     private BigDecimal avgPre1Rate;
 
+    private BigDecimal endRaiseRate55;
+
+    private BigDecimal plankPriceThanLow10;
+    private Long avgExchange10;
+
     /**
      * 
      *
