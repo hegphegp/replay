@@ -36,6 +36,8 @@ public class BaseTestCase {
     private StockReplayDailyComponent stockReplayDailyComponent;
     @Autowired
     private StockKbarComponent stockKbarComponent;
+    @Autowired
+    private StockCommonReplayComponent stockCommonReplayComponent;
     @Test
     public void test1() {
         stockReplayDailyComponent.stockReplayDaily(new Date());
@@ -47,6 +49,9 @@ public class BaseTestCase {
         stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(new Date());
         stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(new Date());
         stockPlankDailyComponent.calSubNewStock(new Date());
+
+        //新版复盘
+        stockCommonReplayComponent.saveCommonReplay(DateUtil.parseDate("2021-05-13 15:30:30",DateUtil.DEFAULT_FORMAT));
 
     }
 

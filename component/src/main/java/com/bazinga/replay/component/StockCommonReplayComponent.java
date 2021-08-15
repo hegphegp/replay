@@ -40,11 +40,11 @@ public class StockCommonReplayComponent {
     private HistoryTransactionDataComponent historyTransactionDataComponent;
 
 
-    public void saveCommonReplay(){
+    public void saveCommonReplay(Date date){
 
         try {
             List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
-            Date currentDate = new Date();
+            Date currentDate = date;
             if(!commonComponent.isTradeDate(currentDate)){
                 log.info("当前日期不是交易日期");
                 return;
