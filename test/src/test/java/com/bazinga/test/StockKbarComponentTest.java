@@ -5,6 +5,8 @@ import com.bazinga.replay.component.StockKbarComponent;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
+
 public class StockKbarComponentTest extends BaseTestCase {
 
     @Autowired
@@ -17,6 +19,6 @@ public class StockKbarComponentTest extends BaseTestCase {
     public void test(){
 
         //stockKbarComponent.batchKbarDataInit();
-        stockCommonReplayComponent.saveCommonReplay();
+        stockCommonReplayComponent.saveCommonReplay(new Date());
     }
 }
