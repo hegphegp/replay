@@ -12,7 +12,7 @@
         <result column="avg_pre1_rate" jdbcType="DECIMAL" property="avgPre1Rate"/>
         <result column="end_raise_rate55" jdbcType="DECIMAL" property="endRaiseRate55"/>
         <result column="plank_price_than_low10" jdbcType="DECIMAL" property="plankPriceThanLow10"/>
-        <result column="avg_exchange10" jdbcType="BIGINT" property="avg_exchange10"/>
+        <result column="avg_exchange10" jdbcType="BIGINT" property="avgExchange10"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
@@ -131,7 +131,7 @@
                 plank_price_than_low10 = #{plankPriceThanLow10, jdbcType=DECIMAL},
             </if>
             <if test="avgExchange10 != null">
-                avg_exchange10 = #{avgExchange10, jdbcType=DECIMAL},
+                avg_exchange10 = #{avgExchange10, jdbcType=BIGINT},
             </if>
             <if test="createTime != null">
                 create_time = #{createTime, jdbcType=TIMESTAMP},
@@ -162,17 +162,14 @@
         <if test="avgPre1Rate != null">
             and avg_pre1_rate = #{avgPre1Rate, jdbcType=DECIMAL}
         </if>
-        <if test="avgPre1Rate != null">
-            avg_pre1_rate = #{avgPre1Rate, jdbcType=DECIMAL},
-        </if>
         <if test="endRaiseRate55 != null">
-            end_raise_rate55 = #{endRaiseRate55, jdbcType=DECIMAL},
+            and end_raise_rate55 = #{endRaiseRate55, jdbcType=DECIMAL}
         </if>
         <if test="plankPriceThanLow10 != null">
-            plank_price_than_low10 = #{plankPriceThanLow10, jdbcType=DECIMAL},
+            and plank_price_than_low10 = #{plankPriceThanLow10, jdbcType=DECIMAL}
         </if>
         <if test="avgExchange10 != null">
-            avg_exchange10 = #{avgExchange10, jdbcType=DECIMAL},
+            and avg_exchange10 = #{avgExchange10, jdbcType=BIGINT}
         </if>
     </sql>
 
