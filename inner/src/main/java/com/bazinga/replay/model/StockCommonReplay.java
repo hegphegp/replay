@@ -2,6 +2,8 @@ package com.bazinga.replay.model;
 
 import java.math.BigDecimal;
 import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Date;
 
@@ -11,7 +13,7 @@ import java.io.Serializable;
  * 〈StockCommonReplay〉<p>
  *
  * @author
- * @date 2021-08-12
+ * @date 2021-08-15
  */
 @lombok.Data
 @lombok.ToString
@@ -80,6 +82,30 @@ public class StockCommonReplay implements Serializable {
      * @是否索引   NO
      */
     private BigDecimal avgPre1Rate;
+
+    /**
+     * 2点55到收盘涨幅
+     *
+     * @允许为空   YES
+     * @是否索引   NO
+     */
+    private BigDecimal endRaiseRate55;
+
+    /**
+     * 明天板价除以10日内最低价格
+     *
+     * @允许为空   YES
+     * @是否索引   NO
+     */
+    private BigDecimal plankPriceThanLow10;
+
+    /**
+     * 10日内平均换手
+     *
+     * @允许为空   YES
+     * @是否索引   NO
+     */
+    private Long avgExchange10;
 
     /**
      * 

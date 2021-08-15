@@ -5,6 +5,8 @@ import com.bazinga.base.PagingQuery;
 
 import java.math.BigDecimal;
 import java.math.BigDecimal;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Date;
 
@@ -14,7 +16,7 @@ import java.io.Serializable;
  * 〈StockCommonReplay 查询参数〉<p>
  *
  * @author
- * @date 2021-08-12
+ * @date 2021-08-15
  */
 @lombok.Data
 @lombok.EqualsAndHashCode(callSuper = true)
@@ -52,6 +54,21 @@ public class StockCommonReplayQuery extends PagingQuery implements Serializable 
      * 上午均价涨幅
      */
     private BigDecimal avgPre1Rate;
+
+    /**
+     * 2点55到收盘涨幅
+     */
+    private BigDecimal endRaiseRate55;
+
+    /**
+     * 明天板价除以10日内最低价格
+     */
+    private BigDecimal plankPriceThanLow10;
+
+    /**
+     * 10日内平均换手
+     */
+    private Long avgExchange10;
 
     /**
      *  开始
