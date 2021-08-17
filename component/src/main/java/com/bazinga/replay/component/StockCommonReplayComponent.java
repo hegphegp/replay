@@ -1,14 +1,19 @@
 package com.bazinga.replay.component;
 
+import com.bazinga.base.Sort;
 import com.bazinga.constant.SymbolConstants;
 import com.bazinga.replay.convert.KBarDTOConvert;
 import com.bazinga.replay.dto.KBarDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.CirculateInfo;
 import com.bazinga.replay.model.StockCommonReplay;
+import com.bazinga.replay.model.StockKbar;
 import com.bazinga.replay.query.CirculateInfoQuery;
+import com.bazinga.replay.query.StockCommonReplayQuery;
+import com.bazinga.replay.query.StockKbarQuery;
 import com.bazinga.replay.service.CirculateInfoService;
 import com.bazinga.replay.service.StockCommonReplayService;
+import com.bazinga.replay.service.StockKbarService;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.PriceUtil;
 import com.tradex.enums.KCate;
@@ -18,6 +23,7 @@ import com.tradex.util.TdxHqUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -38,6 +44,10 @@ public class StockCommonReplayComponent {
 
     @Autowired
     private HistoryTransactionDataComponent historyTransactionDataComponent;
+    @Autowired
+    private StockKbarService stockKbarService;
+    @Autowired
+    private CurrentDayTransactionDataComponent currentDayTransactionDataComponent;
 
 
     public void saveCommonReplay(Date date){
@@ -88,5 +98,65 @@ public class StockCommonReplayComponent {
 
     }
 
+    public void firstPlankNoBuyInfo(Date date){
+        Date currentDate = date;
+        if(!commonComponent.isTradeDate(currentDate)){
+            log.info("当前日期不是交易日期");
+            return;
+        }
+        StockCommonReplayQuery stockCommonReplayQuery = new StockCommonReplayQuery();
+        stockCommonReplayQuery.setKbarDate(DateUtil.format(date,DateUtil.yyyyMMdd));
+        List<StockCommonReplay> stockCommonReplays = stockCommonReplayService.listByCondition(stockCommonReplayQuery);
+        for (StockCommonReplay replay:stockCommonReplays) {
+            try {
+                StockKbarQuery stockKbarQuery = new StockKbarQuery();
+                stockKbarQuery.setStockCode(replay.getStockCode());
+                stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
+                stockKbarQuery.setLimit(10);
+                Long totalExchange = 0l;
+                int days = 1;
+                BigDecimal lowAdjPrice = null;
+                List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
+                if (!CollectionUtils.isEmpty(stockKbars)) {
+                    for (StockKbar kbar : stockKbars) {
+                        totalExchange = totalExchange + kbar.getTradeQuantity();
+                        days++;
+                        if (lowAdjPrice == null || kbar.getAdjLowPrice().compareTo(lowAdjPrice) == -1) {
+                            lowAdjPrice = kbar.getAdjLowPrice();
+                        }
+                    }
+                }
+                if (days > 0) {
+                    long avgExchange = totalExchange / days;
+                    replay.setAvgExchange10(avgExchange);
+                }
+                if (lowAdjPrice != null) {
+                    BigDecimal plankPrice = PriceUtil.calUpperPrice(replay.getStockCode(), stockKbars.get(0).getClosePrice());
+                    BigDecimal divide = plankPrice.divide(lowAdjPrice, 2, BigDecimal.ROUND_HALF_UP);
+                    replay.setPlankPriceThanLow10(divide);
+                }
+                BigDecimal price1455 = null;
+                BigDecimal price1500 = null;
+                List<ThirdSecondTransactionDataDTO> data = currentDayTransactionDataComponent.getData(replay.getStockCode());
+                if (!CollectionUtils.isEmpty(data)) {
+                    for (ThirdSecondTransactionDataDTO dto : data) {
+                        if (price1455 == null && dto.getTradeTime().startsWith("14:5")) {
+                            price1455 = dto.getTradePrice();
+                        }
+                        if (price1500 == null && dto.getTradeTime().startsWith("15")) {
+                            price1500 = dto.getTradePrice();
+                        }
+                    }
+                }
+                if (price1455 != null && price1500 != null) {
+                    BigDecimal rate = PriceUtil.getPricePercentRate(price1500.subtract(price1455), stockKbars.get(1).getClosePrice());
+                    replay.setEndRaiseRate55(rate);
+                }
+                stockCommonReplayService.updateById(replay);
+            }catch (Exception e){
+                log.error(e.getMessage(),e);
+            }
+        }
+    }
 
 }
