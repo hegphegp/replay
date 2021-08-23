@@ -69,6 +69,8 @@ public class StockCommonReplayQuery extends PagingQuery implements Serializable 
      * 10日内平均换手
      */
     private Long avgExchange10;
+    private BigDecimal rateDay5;
+    private Long planksDay10;
 
     /**
      *  开始

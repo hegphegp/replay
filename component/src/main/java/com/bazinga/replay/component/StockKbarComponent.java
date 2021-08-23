@@ -125,6 +125,31 @@ public class StockKbarComponent {
 
     }
 
+    public void initSpecialStockAndSaveKbarData(String stockCode, String stockName, int days) {
+        try {
+            for(int i=0;i<days;i++) {
+                DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, stockCode, i, 1);
+                List<StockKbar> stockKbarList = StockKbarConvert.convertSpecial(dataTable, stockCode, stockName);
+                if (CollectionUtils.isEmpty(stockKbarList)) {
+                    return;
+                }
+                for (StockKbar stockKbar : stockKbarList) {
+                    stockKbar.setAdjClosePrice(stockKbar.getClosePrice());
+                    stockKbar.setAdjOpenPrice(stockKbar.getOpenPrice());
+                    stockKbar.setAdjHighPrice(stockKbar.getHighPrice());
+                    stockKbar.setAdjLowPrice(stockKbar.getLowPrice());
+                    StockKbar byUniqueKey = stockKbarService.getByUniqueKey(stockKbar.getUniqueKey());
+                    if (byUniqueKey == null) {
+                        stockKbarService.save(stockKbar);
+                    }
+
+                }
+            }
+        }catch (Exception e){
+            log.info("跑昨日涨停数据异常",e);
+        }
+    }
+
 
     public void updateKbarDataDaily(String stockCode, String stockName) {
 
@@ -219,6 +244,15 @@ public class StockKbarComponent {
                 initAndSaveKbarData(item.getStockCode(), item.getStockName(), 100);
             }
         });
+    }
+
+    public void batchKbarDataInitToStock(String stockCode,String stockName) {
+        StockKbarQuery query = new StockKbarQuery();
+        query.setStockCode(stockCode);
+        int count = stockKbarService.countByCondition(query);
+        if (count == 0) {
+            initAndSaveKbarData(stockCode, stockName, 100);
+        }
     }
 
     public static void main(String[] args) {

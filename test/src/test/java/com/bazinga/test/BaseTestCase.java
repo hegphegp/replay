@@ -40,19 +40,20 @@ public class BaseTestCase {
     private StockCommonReplayComponent stockCommonReplayComponent;
     @Test
     public void test1() {
-        stockReplayDailyComponent.stockReplayDaily(new Date());
-        stockReplayDailyComponent.calPreDateAvgPrice(new Date());
-        stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
+        stockReplayDailyComponent.stockReplayDaily(DateUtil.parseDate("2021-08-20 15:30:30",DateUtil.DEFAULT_FORMAT));
+        stockReplayDailyComponent.calPreDateAvgPrice(DateUtil.parseDate("2021-08-20 15:30:30",DateUtil.DEFAULT_FORMAT));
+        stockPlankDailyComponent.stockPlankDailyStatistic(DateUtil.parseDate("2021-08-20 15:30:30",DateUtil.DEFAULT_FORMAT));
         newStockComponent.catchNewStock();
-        plankExchangeDailyComponent.plankExchangeDaily(new Date());
+        plankExchangeDailyComponent.plankExchangeDaily(DateUtil.parseDate("2021-08-20 15:30:30",DateUtil.DEFAULT_FORMAT));
         stockKbarComponent.batchUpdateDaily();
-        stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(new Date());
-        stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(new Date());
-        stockPlankDailyComponent.calSubNewStock(new Date());
+        stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(DateUtil.parseDate("2021-08-20 15:30:30",DateUtil.DEFAULT_FORMAT));
+        stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(DateUtil.parseDate("2021-08-20 15:30:30",DateUtil.DEFAULT_FORMAT));
+        stockPlankDailyComponent.calSubNewStock(DateUtil.parseDate("2021-08-20 15:30:30",DateUtil.DEFAULT_FORMAT));
 
         //新版复盘
-        stockCommonReplayComponent.saveCommonReplay(new Date());
-        stockCommonReplayComponent.firstPlankNoBuyInfo(new Date());
+        stockCommonReplayComponent.saveCommonReplay(DateUtil.parseDate("2021-08-20 15:30:30",DateUtil.DEFAULT_FORMAT));
+        stockCommonReplayComponent.firstPlankNoBuyInfo(DateUtil.parseDate("2021-08-20 15:30:30",DateUtil.DEFAULT_FORMAT));
+        stockCommonReplayComponent.highRaiseStockInfo(DateUtil.parseDate("2021-08-20 15:30:30",DateUtil.DEFAULT_FORMAT));
 
     }
 
@@ -64,7 +65,7 @@ public class BaseTestCase {
 
     @Test
     public void test3() {
-        plankExchangeDailyComponent.plankExchangeDaily(new Date());
+        stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
     }
 
 

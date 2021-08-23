@@ -137,16 +137,23 @@ public class StockCommonReplayComponent {
                 }
                 BigDecimal price1455 = null;
                 BigDecimal price1500 = null;
+                BigDecimal priceBefore1455  = null;
                 List<ThirdSecondTransactionDataDTO> data = currentDayTransactionDataComponent.getData(replay.getStockCode());
                 if (!CollectionUtils.isEmpty(data)) {
                     for (ThirdSecondTransactionDataDTO dto : data) {
-                        if (price1455 == null && dto.getTradeTime().startsWith("14:5")) {
+                        if (dto.getTradeTime().startsWith("14:54")||dto.getTradeTime().startsWith("14:53")||dto.getTradeTime().startsWith("14:52")||dto.getTradeTime().startsWith("14:51")) {
+                            priceBefore1455 = dto.getTradePrice();
+                        }
+                        if (price1455 == null && dto.getTradeTime().startsWith("14:55")) {
                             price1455 = dto.getTradePrice();
                         }
                         if (price1500 == null && dto.getTradeTime().startsWith("15")) {
                             price1500 = dto.getTradePrice();
                         }
                     }
+                }
+                if(price1455==null){
+                    price1455 = priceBefore1455;
                 }
                 if (price1455 != null && price1500 != null) {
                     BigDecimal rate = PriceUtil.getPricePercentRate(price1500.subtract(price1455), stockKbars.get(1).getClosePrice());
@@ -158,5 +165,54 @@ public class StockCommonReplayComponent {
             }
         }
     }
+
+    public void highRaiseStockInfo(Date date){
+        Date currentDate = date;
+        if(!commonComponent.isTradeDate(currentDate)){
+            log.info("当前日期不是交易日期");
+            return;
+        }
+        StockCommonReplayQuery stockCommonReplayQuery = new StockCommonReplayQuery();
+        stockCommonReplayQuery.setKbarDate(DateUtil.format(date,DateUtil.yyyyMMdd));
+        List<StockCommonReplay> stockCommonReplays = stockCommonReplayService.listByCondition(stockCommonReplayQuery);
+        for (StockCommonReplay replay:stockCommonReplays) {
+            try {
+                StockKbarQuery stockKbarQuery = new StockKbarQuery();
+                stockKbarQuery.setStockCode(replay.getStockCode());
+                stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
+                stockKbarQuery.setLimit(11);
+                List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
+                BigDecimal preEndPrice = null;
+                BigDecimal currentDayEndPrice = null;
+                BigDecimal rateDay5 = null;
+                long planks = 0;
+                int i = 0;
+                if (!CollectionUtils.isEmpty(stockKbars)) {
+                    for (StockKbar kbar : stockKbars) {
+                        i++;
+                        if (i == 1) {
+                            currentDayEndPrice = kbar.getAdjClosePrice();
+                        }
+                        if(preEndPrice!=null) {
+                            boolean flag = PriceUtil.isUpperPrice(kbar.getStockCode(), preEndPrice, kbar.getClosePrice());
+                            if (flag) {
+                                planks++;
+                            }
+                            if (i == 6) {
+                                rateDay5 = PriceUtil.getPricePercentRate(currentDayEndPrice.subtract(kbar.getAdjClosePrice()), kbar.getAdjClosePrice());
+                            }
+                        }
+                        preEndPrice = kbar.getClosePrice();
+                    }
+                }
+                replay.setRateDay5(rateDay5);
+                replay.setPlanksDay10(planks);
+                stockCommonReplayService.updateById(replay);
+            }catch (Exception e){
+                log.error(e.getMessage(),e);
+            }
+        }
+    }
+
 
 }
