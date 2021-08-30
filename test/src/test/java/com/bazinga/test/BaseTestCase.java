@@ -40,8 +40,12 @@ public class BaseTestCase {
     private StockKbarComponent stockKbarComponent;
     @Autowired
     private StockCommonReplayComponent stockCommonReplayComponent;
+    @Autowired
+    private PlankChenJiaoEComponent plankChenJiaoEComponent;
     @Test
     public void test1() {
+        //无敌数据
+        //plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(new Date());
         stockReplayDailyComponent.calPreDateAvgPrice(new Date());
         stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
