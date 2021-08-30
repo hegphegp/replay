@@ -16,6 +16,7 @@ import com.bazinga.replay.service.StockCommonReplayService;
 import com.bazinga.replay.service.StockKbarService;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.PriceUtil;
+import com.google.common.collect.Lists;
 import com.tradex.enums.KCate;
 import com.tradex.exception.TradeException;
 import com.tradex.model.suport.DataTable;
@@ -48,6 +49,8 @@ public class StockCommonReplayComponent {
     private StockKbarService stockKbarService;
     @Autowired
     private CurrentDayTransactionDataComponent currentDayTransactionDataComponent;
+    @Autowired
+    private StockKbarComponent stockKbarComponent;
 
 
     public void saveCommonReplay(Date date){
@@ -109,55 +112,55 @@ public class StockCommonReplayComponent {
         List<StockCommonReplay> stockCommonReplays = stockCommonReplayService.listByCondition(stockCommonReplayQuery);
         for (StockCommonReplay replay:stockCommonReplays) {
             try {
-                StockKbarQuery stockKbarQuery = new StockKbarQuery();
-                stockKbarQuery.setStockCode(replay.getStockCode());
-                stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
-                stockKbarQuery.setLimit(10);
-                Long totalExchange = 0l;
-                int days = 1;
-                BigDecimal lowAdjPrice = null;
-                List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
-                if (!CollectionUtils.isEmpty(stockKbars)) {
-                    for (StockKbar kbar : stockKbars) {
-                        totalExchange = totalExchange + kbar.getTradeQuantity();
-                        days++;
-                        if (lowAdjPrice == null || kbar.getAdjLowPrice().compareTo(lowAdjPrice) == -1) {
-                            lowAdjPrice = kbar.getAdjLowPrice();
+                List<StockKbar> kbars = stockKbarComponent.getStockKBarRemoveNew(replay.getStockCode(), 50, 11);
+                if(kbars.size()>=2) {
+                    kbars = kbars.subList(1, kbars.size());
+                    List<StockKbar> stockKbars = Lists.reverse(kbars);
+                    Long totalExchange = 0l;
+                    int days = 1;
+                    BigDecimal lowAdjPrice = null;
+                    if (!CollectionUtils.isEmpty(stockKbars)) {
+                        for (StockKbar kbar : stockKbars) {
+                            totalExchange = totalExchange + kbar.getTradeQuantity();
+                            days++;
+                            if (lowAdjPrice == null || kbar.getAdjLowPrice().compareTo(lowAdjPrice) == -1) {
+                                lowAdjPrice = kbar.getAdjLowPrice();
+                            }
                         }
                     }
-                }
-                if (days > 0) {
-                    long avgExchange = totalExchange / days;
-                    replay.setAvgExchange10(avgExchange);
-                }
-                if (lowAdjPrice != null) {
-                    BigDecimal plankPrice = PriceUtil.calUpperPrice(replay.getStockCode(), stockKbars.get(0).getClosePrice());
-                    BigDecimal divide = plankPrice.divide(lowAdjPrice, 2, BigDecimal.ROUND_HALF_UP);
-                    replay.setPlankPriceThanLow10(divide);
-                }
-                BigDecimal price1455 = null;
-                BigDecimal price1500 = null;
-                BigDecimal priceBefore1455  = null;
-                List<ThirdSecondTransactionDataDTO> data = currentDayTransactionDataComponent.getData(replay.getStockCode());
-                if (!CollectionUtils.isEmpty(data)) {
-                    for (ThirdSecondTransactionDataDTO dto : data) {
-                        if (dto.getTradeTime().startsWith("14:54")||dto.getTradeTime().startsWith("14:53")||dto.getTradeTime().startsWith("14:52")||dto.getTradeTime().startsWith("14:51")) {
-                            priceBefore1455 = dto.getTradePrice();
-                        }
-                        if (price1455 == null && dto.getTradeTime().startsWith("14:55")) {
-                            price1455 = dto.getTradePrice();
-                        }
-                        if (price1500 == null && dto.getTradeTime().startsWith("15")) {
-                            price1500 = dto.getTradePrice();
+                    if (days > 0) {
+                        long avgExchange = totalExchange / days;
+                        replay.setAvgExchange10(avgExchange);
+                    }
+                    if (lowAdjPrice != null) {
+                        BigDecimal plankPrice = PriceUtil.calUpperPrice(replay.getStockCode(), stockKbars.get(0).getClosePrice());
+                        BigDecimal divide = plankPrice.divide(lowAdjPrice, 2, BigDecimal.ROUND_HALF_UP);
+                        replay.setPlankPriceThanLow10(divide);
+                    }
+                    BigDecimal price1455 = null;
+                    BigDecimal price1500 = null;
+                    BigDecimal priceBefore1455 = null;
+                    List<ThirdSecondTransactionDataDTO> data = currentDayTransactionDataComponent.getData(replay.getStockCode());
+                    if (!CollectionUtils.isEmpty(data)) {
+                        for (ThirdSecondTransactionDataDTO dto : data) {
+                            if (dto.getTradeTime().startsWith("14:54") || dto.getTradeTime().startsWith("14:53") || dto.getTradeTime().startsWith("14:52") || dto.getTradeTime().startsWith("14:51")) {
+                                priceBefore1455 = dto.getTradePrice();
+                            }
+                            if (price1455 == null && dto.getTradeTime().startsWith("14:55")) {
+                                price1455 = dto.getTradePrice();
+                            }
+                            if (price1500 == null && dto.getTradeTime().startsWith("15")) {
+                                price1500 = dto.getTradePrice();
+                            }
                         }
                     }
-                }
-                if(price1455==null){
-                    price1455 = priceBefore1455;
-                }
-                if (price1455 != null && price1500 != null) {
-                    BigDecimal rate = PriceUtil.getPricePercentRate(price1500.subtract(price1455), stockKbars.get(1).getClosePrice());
-                    replay.setEndRaiseRate55(rate);
+                    if (price1455 == null) {
+                        price1455 = priceBefore1455;
+                    }
+                    if (price1455 != null && price1500 != null) {
+                        BigDecimal rate = PriceUtil.getPricePercentRate(price1500.subtract(price1455), stockKbars.get(1).getClosePrice());
+                        replay.setEndRaiseRate55(rate);
+                    }
                 }
                 stockCommonReplayService.updateById(replay);
             }catch (Exception e){
@@ -177,11 +180,8 @@ public class StockCommonReplayComponent {
         List<StockCommonReplay> stockCommonReplays = stockCommonReplayService.listByCondition(stockCommonReplayQuery);
         for (StockCommonReplay replay:stockCommonReplays) {
             try {
-                StockKbarQuery stockKbarQuery = new StockKbarQuery();
-                stockKbarQuery.setStockCode(replay.getStockCode());
-                stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
-                stockKbarQuery.setLimit(11);
-                List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
+                List<StockKbar> kbars = stockKbarComponent.getStockKBarRemoveNew(replay.getStockCode(), 50, 11);
+                List<StockKbar> stockKbars = Lists.reverse(kbars);
                 BigDecimal preEndPrice = null;
                 BigDecimal currentDayEndPrice = null;
                 BigDecimal rateDay5 = null;
@@ -207,6 +207,48 @@ public class StockCommonReplayComponent {
                 }
                 replay.setRateDay5(rateDay5);
                 replay.setPlanksDay10(planks);
+                stockCommonReplayService.updateById(replay);
+            }catch (Exception e){
+                log.error(e.getMessage(),e);
+            }
+        }
+    }
+
+    public void forTwoPlankWuDi(Date date){
+        Date currentDate = date;
+        if(!commonComponent.isTradeDate(currentDate)){
+            log.info("当前日期不是交易日期");
+            return;
+        }
+        StockCommonReplayQuery stockCommonReplayQuery = new StockCommonReplayQuery();
+        stockCommonReplayQuery.setKbarDate(DateUtil.format(date,DateUtil.yyyyMMdd));
+        List<StockCommonReplay> stockCommonReplays = stockCommonReplayService.listByCondition(stockCommonReplayQuery);
+        for (StockCommonReplay replay:stockCommonReplays) {
+            try {
+                List<StockKbar> kbars = stockKbarComponent.getStockKBarRemoveNew(replay.getStockCode(), 50, 11);
+                List<StockKbar> stockKbars = Lists.reverse(kbars);
+                BigDecimal currentDayEndPrice = null;
+                BigDecimal rateDay3 = null;
+                BigDecimal lowPrice  = null;
+                int i = 0;
+                if (!CollectionUtils.isEmpty(stockKbars)) {
+                    for (StockKbar kbar : stockKbars) {
+                        i++;
+                        if (i == 1) {
+                            currentDayEndPrice = kbar.getAdjClosePrice();
+                        }
+                        if (i == 4) {
+                            rateDay3 = PriceUtil.getPricePercentRate(currentDayEndPrice.subtract(kbar.getAdjClosePrice()), kbar.getAdjClosePrice());
+                        }
+                        if(i<=10){
+                            if(lowPrice==null||kbar.getAdjLowPrice().compareTo(lowPrice)==-1){
+                                lowPrice = kbar.getAdjLowPrice();
+                            }
+                        }
+                    }
+                }
+                replay.setRateDay3(rateDay3);
+                replay.setGatherPriceThanLow10(lowPrice);
                 stockCommonReplayService.updateById(replay);
             }catch (Exception e){
                 log.error(e.getMessage(),e);

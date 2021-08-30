@@ -14,6 +14,8 @@
         <result column="plank_price_than_low10" jdbcType="DECIMAL" property="plankPriceThanLow10"/>
         <result column="avg_exchange10" jdbcType="BIGINT" property="avgExchange10"/>
         <result column="rate_day5" jdbcType="DECIMAL" property="rateDay5"/>
+        <result column="rate_day3" jdbcType="DECIMAL" property="rateDay3"/>
+        <result column="gather_price_than_low10" jdbcType="DECIMAL" property="gatherPriceThanLow10"/>
         <result column="planks_day10" jdbcType="BIGINT" property="planksDay10"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -32,6 +34,8 @@
             plank_price_than_low10,
             avg_exchange10,
             rate_day5,
+            rate_day3,
+            gather_price_than_low10,
             planks_day10,
             create_time,
             update_time
@@ -83,6 +87,12 @@
         <if test="rateDay5 != null">
             rate_day5 = #{rateDay5, jdbcType=DECIMAL},
         </if>
+        <if test="rateDay3 != null">
+            rate_day3 = #{rateDay3, jdbcType=DECIMAL},
+        </if>
+        <if test="gatherPriceThanLow10 != null">
+            gather_price_than_low10 = #{gatherPriceThanLow10, jdbcType=DECIMAL},
+        </if>
         <if test="planksDay10 != null">
             planks_day10 = #{planksDay10, jdbcType=BIGINT},
         </if>
@@ -109,6 +119,8 @@
             #{plankPriceThanLow10, jdbcType=DECIMAL},
             #{avgExchange10, jdbcType=BIGINT},
             #{rateDay5, jdbcType=DECIMAL},
+            #{rateDay3, jdbcType=DECIMAL},
+            #{gatherPriceThanLow10, jdbcType=DECIMAL},
             #{planksDay10, jdbcType=BIGINT},
             #{createTime, jdbcType=TIMESTAMP},
             #{updateTime, jdbcType=TIMESTAMP}
@@ -147,6 +159,12 @@
             </if>
             <if test="rateDay5 != null">
                 rate_day5 = #{rateDay5, jdbcType=DECIMAL},
+            </if>
+            <if test="rateDay3 != null">
+                rate_day3 = #{rateDay3, jdbcType=DECIMAL},
+            </if>
+            <if test="gatherPriceThanLow10 != null">
+                gather_price_than_low10 = #{gatherPriceThanLow10, jdbcType=DECIMAL},
             </if>
             <if test="planksDay10 != null">
                 planks_day10 = #{planksDay10, jdbcType=BIGINT},
@@ -191,6 +209,12 @@
         </if>
         <if test="rateDay5 != null">
             and rate_day5 = #{rateDay5, jdbcType=DECIMAL}
+        </if>
+        <if test="rateDay3 != null">
+            and rate_day3 = #{rateDay3, jdbcType=DECIMAL}
+        </if>
+        <if test="gatherPriceThanLow10 != null">
+            and gather_price_than_low10 = #{gatherPriceThanLow10, jdbcType=DECIMAL}
         </if>
         <if test="planksDay10 != null">
             and planks_day10 = #{planksDay10, jdbcType=BIGINT}
