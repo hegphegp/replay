@@ -45,7 +45,7 @@ public class BaseTestCase {
     @Test
     public void test1() {
         //无敌数据
-        //plankChenJiaoEComponent.exportData();
+        plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(new Date());
         stockReplayDailyComponent.calPreDateAvgPrice(new Date());
         stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
