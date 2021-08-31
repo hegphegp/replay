@@ -11,6 +11,7 @@ import com.bazinga.replay.service.*;
 import com.bazinga.util.CommonUtil;
 import com.bazinga.util.Excel2JavaPojoUtil;
 import com.bazinga.util.MarketUtil;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.tradex.util.Conf;
@@ -52,6 +53,9 @@ public class SynInfoComponent {
     @Autowired
     private ThsBlockInfoService thsBlockInfoService;
 
+    public static List<String> BLOCK_NAME_FILTER_LIST = Lists.newArrayList("沪股通","深股通","标普道琼斯","新股","次新",
+            "其他","创业板重组松绑","高送转","填权","共同富裕示范区");
+
     public void synThsBlockInfo() throws IOException {
         File file = new File("D:/circulate/block_conception.ini");
         List<String> list = FileUtils.readLines(file, "GBK");
@@ -84,11 +88,17 @@ public class SynInfoComponent {
             }
         }
         log.info("板块数据{}",JSONObject.toJSONString(blockInfoMap));
-        for (Map.Entry<String, String> entry : blockInfoMap.entrySet()) {
+        block: for (Map.Entry<String, String> entry : blockInfoMap.entrySet()) {
             String detailString = blockDetailMap.get(entry.getKey());
             if(StringUtils.isEmpty(detailString)){
                 continue;
             }
+            for (String filterName : BLOCK_NAME_FILTER_LIST) {
+                if(entry.getValue().contains(filterName)){
+                    continue block;
+                }
+            }
+
             String[] detailArr = detailString.split(SymbolConstants.COMMA);
             Set<String> detailSet = Sets.newHashSet(detailArr);
             ThsBlockInfo blockInfo = new ThsBlockInfo();
