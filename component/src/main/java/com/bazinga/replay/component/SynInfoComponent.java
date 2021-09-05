@@ -54,7 +54,7 @@ public class SynInfoComponent {
     private ThsBlockInfoService thsBlockInfoService;
 
     public static List<String> BLOCK_NAME_FILTER_LIST = Lists.newArrayList("沪股通","深股通","标普道琼斯","新股","次新",
-            "其他","创业板重组松绑","高送转","填权","共同富裕示范区");
+            "其他","创业板重组松绑","高送转","填权","共同富裕示范区","融资融券","MSCI","ST");
 
     public void synThsBlockInfo() throws IOException {
         File file = new File("D:/circulate/block_conception.ini");
