@@ -7,6 +7,7 @@ import com.bazinga.replay.dto.CirculateInfoExcelDTO;
 import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.BlockInfoQuery;
 import com.bazinga.replay.query.CirculateInfoQuery;
+import com.bazinga.replay.query.ThsBlockStockDetailQuery;
 import com.bazinga.replay.service.*;
 import com.bazinga.util.CommonUtil;
 import com.bazinga.util.Excel2JavaPojoUtil;
@@ -53,11 +54,11 @@ public class SynInfoComponent {
     @Autowired
     private ThsBlockInfoService thsBlockInfoService;
 
-    public static List<String> BLOCK_NAME_FILTER_LIST = Lists.newArrayList("沪股通","深股通","标普道琼斯","新股","次新",
-            "其他","创业板重组松绑","高送转","填权","共同富裕示范区","融资融券","MSCI","ST");
+    public static List<String> BLOCK_NAME_FILTER_LIST = Lists.newArrayList("沪股通","深股通","标普道琼斯","新股","次新"
+            ,"创业板重组松绑","高送转","填权","共同富裕示范区","融资融券","MSCI","ST");
 
     public void synThsBlockInfo() throws IOException {
-        File file = new File("D:/circulate/block_conception.ini");
+        File file = new File("D:/circulate/block_industry.ini");
         List<String> list = FileUtils.readLines(file, "GBK");
         log.info(JSONObject.toJSONString(list));
         int blockIndex = 0;
@@ -122,6 +123,45 @@ public class SynInfoComponent {
                 thsBlockStockDetailService.save(thsBlockStockDetail);
             }
         }
+    }
+
+    public void thsblockIndex() throws IOException {
+        File file = new File("D:/circulate/同花顺行业板块索引.txt");
+        List<String> list = FileUtils.readLines(file, "UTF-8");
+
+        for (String blockIndexString : list) {
+            log.info("行数据{}",blockIndexString);
+            String[] indexAttr = blockIndexString.split("\\t");
+            if(indexAttr.length>2){
+                int count = 0;
+                String blockCode = indexAttr[0];
+                String blockName = indexAttr[1];
+                for (int i = 2; i < indexAttr.length; i++) {
+                    ThsBlockStockDetailQuery query = new ThsBlockStockDetailQuery();
+                    String originalBlockCode = indexAttr[i];
+                    query.setBlockCode(originalBlockCode);
+                    List<ThsBlockStockDetail> thsBlockStockDetails = thsBlockStockDetailService.listByCondition(query);
+                    if(CollectionUtils.isEmpty(thsBlockStockDetails)){
+                        continue;
+                    }
+                    for (ThsBlockStockDetail thsBlockStockDetail : thsBlockStockDetails) {
+                        thsBlockStockDetail.setBlockCode(blockCode);
+                        thsBlockStockDetail.setBlockName(blockName);
+                        thsBlockStockDetailService.updateById(thsBlockStockDetail);
+                        count++;
+                    }
+
+
+                }
+                ThsBlockInfo thsBlockInfo = new ThsBlockInfo();
+                thsBlockInfo.setTotalCount(count);
+                thsBlockInfo.setBlockName(blockName);
+                thsBlockInfo.setBlockCode(blockCode);
+                log.info("新增板块数据 blockCode{} blockName{}",blockCode,blockName);
+                thsBlockInfoService.save(thsBlockInfo);
+            }
+        }
+
     }
     /**
      * 同步板块信息
