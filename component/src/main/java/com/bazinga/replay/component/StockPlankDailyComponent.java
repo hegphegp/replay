@@ -9,6 +9,7 @@ import com.bazinga.replay.convert.KBarDTOConvert;
 import com.bazinga.replay.dto.AdjFactorDTO;
 import com.bazinga.replay.dto.KBarDTO;
 import com.bazinga.replay.dto.PlankTypeDTO;
+import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.CirculateInfoAllQuery;
 import com.bazinga.replay.query.StockKbarQuery;
@@ -26,6 +27,7 @@ import com.tradex.enums.KCate;
 import com.tradex.model.suport.DataTable;
 import com.tradex.util.TdxHqUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -58,6 +60,8 @@ public class StockPlankDailyComponent {
     private StockKbarService stockKbarService;
     @Autowired
     private HistoryTransactionDataComponent historyTransactionDataComponent;
+    @Autowired
+    private CurrentDayTransactionDataComponent currentDayTransactionDataComponent;
 
 
     public void stockPlankDailyStatistic(Date date){
@@ -453,6 +457,39 @@ public class StockPlankDailyComponent {
             }
         }
 
+    }
+
+    public void insertTime(Date date){
+        StockPlankDailyQuery query = new StockPlankDailyQuery();
+        query.setTradeDateFrom(DateTimeUtils.getDate000000(date));
+        query.setTradeDateTo(DateTimeUtils.getDate235959(date));
+        List<StockPlankDaily> stockPlankDailies = stockPlankDailyService.listByCondition(query);
+        String dateStr = DateUtil.format(date, DateUtil.yyyy_MM_dd);
+        for (StockPlankDaily stockPlankDaily:stockPlankDailies){
+            try {
+                DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, stockPlankDaily.getStockCode(), 0, 10);
+                List<KBarDTO> kbars = KBarDTOConvert.convertKBar(dataTable);
+                if(CollectionUtils.isEmpty(kbars)){
+                    continue;
+                }
+                BigDecimal preEndPrice = null;
+                for (KBarDTO kBarDTO:kbars){
+                    if(preEndPrice!=null&&kBarDTO.getDateStr().equals(dateStr)) {
+                        List<ThirdSecondTransactionDataDTO> datas = currentDayTransactionDataComponent.getData(stockPlankDaily.getStockCode());
+                        String insertTime = currentDayTransactionDataComponent.insertTime(preEndPrice, stockPlankDaily.getStockCode(), datas);
+                        Date insertDate = null;
+                        if(!StringUtils.isBlank(insertTime)){
+                            insertDate = DateUtil.parseDate(DateUtil.format(date, DateUtil.yyyy_MM_dd) + " " + insertTime + ":00", DateUtil.DEFAULT_FORMAT);
+                        }
+                        stockPlankDaily.setInsertTime(insertDate);
+                        stockPlankDailyService.updateById(stockPlankDaily);
+                    }
+                    preEndPrice = kBarDTO.getEndPrice();
+                }
+            }catch (Exception e){
+                log.error(e.getMessage(),e);
+            }
+        }
     }
 
 

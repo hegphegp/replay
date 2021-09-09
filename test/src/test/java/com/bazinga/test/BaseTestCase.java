@@ -1,6 +1,7 @@
 package com.bazinga.test;
 
 import com.bazinga.replay.component.*;
+import com.bazinga.replay.model.StockKbar;
 import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
 import com.tradex.enums.KCate;
@@ -13,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 单元测试基类<p/>
@@ -38,9 +40,13 @@ public class BaseTestCase {
     private StockKbarComponent stockKbarComponent;
     @Autowired
     private StockCommonReplayComponent stockCommonReplayComponent;
+    @Autowired
+    private PlankChenJiaoEComponent plankChenJiaoEComponent;
     @Test
     public void test1() {
-        /*stockReplayDailyComponent.stockReplayDaily(new Date());
+        //无敌数据
+        plankChenJiaoEComponent.exportData();
+        stockReplayDailyComponent.stockReplayDaily(new Date());
         stockReplayDailyComponent.calPreDateAvgPrice(new Date());
         stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
         newStockComponent.catchNewStock();
@@ -48,10 +54,17 @@ public class BaseTestCase {
         stockKbarComponent.batchUpdateDaily();
         stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(new Date());
         stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(new Date());
-        stockPlankDailyComponent.calSubNewStock(new Date());*/
+        //stockPlankDaily添加次新标签
+        stockPlankDailyComponent.calSubNewStock(new Date());
+        //stockPlankDaily添加insertTime
+        stockPlankDailyComponent.insertTime(new Date());
 
         //新版复盘
-        stockCommonReplayComponent.saveCommonReplay(DateUtil.parseDate("2021-08-13 15:30:30",DateUtil.DEFAULT_FORMAT));
+        stockCommonReplayComponent.saveCommonReplay(new Date());
+        stockCommonReplayComponent.firstPlankNoBuyInfo(new Date());
+        stockCommonReplayComponent.highRaiseStockInfo(new Date());
+        stockCommonReplayComponent.forTwoPlankWuDi(new Date());
+        stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
 
     }
 
@@ -63,7 +76,10 @@ public class BaseTestCase {
 
     @Test
     public void test3() {
-        plankExchangeDailyComponent.plankExchangeDaily(new Date());
+
+        //stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
+        List<StockKbar> kbars = stockKbarComponent.getStockKBarRemoveNew("605588", 3, 50);
+        System.out.println(kbars);
     }
 
 
