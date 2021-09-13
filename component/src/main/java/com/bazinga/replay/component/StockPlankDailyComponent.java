@@ -392,7 +392,7 @@ public class StockPlankDailyComponent {
                 StockKbar currentDayKbar = null;
                 for (StockKbar kbar : stockKbars) {
                     if (!kbar.getKbarDate().equals(dateStr)) {
-                        if (lowKbar == null || kbar.getAdjLowPrice().compareTo(lowKbar.getAdjLowPrice()) == 1) {
+                        if (lowKbar == null || kbar.getAdjLowPrice().compareTo(lowKbar.getAdjLowPrice()) == -1) {
                             lowKbar = kbar;
                         }
                     } else {
@@ -492,6 +492,68 @@ public class StockPlankDailyComponent {
         }
     }
 
+    public void superFactor(Date date){
+        Date date000000 = DateTimeUtils.getDate000000(date);
+        Date date235959 = DateTimeUtils.getDate235959(date);
+        StockPlankDailyQuery query = new StockPlankDailyQuery();
+        query.setTradeDateFrom(date000000);
+        query.setTradeDateTo(date235959);
+        List<StockPlankDaily> dailies = stockPlankDailyService.listByCondition(query);
+        for (StockPlankDaily stockPlankDaily:dailies){
+            StockKbarQuery stockKbarQuery = new StockKbarQuery();
+            stockKbarQuery.setStockCode(stockPlankDaily.getStockCode());
+            stockKbarQuery.setLimit(100);
+            stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
+            List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
+            if(CollectionUtils.isEmpty(stockKbars)){
+                stockPlankDaily.setKbarCounts(0);
+                stockPlankDailyService.updateById(stockPlankDaily);
+                continue;
+            }
+            stockPlankDaily.setKbarCounts(stockKbars.size());
+            int i = 0;
+            BigDecimal plankHighPrice = null;
+            BigDecimal lowPrice = null;
+            for (StockKbar kbar:stockKbars){
+                i++;
+                if(i<=15){
+                    if(lowPrice==null||kbar.getAdjLowPrice().compareTo(lowPrice)==-1){
+                        lowPrice = kbar.getAdjLowPrice();
+                    }
+                   if(i==1){
+                       plankHighPrice = kbar.getAdjHighPrice();
+                   }
+                }
+            }
+            if(plankHighPrice!=null&&lowPrice!=null){
+                BigDecimal divide = plankHighPrice.divide(lowPrice,2,BigDecimal.ROUND_HALF_UP);
+                stockPlankDaily.setDay15HighLow(divide);
+            }
 
+            int seriesPlanks = 1;
+            StockKbar nextKbar = null;
+            int j = 0;
+            for (StockKbar kbar:stockKbars){
+                j++;
+                if(j>=3){
+                    boolean endPlank = PriceUtil.isUpperPrice(kbar.getStockCode(), nextKbar.getClosePrice(), kbar.getClosePrice());
+                    if(!endPlank){
+                        endPlank = PriceUtil.isUpperPrice(kbar.getStockCode(), nextKbar.getAdjClosePrice(),kbar.getAdjClosePrice());
+                    }
+                    if(endPlank){
+                        seriesPlanks++;
+                    }else{
+                        break;
+                    }
+                }
+                nextKbar = kbar;
+            }
+            stockPlankDaily.setSeriesPlanks(seriesPlanks);
+            stockPlankDailyService.updateById(stockPlankDaily);
+        }
+
+
+
+    }
 
 }

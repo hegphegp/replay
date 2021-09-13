@@ -65,7 +65,7 @@ public class BaseTestCase {
         stockCommonReplayComponent.highRaiseStockInfo(new Date());
         stockCommonReplayComponent.forTwoPlankWuDi(new Date());
         stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
-
+        stockPlankDailyComponent.superFactor(new Date());
     }
 
     @Test
@@ -76,10 +76,11 @@ public class BaseTestCase {
 
     @Test
     public void test3() {
-
+        //stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(DateUtil.parseDate("20210910",DateUtil.yyyyMMdd));
+       stockPlankDailyComponent.superFactor(DateUtil.parseDate("20210910",DateUtil.yyyyMMdd));
         //stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
-        List<StockKbar> kbars = stockKbarComponent.getStockKBarRemoveNew("605588", 3, 50);
-        System.out.println(kbars);
+        /*List<StockKbar> kbars = stockKbarComponent.getStockKBarRemoveNew("605588", 3, 50);
+        System.out.println(kbars);*/
     }
 
 
