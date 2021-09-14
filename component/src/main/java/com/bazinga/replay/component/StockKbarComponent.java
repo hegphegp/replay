@@ -180,8 +180,9 @@ public class StockKbarComponent {
                     return;
                 }
                 AdjFactorDTO adjFactorDTO = adjFactorMap.get(todayDate);
-                if (adjFactorDTO.getAdjFactor() == null) {
+                if (adjFactorDTO==null||adjFactorDTO.getAdjFactor() == null) {
                     log.info("当前日不是交易日 today ={}", todayDate);
+                    return;
                 }
                 if (stockKbarList.get(0).getAdjFactor().compareTo(adjFactorDTO.getAdjFactor()) == 0) {
                     TradeDatePoolQuery tradeDatequery = new TradeDatePoolQuery();
@@ -232,6 +233,7 @@ public class StockKbarComponent {
         //circulateInfoQuery.setMarketType(MarketTypeEnum.GENERAL.getCode());
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
         circulateInfos.forEach(item -> {
+            log.info("更新K线数据开始 stockCode ={}", item.getStockCode());
             updateKbarDataDaily(item.getStockCode(), item.getStockName());
         }); }
 
