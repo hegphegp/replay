@@ -7,6 +7,7 @@ import com.bazinga.replay.dto.CirculateInfoExcelDTO;
 import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.BlockInfoQuery;
 import com.bazinga.replay.query.CirculateInfoQuery;
+import com.bazinga.replay.query.HotCirculateInfoQuery;
 import com.bazinga.replay.query.ThsBlockStockDetailQuery;
 import com.bazinga.replay.service.*;
 import com.bazinga.util.CommonUtil;
@@ -53,6 +54,8 @@ public class SynInfoComponent {
 
     @Autowired
     private ThsBlockInfoService thsBlockInfoService;
+    @Autowired
+    private HotCirculateInfoService hotCirculateInfoService;
 
     public static List<String> BLOCK_NAME_FILTER_LIST = Lists.newArrayList("沪股通","深股通","标普道琼斯","新股","次新"
             ,"创业板重组松绑","高送转","填权","共同富裕示范区","融资融券","MSCI","ST");
@@ -243,9 +246,55 @@ public class SynInfoComponent {
             throw new BusinessException("文件解析及同步异常", e);
         }
     }
+
+    public void synHotCirculateInfo() {
+        File file = new File("D:/circulate/hotCirculate.xlsx");
+        if (!file.exists()) {
+            throw new BusinessException("文件:" + "D:/circulate/hotCirculate.xlsx" + "不存在");
+        }
+        try {
+            List<CirculateInfoExcelDTO> dataList = new Excel2JavaPojoUtil(file).excel2JavaPojo(CirculateInfoExcelDTO.class);
+            dataList.forEach(item -> {
+                HotCirculateInfoQuery query = new HotCirculateInfoQuery();
+                query.setStockCode(item.getStock());
+                List<HotCirculateInfo> hotCirculateInfos = hotCirculateInfoService.listByCondition(query);
+                HotCirculateInfo hotCirculateInfo = null;
+                if (!CollectionUtils.isEmpty(hotCirculateInfos)) {
+                    hotCirculateInfo = hotCirculateInfos.get(0);
+                }
+                if (hotCirculateInfo==null) {
+                    hotCirculateInfo = convert2HotCirculateMode(item);
+                    hotCirculateInfoService.save(hotCirculateInfo);
+                } else {
+                    hotCirculateInfo.setStockCode(item.getStock());
+                    hotCirculateInfo.setCirculate(item.getTotalQuantity().longValue());
+                    hotCirculateInfo.setCirculateZ(item.getCirculateZ().longValue());
+                    hotCirculateInfo.setStockName(item.getStockName());
+                    hotCirculateInfo.setStockType(CommonUtil.getStockType(item.getCirculateZ().longValue()));
+                    hotCirculateInfoService.updateById(hotCirculateInfo);
+                }
+            });
+            log.info("更新流通 z 信息完毕 size = {}", dataList.size());
+        } catch (Exception e) {
+            log.error("更新流通 z 信息异常", e);
+            throw new BusinessException("文件解析及同步异常", e);
+        }
+    }
     private CirculateInfo convert2Mode(CirculateInfoExcelDTO item) {
         Integer marketCode = MarketUtil.getMarketCode(item.getStock());
         CirculateInfo circulateInfo = new CirculateInfo();
+        circulateInfo.setStockCode(item.getStock());
+        circulateInfo.setMarketType(marketCode);
+        circulateInfo.setCirculate(item.getTotalQuantity().longValue());
+        circulateInfo.setCirculateZ(item.getCirculateZ().longValue());
+        circulateInfo.setStockName(item.getStockName());
+        circulateInfo.setStockType(CommonUtil.getStockType(item.getCirculateZ().longValue()));
+        return circulateInfo;
+    }
+
+    private HotCirculateInfo convert2HotCirculateMode(CirculateInfoExcelDTO item) {
+        Integer marketCode = MarketUtil.getMarketCode(item.getStock());
+        HotCirculateInfo circulateInfo = new HotCirculateInfo();
         circulateInfo.setStockCode(item.getStock());
         circulateInfo.setMarketType(marketCode);
         circulateInfo.setCirculate(item.getTotalQuantity().longValue());

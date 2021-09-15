@@ -73,6 +73,11 @@ public class BaseTestCase {
         synInfoComponent.synCirculateInfo();
     }
 
+    @Test
+    public void test4() {
+        synInfoComponent.synHotCirculateInfo();
+    }
+
 
     @Test
     public void test3() {
