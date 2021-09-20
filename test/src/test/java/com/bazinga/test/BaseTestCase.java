@@ -45,12 +45,12 @@ public class BaseTestCase {
     @Test
     public void test1() {
         //无敌数据
-        plankChenJiaoEComponent.exportData();
+       /* plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(new Date());
         stockReplayDailyComponent.calPreDateAvgPrice(new Date());
         stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
         newStockComponent.catchNewStock();
-        plankExchangeDailyComponent.plankExchangeDaily(new Date());
+        plankExchangeDailyComponent.plankExchangeDaily(new Date());*/
         stockKbarComponent.batchUpdateDaily();
         stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(new Date());
         stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(new Date());

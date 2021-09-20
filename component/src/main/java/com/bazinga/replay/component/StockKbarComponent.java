@@ -105,6 +105,9 @@ public class StockKbarComponent {
             log.info("stockCode ={} http方式获取复权因子失败", stockCode);
             return;
         }
+        if(adjFactorMap.get(stockKbarList.get(stockKbarList.size() - 1).getKbarDate())==null){
+            return;
+        }
         BigDecimal maxAdjFactor = adjFactorMap.get(stockKbarList.get(stockKbarList.size() - 1).getKbarDate()).getAdjFactor();
         transactionTemplate.execute((TransactionCallback<Void>) status -> {
             try {
