@@ -286,6 +286,7 @@ public class SynInfoComponent {
         circulateInfo.setStockCode(item.getStock());
         circulateInfo.setMarketType(marketCode);
         circulateInfo.setCirculate(item.getTotalQuantity().longValue());
+        System.out.println(item.getStock());
         circulateInfo.setCirculateZ(item.getCirculateZ().longValue());
         circulateInfo.setStockName(item.getStockName());
         circulateInfo.setStockType(CommonUtil.getStockType(item.getCirculateZ().longValue()));
