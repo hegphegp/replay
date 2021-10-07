@@ -42,6 +42,10 @@ public class BaseTestCase {
     private StockCommonReplayComponent stockCommonReplayComponent;
     @Autowired
     private PlankChenJiaoEComponent plankChenJiaoEComponent;
+    @Autowired
+    private BlockKbarComponent blockKbarComponent;
+    @Autowired
+    private HotBlockDropInfoComponent hotBlockDropInfoComponent;
     @Test
     public void test1() {
         //无敌数据
@@ -82,10 +86,12 @@ public class BaseTestCase {
     @Test
     public void test3() {
         //stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(DateUtil.parseDate("20210910",DateUtil.yyyyMMdd));
-       stockPlankDailyComponent.superFactor(DateUtil.parseDate("20210910",DateUtil.yyyyMMdd));
+       //stockPlankDailyComponent.superFactor(DateUtil.parseDate("20210910",DateUtil.yyyyMMdd));
         //stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         /*List<StockKbar> kbars = stockKbarComponent.getStockKBarRemoveNew("605588", 3, 50);
         System.out.println(kbars);*/
+        //blockKbarComponent.thsBlockKbar(DateUtil.parseDate("20210927",DateUtil.yyyyMMdd));
+        hotBlockDropInfoComponent.thsBlockKbar(DateUtil.parseDate("20210930",DateUtil.yyyyMMdd));
     }
 
 
