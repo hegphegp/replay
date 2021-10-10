@@ -5,22 +5,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import com.bazinga.base.Sort;
+import com.bazinga.constant.SymbolConstants;
 import com.bazinga.replay.dto.AdjFactorDTO;
 import com.bazinga.replay.convert.StockKbarConvert;
 import com.bazinga.replay.dto.KBarDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
-import com.bazinga.replay.model.CirculateInfo;
-import com.bazinga.replay.model.CirculateInfoAll;
-import com.bazinga.replay.model.StockKbar;
-import com.bazinga.replay.model.TradeDatePool;
-import com.bazinga.replay.query.CirculateInfoAllQuery;
-import com.bazinga.replay.query.CirculateInfoQuery;
-import com.bazinga.replay.query.StockKbarQuery;
-import com.bazinga.replay.query.TradeDatePoolQuery;
-import com.bazinga.replay.service.CirculateInfoAllService;
-import com.bazinga.replay.service.CirculateInfoService;
-import com.bazinga.replay.service.StockKbarService;
-import com.bazinga.replay.service.TradeDatePoolService;
+import com.bazinga.replay.model.*;
+import com.bazinga.replay.query.*;
+import com.bazinga.replay.service.*;
 import com.bazinga.util.DateFormatUtils;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.PriceUtil;
@@ -66,6 +58,8 @@ public class StockKbarComponent {
     @Autowired
     private HistoryTransactionDataComponent historyTransactionDataComponent;
 
+    @Autowired
+    private StockAverageLineService stockAverageLineService;
 
     public Map<String,Long> getCybMinQuantity(){
         Map<String,Long> resultMap = Maps.newHashMap();
@@ -249,7 +243,7 @@ public class StockKbarComponent {
             query.setStockCode(item.getStockCode());
             int count = stockKbarService.countByCondition(query);
             if (count == 0) {
-                initAndSaveKbarData(item.getStockCode(), item.getStockName(), 250);
+                initAndSaveKbarData(item.getStockCode(), item.getStockName(), 400);
             }
         });
     }
@@ -354,6 +348,89 @@ public class StockKbarComponent {
     }
 
 
+    public Double calDaysAvg(String stockCode, String kbarDate, int days) {
+        StockKbarQuery query = new StockKbarQuery();
+        query.setKbarDateTo(kbarDate);
+        query.setStockCode(stockCode);
+        query.setLimit(days);
+        query.addOrderBy("kbar_date", Sort.SortType.DESC);
+        List<StockKbar> stockKbarList = stockKbarService.listByCondition(query);
+
+        if (CollectionUtils.isEmpty(stockKbarList) || stockKbarList.size() < days) {
+            return null;
+        }
+        if (!kbarDate.equals(stockKbarList.get(0).getKbarDate())) {
+            log.info("没有该交易日的K线数据 stockCode ={}, kbarDate ={}", stockCode, kbarDate);
+            return null;
+        }
+        return stockKbarList.stream().map(StockKbar::getAdjClosePrice).mapToDouble(BigDecimal::doubleValue).average().getAsDouble();
+    }
+
+    public void calAvgLine(String stockCode, String stockName, int days) {
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
+        for (TradeDatePool tradeDatePool : tradeDatePools) {
+            String kbarDate = DateFormatUtils.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+            Double avgPrice = calDaysAvg(stockCode, kbarDate, days);
+            if (avgPrice != null) {
+                StockAverageLine stockAverageLine = new StockAverageLine();
+                stockAverageLine.setAveragePrice(new BigDecimal(avgPrice).setScale(2, RoundingMode.HALF_UP));
+                stockAverageLine.setDayType(days);
+                stockAverageLine.setKbarDate(kbarDate);
+                stockAverageLine.setStockName(stockName);
+                stockAverageLine.setUniqueKey(stockCode + SymbolConstants.UNDERLINE + kbarDate + SymbolConstants.UNDERLINE + days);
+                stockAverageLine.setStockCode(stockCode);
+                stockAverageLineService.save(stockAverageLine);
+            }
+        }
+
+    }
+
+
+    public void batchcalAvgLine() {
+        CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
+        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
+        circulateInfos.forEach(item -> {
+            StockAverageLineQuery query = new StockAverageLineQuery();
+            query.setStockCode(item.getStockCode());
+            System.out.println(item.getStockCode());
+            int count = stockAverageLineService.countByCondition(query);
+            if (count == 0) {
+                //calAvgLine(item.getStock(), item.getStockName(), 60);
+                for (int i = 5; i <=60 ; i++) {
+                    calAvgLine(item.getStockCode(), item.getStockName(), i);
+                }
+                //calAvgLine(item.getStock(), item.getStockName(), 10);
+                //calAvgLine(item.getStock(), item.getStockName(), 5);
+            }
+
+        });
+    }
+
+    public Double avgLineResult(String stockCode, String kbarDate) {
+        StockAverageLineQuery query = new StockAverageLineQuery();
+        query.setKbarDateTo(kbarDate);
+        query.setStockCode(stockCode);
+        query.setDayType(60);
+        query.setLimit(10);
+        query.addOrderBy("kbar_date", Sort.SortType.DESC);
+        List<StockAverageLine> stockAverageLines = stockAverageLineService.listByCondition(query);
+        if (stockAverageLines.size() == 10 && kbarDate.equals(stockAverageLines.get(0).getKbarDate())) {
+            int moreNum = 0;
+            int lessNum = 0;
+            for (int i = 0; i < stockAverageLines.size() - 1; i++) {
+                for (int j = i + 1; j < stockAverageLines.size(); j++) {
+                    if (stockAverageLines.get(i).getAveragePrice().compareTo(stockAverageLines.get(j).getAveragePrice()) >= 0) {
+                        moreNum = moreNum + 1;
+                    } else {
+                        lessNum = lessNum + 1;
+                    }
+                }
+            }
+            log.info("stockCode ={}, kbarDate ={}, moreNum ={} ,lessNum = {} percent ={}", stockCode, kbarDate, moreNum, lessNum, Math.round(moreNum * 10000 / (moreNum + lessNum)) * 0.01);
+            return Math.round(moreNum * 10000 / (moreNum + lessNum)) * 0.01;
+        }
+        return null;
+    }
 
 
     public void histotyTradeData(){

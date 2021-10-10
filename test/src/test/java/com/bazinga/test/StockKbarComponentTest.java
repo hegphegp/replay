@@ -21,4 +21,9 @@ public class StockKbarComponentTest extends BaseTestCase {
         stockKbarComponent.batchKbarDataInit();
         //stockCommonReplayComponent.saveCommonReplay(new Date());
     }
+
+    @Test
+    public void test2(){
+        stockKbarComponent.batchcalAvgLine();
+    }
 }
