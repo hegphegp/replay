@@ -115,10 +115,17 @@ public class HotBlockDropInfoComponent {
                     hotBlockDropStock.setBlockCode(detail.getBlockCode());
                     hotBlockDropStock.setBlockName(detail.getBlockName());
                     hotBlockDropStock.setStockCode(detail.getStockCode());
+                    hotBlockDropStock.setStockName(detail.getStockName());
                     Date tradeDate = commonComponent.afterTradeDate(date);
                     hotBlockDropStock.setTradeDate(DateUtil.format(tradeDate,DateUtil.yyyyMMdd));
                     hotBlockDropStock.setCreateTime(new Date());
-                    hotBlockDropStockService.save(hotBlockDropStock);
+                    HotBlockDropStockQuery query = new HotBlockDropStockQuery();
+                    query.setStockCode(hotBlockDropStock.getStockCode());
+                    query.setTradeDate(hotBlockDropStock.getTradeDate());
+                    List<HotBlockDropStock> hotBlockDropStocks = hotBlockDropStockService.listByCondition(query);
+                    if(CollectionUtils.isEmpty(hotBlockDropStocks)) {
+                        hotBlockDropStockService.save(hotBlockDropStock);
+                    }
                 }
 
             }
