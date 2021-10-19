@@ -196,5 +196,29 @@ public class HotBlockDropInfoComponent {
         return list;
     }
 
+    public void getAvgPrice(){
+        List<HotBlockDropStock> hotBlockDropStocks = hotBlockDropStockService.listByCondition(new HotBlockDropStockQuery());
+        BigDecimal total = BigDecimal.ZERO;
+        int count = 0;
+        for (HotBlockDropStock hotBlockDropStock:hotBlockDropStocks){
+            StockKbarQuery stockKbarQuery = new StockKbarQuery();
+            stockKbarQuery.setKbarDate(hotBlockDropStock.getTradeDate());
+            stockKbarQuery.setStockCode(hotBlockDropStock.getStockCode());
+            List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
+            if(CollectionUtils.isEmpty(stockKbars)){
+                continue;
+            }
+            BigDecimal openPrice = stockKbars.get(0).getOpenPrice();
+            BigDecimal avgPrice = currentDayTransactionDataComponent.calAvgPrice(hotBlockDropStock.getStockCode());
+            BigDecimal rate = PriceUtil.getPricePercentRate(avgPrice.subtract(openPrice), openPrice);
+            System.out.println(hotBlockDropStock.getStockCode()+"======="+rate);
+            count = count+1;
+            total = total.add(rate);
+        }
+        System.out.println(total+"======"+count);
+        BigDecimal divide = total.divide(new BigDecimal(count), 2, BigDecimal.ROUND_HALF_UP);
+        System.out.println(divide);
+    }
+
 
 }
