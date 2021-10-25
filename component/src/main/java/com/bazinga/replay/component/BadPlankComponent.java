@@ -77,7 +77,7 @@ public class BadPlankComponent {
             String stockCode = daily.getStockCode();
             String stockName = daily.getStockName();
             try {
-                /*if (!stockCode.equals("603787")) {
+                /*if (!stockCode.equals("600505")) {
                     continue;
                 }*/
                 List<StockKbar> stockKBars = getStockKBars(stockCode,DateUtil.format(date,DateUtil.yyyyMMdd));
@@ -85,7 +85,7 @@ public class BadPlankComponent {
                     log.info("复盘烂板没有获取到k线数据 stockCode:{} stockName:{}", stockCode, stockName);
                     continue;
                 }
-                List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockCode, date);
+                List<ThirdSecondTransactionDataDTO> datas = currentDayTransactionDataComponent.getData(stockCode);
                 if(CollectionUtils.isEmpty(datas)){
                     log.info("复盘烂板没有获取到分时成交数据 stockCode:{} stockName:{}", stockCode, stockName);
                     continue;
@@ -93,7 +93,7 @@ public class BadPlankComponent {
                 boolean badPlank = isBadPlank(datas, daily.getStockCode(), stockKBars.get(1).getClosePrice());
                 if(badPlank){
                     daily.setBadPlankType(1);
-                    stockPlankDailyService.save(daily);
+                    stockPlankDailyService.updateById(daily);
                 }
             }catch (Exception e){
                 log.info("复盘烂板异常 stockCode:{} stockName:{} e：{}", stockCode, stockName,e);

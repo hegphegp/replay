@@ -97,7 +97,8 @@ public class BaseTestCase {
         System.out.println(kbars);*/
         //blockKbarComponent.thsBlockKbar(DateUtil.parseDate("20211018",DateUtil.yyyyMMdd));
         //hotBlockDropInfoComponent.thsBlockKbar(DateUtil.parseDate("20211018",DateUtil.yyyyMMdd));
-        hotBlockDropInfoComponent.getAvgPrice();
+        //hotBlockDropInfoComponent.getAvgPrice();
+        badPlankComponent.badPlankJudge(new Date());
     }
 
 
