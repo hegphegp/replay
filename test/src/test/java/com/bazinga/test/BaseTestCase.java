@@ -46,6 +46,8 @@ public class BaseTestCase {
     private BlockKbarComponent blockKbarComponent;
     @Autowired
     private HotBlockDropInfoComponent hotBlockDropInfoComponent;
+    @Autowired
+    private BadPlankComponent badPlankComponent;
     @Test
     public void test1() {
         //无敌数据
@@ -69,6 +71,7 @@ public class BaseTestCase {
         stockCommonReplayComponent.highRaiseStockInfo(new Date());
         stockCommonReplayComponent.forTwoPlankWuDi(new Date());
         stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
+        badPlankComponent.badPlankJudge(new Date());
         stockPlankDailyComponent.superFactor(new Date());
         blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(new Date()));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(new Date()));
