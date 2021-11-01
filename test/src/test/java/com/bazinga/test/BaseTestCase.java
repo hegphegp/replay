@@ -98,7 +98,9 @@ public class BaseTestCase {
         //blockKbarComponent.thsBlockKbar(DateUtil.parseDate("20211018",DateUtil.yyyyMMdd));
         //hotBlockDropInfoComponent.thsBlockKbar(DateUtil.parseDate("20211018",DateUtil.yyyyMMdd));
         //hotBlockDropInfoComponent.getAvgPrice();
-        badPlankComponent.badPlankJudge(new Date());
+        //badPlankComponent.badPlankJudge(new Date());
+        DataTable securityBars = TdxHqUtil.getSecurityBars(KCate.DAY, "128105", 0,100);
+        System.out.println(securityBars);
     }
 
 
