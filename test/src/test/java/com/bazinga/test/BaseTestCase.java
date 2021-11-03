@@ -1,6 +1,7 @@
 package com.bazinga.test;
 
 import com.bazinga.replay.component.*;
+import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.StockKbar;
 import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
@@ -48,6 +49,8 @@ public class BaseTestCase {
     private HotBlockDropInfoComponent hotBlockDropInfoComponent;
     @Autowired
     private BadPlankComponent badPlankComponent;
+    @Autowired
+    private HistoryTransactionDataComponent historyTransactionDataComponent;
     @Test
     public void test1() {
         //无敌数据
@@ -99,8 +102,9 @@ public class BaseTestCase {
         //hotBlockDropInfoComponent.thsBlockKbar(DateUtil.parseDate("20211018",DateUtil.yyyyMMdd));
         //hotBlockDropInfoComponent.getAvgPrice();
         //badPlankComponent.badPlankJudge(new Date());
-        DataTable securityBars = TdxHqUtil.getSecurityBars(KCate.DAY, "128105", 0,100);
-        System.out.println(securityBars);
+        DataTable securityBars = TdxHqUtil.getSecurityBars(KCate.DAY, "128094", 0,100);
+        List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("123048", "20211102");
+        System.out.println(data);
     }
 
 
