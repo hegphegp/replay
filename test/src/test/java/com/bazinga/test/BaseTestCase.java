@@ -107,7 +107,7 @@ public class BaseTestCase {
         /*DataTable securityBars = TdxHqUtil.getSecurityBars(KCate.DAY, "128094", 0,100);
         List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("123048", "20211102");
         System.out.println(data);*/
-        blockKbarSelfComponent.initBlockKbarSelf(new Date());
+        blockKbarSelfComponent.initBlockKbarSelf();
     }
 
 

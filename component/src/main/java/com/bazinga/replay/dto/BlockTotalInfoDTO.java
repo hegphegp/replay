@@ -8,11 +8,11 @@ import java.util.Date;
 @Data
 public class BlockTotalInfoDTO {
 
-    private String dateStr;
+    private String tradeDate;
     private BigDecimal openTotalRate;
     private BigDecimal closeTotalRate;
     //总额
-    private BigDecimal totalExchange;
+    private BigDecimal totalExchangeAmount;
     //数量
-    private int count;
+    private int count = 0;
 }
