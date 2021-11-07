@@ -6,8 +6,8 @@ import com.bazinga.replay.query.StockCommonReplayQuery;
 import java.util.List;
 
 /**
- * ¡´StockCommonReplay Service¡µ<p>
- * ¡´¹¦ÄÜÏêÏ¸ÃèÊö¡µ
+ * ã€ˆStockCommonReplay Serviceã€‰<p>
+ * ã€ˆåŠŸèƒ½è¯¦ç»†æè¿°ã€‰
  *
  * @author
  * @date 2021-08-15
@@ -15,51 +15,51 @@ import java.util.List;
 public interface StockCommonReplayService {
 
     /**
-     * ĞÂÔöÒ»Ìõ¼ÇÂ¼
+     * æ–°å¢ä¸€æ¡è®°å½•
      *
-     * @param record ±£´æ¶ÔÏó
+     * @param record ä¿å­˜å¯¹è±¡
      */
     StockCommonReplay save(StockCommonReplay record);
 
     /**
-     * ¸ù¾İID²éÑ¯
+     * æ ¹æ®IDæŸ¥è¯¢
      *
-     * @param id Êı¾İ¿âID
+     * @param id æ•°æ®åº“ID
      */
     StockCommonReplay getById(Long id);
 
     /**
-     * ¸ù¾İid¸üĞÂÒ»ÌõÊı¾İ
+     * æ ¹æ®idæ›´æ–°ä¸€æ¡æ•°æ®
      *
-     * @param record ¸üĞÂ²ÎÊı
+     * @param record æ›´æ–°å‚æ•°
      */
     int updateById(StockCommonReplay record);
 
     /**
-     * ¸ù¾İ²éÑ¯²ÎÊı²éÑ¯Êı¾İ
+     * æ ¹æ®æŸ¥è¯¢å‚æ•°æŸ¥è¯¢æ•°æ®
      *
-     * @param query ²éÑ¯²ÎÊı
+     * @param query æŸ¥è¯¢å‚æ•°
      */
     List<StockCommonReplay> listByCondition(StockCommonReplayQuery query);
 
     /**
-     * ¸ù¾İ²éÑ¯²ÎÊı²éÑ¯Êı¾İ×ÜÁ¿
+     * æ ¹æ®æŸ¥è¯¢å‚æ•°æŸ¥è¯¢æ•°æ®æ€»é‡
      *
-     * @param query ²éÑ¯²ÎÊı
+     * @param query æŸ¥è¯¢å‚æ•°
      */
     int countByCondition(StockCommonReplayQuery query);
 
     /**
-     * Î¨Ò»¼üuniqueKey ²éÑ¯
+     * å”¯ä¸€é”®uniqueKey æŸ¥è¯¢
      *
-     * @param uniqueKey ²éÑ¯²ÎÊı
+     * @param uniqueKey æŸ¥è¯¢å‚æ•°
      */
     StockCommonReplay getByUniqueKey(String uniqueKey);
 
     /**
-     * Î¨Ò»¼üuniqueKey ¸üĞÂ
+     * å”¯ä¸€é”®uniqueKey æ›´æ–°
      *
-     * @param record ¸üĞÂ²ÎÊı
+     * @param record æ›´æ–°å‚æ•°
      */
     int updateByUniqueKey(StockCommonReplay record);
 }

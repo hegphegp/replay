@@ -78,6 +78,9 @@ public class StockUtils {
             if (stockCode.startsWith("123")) {
                 return "SZ.ZZ";
             }
+            if (stockCode.startsWith("113")) {
+                return "SZ.ZZ";
+            }
         }
         throw new IllegalArgumentException("股票代码(" + stockCode + ")不属于中国大陆证券代码.");
     }
