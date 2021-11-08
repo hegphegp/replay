@@ -15,7 +15,7 @@ public class MainTest {
             System.out.println(token);
 
            // String result = JoinQuantUtil.getDragonTiger("123048.XSHE", "2021-11-04", token);
-            String result = JoinQuantUtil.getTicks("123048.XSHE", "2021-11-04", token);
+            String result = JoinQuantUtil.getTicks("300148.XSHE", "2021-11-04", token);
 
             String[] array = result.split(" ");
             for (String s : array) {

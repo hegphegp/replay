@@ -63,7 +63,7 @@ public class JoinQuantUtil {
         paramMap.put("token",token);
         paramMap.put("code",code);
         paramMap.put("end_date","2021-11-04");
-        paramMap.put("count",100);
+        paramMap.put("count",4800);
         return Jsoup.connect("https://dataapi.joinquant.com/apis").ignoreContentType(true)
                 .header("Content-Type", "application/json")
                 .requestBody(JSONObject.toJSONString(paramMap)).post().text();
