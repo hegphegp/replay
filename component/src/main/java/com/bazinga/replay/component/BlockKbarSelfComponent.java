@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.SocketUtils;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -56,9 +57,10 @@ public class BlockKbarSelfComponent {
     public void initBlockKbarSelf(){
         List<ThsBlockInfo> thsBlockInfos = thsBlockInfoService.listByCondition(new ThsBlockInfoQuery());
         for (ThsBlockInfo thsBlockInfo:thsBlockInfos){
-            if(!thsBlockInfo.getBlockCode().equals("CA9F")){
+            /*if(!thsBlockInfo.getBlockCode().equals("CA9F")){
                 continue;
-            }
+            }*/
+            System.out.println(thsBlockInfo.getBlockCode());
             String blockCode = thsBlockInfo.getBlockCode();
             String blockName = thsBlockInfo.getBlockName();
             try {
@@ -68,7 +70,7 @@ public class BlockKbarSelfComponent {
                 if(CollectionUtils.isEmpty(details)){
                     continue;
                 }
-                calKbarInfo(details,thsBlockInfo,10);
+                calKbarInfo(details,thsBlockInfo,400);
 
             }catch (Exception e){
                 log.info("复盘数据 异常 stockCode:{} stockName:{} e：{}", blockCode, blockName,e);
