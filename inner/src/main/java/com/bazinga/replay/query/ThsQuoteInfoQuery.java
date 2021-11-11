@@ -45,10 +45,6 @@ public class ThsQuoteInfoQuery extends PagingQuery implements Serializable {
      */
     private String quoteDate;
 
-    /**
-     * 唯一索引
-     */
-    private String uniqueKey;
 
     /**
      * 行情时间
