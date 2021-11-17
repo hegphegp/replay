@@ -112,6 +112,8 @@ public class BaseTestCase {
         List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("123048", "20211102");
         System.out.println(data);*/
         //blockKbarSelfComponent.initBlockKbarSelf();
+        stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
+
     }
 
 
