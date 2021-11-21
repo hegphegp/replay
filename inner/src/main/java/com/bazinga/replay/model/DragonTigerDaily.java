@@ -54,6 +54,11 @@ public class DragonTigerDaily implements Serializable {
     private String kbarDate;
 
     /**
+     * 交易方向
+     */
+    private String direction;
+
+    /**
      * 买几
      *
      * @允许为空   NO
