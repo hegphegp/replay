@@ -95,6 +95,11 @@ public class BaseTestCase {
         synInfoComponent.synHotCirculateInfo();
     }
 
+    @Test
+    public void test5() {
+        synInfoComponent.synTbondInfo();
+    }
+
 
     @Test
     public void test3() {
