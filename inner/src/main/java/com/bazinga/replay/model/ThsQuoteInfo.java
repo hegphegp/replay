@@ -62,15 +62,6 @@ public class ThsQuoteInfo implements Serializable {
      */
     private String quoteDate;
 
-    /**
-     * 唯一索引
-     *
-     * @最大长度   20
-     * @允许为空   NO
-     * @是否索引   YES
-     * @唯一索引   uk_unique_key
-     */
-    private String uniqueKey;
 
     /**
      * 行情时间
@@ -120,6 +111,15 @@ public class ThsQuoteInfo implements Serializable {
      * @是否索引   NO
      */
     private BigDecimal ask2;
+
+
+    private Long bidSize1;
+
+    private Long bidSize2;
+
+    private Long askSize1;
+
+    private Long askSize2;
 
     /**
      * 总卖数量

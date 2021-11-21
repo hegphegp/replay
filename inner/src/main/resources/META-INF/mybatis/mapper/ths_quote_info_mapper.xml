@@ -7,13 +7,16 @@
         <result column="stock_code" jdbcType="VARCHAR" property="stockCode"/>
         <result column="stock_name" jdbcType="VARCHAR" property="stockName"/>
         <result column="quote_date" jdbcType="VARCHAR" property="quoteDate"/>
-        <result column="unique_key" jdbcType="VARCHAR" property="uniqueKey"/>
         <result column="quote_time" jdbcType="VARCHAR" property="quoteTime"/>
         <result column="current_price" jdbcType="DECIMAL" property="currentPrice"/>
         <result column="bid1" jdbcType="DECIMAL" property="bid1"/>
         <result column="bid2" jdbcType="DECIMAL" property="bid2"/>
         <result column="ask1" jdbcType="DECIMAL" property="ask1"/>
         <result column="ask2" jdbcType="DECIMAL" property="ask2"/>
+        <result column="bid_size1" jdbcType="BIGINT" property="bidSize1"/>
+        <result column="bid_size2" jdbcType="BIGINT" property="bidSize2"/>
+        <result column="ask_size1" jdbcType="BIGINT" property="askSize1"/>
+        <result column="ask_size2" jdbcType="BIGINT" property="askSize2"/>
         <result column="total_sell_volume" jdbcType="BIGINT" property="totalSellVolume"/>
         <result column="total_buy_volume" jdbcType="BIGINT" property="totalBuyVolume"/>
         <result column="avg_buy_price" jdbcType="DECIMAL" property="avgBuyPrice"/>
@@ -32,13 +35,16 @@
             stock_code,
             stock_name,
             quote_date,
-            unique_key,
             quote_time,
             current_price,
             bid1,
             bid2,
             ask1,
             ask2,
+            bid_size1,
+            bid_size2,
+            ask_size1,
+            ask_size2,
             total_sell_volume,
             total_buy_volume,
             avg_buy_price,
@@ -59,77 +65,6 @@
         where id = #{id}
     </select>
 
-
-    <select id="selectByUniqueKey" parameterType="java.lang.String" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List" />
-        from ths_quote_info
-        where unique_key = #{uniqueKey} limit 1
-    </select>
-
-    <update id="updateByUniqueKey" parameterType="com.bazinga.replay.model.ThsQuoteInfo">
-        update ths_quote_info
-        <set>
-        <if test="stockCode != null">
-            stock_code = #{stockCode, jdbcType=VARCHAR},
-        </if>
-        <if test="stockName != null">
-            stock_name = #{stockName, jdbcType=VARCHAR},
-        </if>
-        <if test="quoteDate != null">
-            quote_date = #{quoteDate, jdbcType=VARCHAR},
-        </if>
-        <if test="quoteTime != null">
-            quote_time = #{quoteTime, jdbcType=VARCHAR},
-        </if>
-        <if test="currentPrice != null">
-            current_price = #{currentPrice, jdbcType=DECIMAL},
-        </if>
-        <if test="bid1 != null">
-            bid1 = #{bid1, jdbcType=DECIMAL},
-        </if>
-        <if test="bid2 != null">
-            bid2 = #{bid2, jdbcType=DECIMAL},
-        </if>
-        <if test="ask1 != null">
-            ask1 = #{ask1, jdbcType=DECIMAL},
-        </if>
-        <if test="ask2 != null">
-            ask2 = #{ask2, jdbcType=DECIMAL},
-        </if>
-        <if test="totalSellVolume != null">
-            total_sell_volume = #{totalSellVolume, jdbcType=BIGINT},
-        </if>
-        <if test="totalBuyVolume != null">
-            total_buy_volume = #{totalBuyVolume, jdbcType=BIGINT},
-        </if>
-        <if test="avgBuyPrice != null">
-            avg_buy_price = #{avgBuyPrice, jdbcType=DECIMAL},
-        </if>
-        <if test="avgSellPrice != null">
-            avg_sell_price = #{avgSellPrice, jdbcType=DECIMAL},
-        </if>
-        <if test="amt != null">
-            amt = #{amt, jdbcType=DECIMAL},
-        </if>
-        <if test="vol != null">
-            vol = #{vol, jdbcType=BIGINT},
-        </if>
-        <if test="amount != null">
-            amount = #{amount, jdbcType=DECIMAL},
-        </if>
-        <if test="volume != null">
-            volume = #{volume, jdbcType=BIGINT},
-        </if>
-        <if test="createTime != null">
-            create_time = #{createTime, jdbcType=TIMESTAMP},
-        </if>
-        <if test="updateTime != null">
-            update_time = #{updateTime, jdbcType=TIMESTAMP},
-        </if>
-        </set>
-        where unique_key = #{uniqueKey} limit 1
-    </update>
     <insert id="insert" parameterType="com.bazinga.replay.model.ThsQuoteInfo" useGeneratedKeys="true" keyProperty="id">
         insert into ths_quote_info (<include refid="Base_Column_List" />)
         values(
@@ -137,13 +72,16 @@
             #{stockCode, jdbcType=VARCHAR},
             #{stockName, jdbcType=VARCHAR},
             #{quoteDate, jdbcType=VARCHAR},
-            #{uniqueKey, jdbcType=VARCHAR},
             #{quoteTime, jdbcType=VARCHAR},
             #{currentPrice, jdbcType=DECIMAL},
             #{bid1, jdbcType=DECIMAL},
             #{bid2, jdbcType=DECIMAL},
             #{ask1, jdbcType=DECIMAL},
             #{ask2, jdbcType=DECIMAL},
+            #{bidSize1, jdbcType=BIGINT},
+            #{bidSize2, jdbcType=BIGINT},
+            #{askSize1, jdbcType=BIGINT},
+            #{askSize2, jdbcType=BIGINT},
             #{totalSellVolume, jdbcType=BIGINT},
             #{totalBuyVolume, jdbcType=BIGINT},
             #{avgBuyPrice, jdbcType=DECIMAL},
@@ -169,9 +107,6 @@
             <if test="quoteDate != null">
                 quote_date = #{quoteDate, jdbcType=VARCHAR},
             </if>
-            <if test="uniqueKey != null">
-                unique_key = #{uniqueKey, jdbcType=VARCHAR},
-            </if>
             <if test="quoteTime != null">
                 quote_time = #{quoteTime, jdbcType=VARCHAR},
             </if>
@@ -189,6 +124,18 @@
             </if>
             <if test="ask2 != null">
                 ask2 = #{ask2, jdbcType=DECIMAL},
+            </if>
+            <if test="bidSize1 != null">
+                bid_size1 = #{bidSize1, jdbcType=BIGINT},
+            </if>
+            <if test="bidSize2 != null">
+                bid_size2 = #{bidSize2, jdbcType=BIGINT},
+            </if>
+            <if test="askSize1 != null">
+                ask_size1 = #{askSize1, jdbcType=BIGINT},
+            </if>
+            <if test="askSize2 != null">
+                ask_size2 = #{askSize2, jdbcType=BIGINT},
             </if>
             <if test="totalSellVolume != null">
                 total_sell_volume = #{totalSellVolume, jdbcType=BIGINT},
@@ -234,9 +181,6 @@
         <if test="quoteDate != null">
             and quote_date = #{quoteDate, jdbcType=VARCHAR}
         </if>
-        <if test="uniqueKey != null">
-            and unique_key = #{uniqueKey, jdbcType=VARCHAR}
-        </if>
         <if test="quoteTime != null">
             and quote_time = #{quoteTime, jdbcType=VARCHAR}
         </if>
@@ -254,6 +198,18 @@
         </if>
         <if test="ask2 != null">
             and ask2 = #{ask2, jdbcType=DECIMAL}
+        </if>
+        <if test="bidSize1 != null">
+            and bid_size1 = #{bigSize1, jdbcType=BIGINT}
+        </if>
+        <if test="bidSize2 != null">
+            and bid_size2 = #{bigSize2, jdbcType=BIGINT}
+        </if>
+        <if test="askSize1 != null">
+            and ask_size1 = #{askSize1, jdbcType=BIGINT}
+        </if>
+        <if test="askSize2 != null">
+            and ask_size2 = #{bigSize2, jdbcType=BIGINT}
         </if>
         <if test="totalSellVolume != null">
             and total_sell_volume = #{totalSellVolume, jdbcType=BIGINT}

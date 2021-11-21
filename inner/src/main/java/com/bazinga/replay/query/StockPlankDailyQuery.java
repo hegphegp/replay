@@ -34,6 +34,8 @@ public class StockPlankDailyQuery extends PagingQuery implements Serializable {
      */
     private String stockName;
 
+    private String uniqueKey;
+
     /**
      *  开始
      */
@@ -91,6 +93,8 @@ public class StockPlankDailyQuery extends PagingQuery implements Serializable {
      * 0 正常  1烂板
      */
     private Integer badPlankType;
+
+    private Integer continuePlankType;
 
     /**
      *  开始
