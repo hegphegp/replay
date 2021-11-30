@@ -10,7 +10,6 @@ import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateTimeUtils;
-import com.bazinga.util.DateUtil;
 import com.tradex.enums.KCate;
 import com.tradex.model.suport.DataTable;
 import com.tradex.util.TdxHqUtil;
