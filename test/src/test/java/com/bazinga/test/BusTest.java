@@ -24,7 +24,7 @@ public class BusTest extends BaseTestCase {
 
     @Test
     public void test(){
-        stockKbarComponent.batchUpdateDaily();
+       // stockKbarComponent.batchUpdateDaily();
 
         dragonTigerDailyComponent.save2Db();
       /*  List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("113615", "20211103");

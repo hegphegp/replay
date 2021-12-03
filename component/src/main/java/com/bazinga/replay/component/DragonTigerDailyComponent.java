@@ -64,6 +64,7 @@ public class DragonTigerDailyComponent {
         String kbarDate = DateUtil.format(preTradeDate,DateUtil.yyyyMMdd);
         try {
             String token = JoinQuantUtil.getToken();
+            log.info("token{}",token);
             for (CirculateInfo circulateInfo : circulateInfos) {
               /*  if(!"300264".equals(circulateInfo.getStockCode())){
                     continue;
