@@ -10,6 +10,7 @@ import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateTimeUtils;
+import com.bazinga.util.DateUtil;
 import com.tradex.enums.KCate;
 import com.tradex.model.suport.DataTable;
 import com.tradex.util.TdxHqUtil;
@@ -63,31 +64,32 @@ public class BaseTestCase {
     @Test
     public void test1() {
         //无敌数据
+        Date date = new Date();
         plankChenJiaoEComponent.exportData();
-        stockReplayDailyComponent.stockReplayDaily(new Date());
-        stockReplayDailyComponent.calPreDateAvgPrice(new Date());
-        stockPlankDailyComponent.stockPlankDailyStatistic(new Date());
+        stockReplayDailyComponent.stockReplayDaily(date);
+        stockReplayDailyComponent.calPreDateAvgPrice(date);
+        stockPlankDailyComponent.stockPlankDailyStatistic(date);
         newStockComponent.catchNewStock();
-        plankExchangeDailyComponent.plankExchangeDaily(new Date());
+        plankExchangeDailyComponent.plankExchangeDaily(date);
         stockKbarComponent.batchUpdateDaily();
-        stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(new Date());
-        stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(new Date());
+        stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(date);
+        stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(date);
         //stockPlankDaily添加次新标签
-        stockPlankDailyComponent.calSubNewStock(new Date());
+        stockPlankDailyComponent.calSubNewStock(date);
         //stockPlankDaily添加insertTime
-        stockPlankDailyComponent.insertTime(new Date());
+        stockPlankDailyComponent.insertTime(date);
 
         //新版复盘
-        stockCommonReplayComponent.saveCommonReplay(new Date());
-        stockCommonReplayComponent.firstPlankNoBuyInfo(new Date());
-        stockCommonReplayComponent.highRaiseStockInfo(new Date());
-        stockCommonReplayComponent.forTwoPlankWuDi(new Date());
+        stockCommonReplayComponent.saveCommonReplay(date);
+        stockCommonReplayComponent.firstPlankNoBuyInfo(date);
+        stockCommonReplayComponent.highRaiseStockInfo(date);
+        stockCommonReplayComponent.forTwoPlankWuDi(date);
         stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
-        badPlankComponent.badPlankJudge(new Date());
-        stockPlankDailyComponent.superFactor(new Date());
-        blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(new Date()));
-        hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(new Date()));
+        badPlankComponent.badPlankJudge(date);
+        stockPlankDailyComponent.superFactor(date);
+        blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
+        hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
     }
 
     @Test
