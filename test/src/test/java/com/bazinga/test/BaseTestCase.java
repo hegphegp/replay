@@ -61,6 +61,8 @@ public class BaseTestCase {
     private BlockKbarSelfComponent blockKbarSelfComponent;
     @Autowired
     private TradeDatePoolService tradeDatePoolService;
+    @Autowired
+    private PlanksInfoComponent planksInfoComponent;
     @Test
     public void test1() {
         //无敌数据
@@ -134,7 +136,8 @@ public class BaseTestCase {
             System.out.println(tradeDatePool);
             //blockKbarComponent.thsBlockKbar(tradeDatePool.getTradeDate());
         }*/
-        blockKbarComponent.thsBlockKbarGatherQuantity();
+        //blockKbarComponent.thsBlockKbarGatherQuantity();
+        planksInfoComponent.planksInfo(DateUtil.parseDate("20211206",DateUtil.yyyyMMdd));
 
     }
 
