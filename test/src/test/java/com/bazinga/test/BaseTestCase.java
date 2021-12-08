@@ -81,6 +81,7 @@ public class BaseTestCase {
         //stockPlankDaily添加insertTime
         stockPlankDailyComponent.insertTime(date);
         //stockPlankDaily添加实际连板数
+        stockPlankDailyComponent.realPlanks(date);
 
 
         //新版复盘
