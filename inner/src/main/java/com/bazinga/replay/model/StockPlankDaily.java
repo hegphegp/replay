@@ -111,6 +111,7 @@ public class StockPlankDaily implements Serializable {
      */
     private Integer badPlankType;
     private Integer continuePlankType;
+    private Integer realPlanks;
 
     /**
      * 

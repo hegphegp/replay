@@ -80,6 +80,8 @@ public class BaseTestCase {
         stockPlankDailyComponent.calSubNewStock(date);
         //stockPlankDaily添加insertTime
         stockPlankDailyComponent.insertTime(date);
+        //stockPlankDaily添加实际连板数
+
 
         //新版复盘
         stockCommonReplayComponent.saveCommonReplay(date);
@@ -137,7 +139,8 @@ public class BaseTestCase {
             //blockKbarComponent.thsBlockKbar(tradeDatePool.getTradeDate());
         }*/
         //blockKbarComponent.thsBlockKbarGatherQuantity();
-        planksInfoComponent.planksInfo(DateUtil.parseDate("20211206",DateUtil.yyyyMMdd));
+        //planksInfoComponent.planksInfo(DateUtil.parseDate("20211206",DateUtil.yyyyMMdd));
+        stockPlankDailyComponent.realPlanks(new Date());
 
     }
 
