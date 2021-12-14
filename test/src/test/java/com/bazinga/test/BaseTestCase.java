@@ -67,11 +67,11 @@ public class BaseTestCase {
     public void test1() {
         //无敌数据
         Date date = new Date();
+        newStockComponent.catchNewStock();
         plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(date);
         stockReplayDailyComponent.calPreDateAvgPrice(date);
         stockPlankDailyComponent.stockPlankDailyStatistic(date);
-        newStockComponent.catchNewStock();
         plankExchangeDailyComponent.plankExchangeDaily(date);
         stockKbarComponent.batchUpdateDaily();
         stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(date);
@@ -115,6 +115,7 @@ public class BaseTestCase {
 
     @Test
     public void test3() {
+        newStockComponent.catchNewStock();
         //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         //stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(DateUtil.parseDate("20210910",DateUtil.yyyyMMdd));
        //stockPlankDailyComponent.superFactor(DateUtil.parseDate("20210910",DateUtil.yyyyMMdd));
@@ -141,7 +142,7 @@ public class BaseTestCase {
         }*/
         //blockKbarComponent.thsBlockKbarGatherQuantity();
         //planksInfoComponent.planksInfo(DateUtil.parseDate("20211206",DateUtil.yyyyMMdd));
-        stockPlankDailyComponent.realPlanks(new Date());
+        //stockPlankDailyComponent.realPlanks(new Date());
 
     }
 
