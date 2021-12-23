@@ -112,6 +112,11 @@ public class BaseTestCase {
         synInfoComponent.synTbondInfo();
     }
 
+    @Test
+    public void test6() {
+        synInfoComponent.synTbondInfo();
+    }
+
 
     @Test
     public void test3() {
