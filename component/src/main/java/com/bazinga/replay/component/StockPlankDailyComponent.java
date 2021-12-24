@@ -12,12 +12,10 @@ import com.bazinga.replay.dto.PlankTypeDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.CirculateInfoAllQuery;
+import com.bazinga.replay.query.CirculateInfoQuery;
 import com.bazinga.replay.query.StockKbarQuery;
 import com.bazinga.replay.query.StockPlankDailyQuery;
-import com.bazinga.replay.service.CirculateInfoAllService;
-import com.bazinga.replay.service.StockKbarService;
-import com.bazinga.replay.service.StockPlankDailyService;
-import com.bazinga.replay.service.StockRehabilitationService;
+import com.bazinga.replay.service.*;
 import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
@@ -62,6 +60,8 @@ public class StockPlankDailyComponent {
     private HistoryTransactionDataComponent historyTransactionDataComponent;
     @Autowired
     private CurrentDayTransactionDataComponent currentDayTransactionDataComponent;
+    @Autowired
+    private CirculateInfoService circulateInfoService;
 
 
     public void stockPlankDailyStatistic(Date date){
@@ -78,7 +78,7 @@ public class StockPlankDailyComponent {
                 /*if (!stockCode.equals("603787")) {
                     continue;
                 }*/
-                List<KBarDTO> stockKBars = getStockKBars(circulateInfo);
+                List<KBarDTO> stockKBars = getStockKBars(circulateInfo.getStockCode());
                 log.info("复盘数据 k线数据 stockCode:{} stockName:{} kbars:{}", stockCode, stockName, JSONObject.toJSONString(stockKBars));
                 if (CollectionUtils.isEmpty(stockKBars)) {
                     log.info("复盘数据 没有获取到k线数据 stockCode:{} stockName:{}", stockCode, stockName);
@@ -294,11 +294,11 @@ public class StockPlankDailyComponent {
     }
 
 
-    public List<KBarDTO> getStockKBars(CirculateInfo circulateInfo){
+    public List<KBarDTO> getStockKBars(String stockCode){
         try {
-            DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, circulateInfo.getStockCode(), 0, 50);
+            DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY,stockCode, 0, 50);
             List<KBarDTO> kbars = KBarDTOConvert.convertKBar(dataTable);
-            List<KBarDTO> list = deleteNewStockTimes(kbars, 50, circulateInfo.getStockCode());
+            List<KBarDTO> list = deleteNewStockTimes(kbars, 50, stockCode);
             return list;
         }catch (Exception e){
             return null;
@@ -519,6 +519,44 @@ public class StockPlankDailyComponent {
             }
         }
     }
+
+
+    public void realPlanks(Date date){
+        StockPlankDailyQuery query = new StockPlankDailyQuery();
+        query.setTradeDateFrom(DateTimeUtils.getDate000000(date));
+        query.setTradeDateTo(DateTimeUtils.getDate235959(date));
+        List<StockPlankDaily> stockPlankDailies = stockPlankDailyService.listByCondition(query);
+        String dateStr = DateUtil.format(date, DateUtil.yyyy_MM_dd);
+        for (StockPlankDaily stockPlankDaily:stockPlankDailies){
+            try {
+                String stockCode = stockPlankDaily.getStockCode();
+                List<KBarDTO> stockKBars = getStockKBars(stockPlankDaily.getStockCode());
+                log.info("复盘数据 k线数据 stockCode:{} stockName:{} kbars:{}", stockCode, stockPlankDaily.getStockName(), JSONObject.toJSONString(stockKBars));
+                if (CollectionUtils.isEmpty(stockKBars)) {
+                    log.info("复盘数据 没有获取到k线数据 stockCode:{} stockName:{}", stockCode, stockPlankDaily.getStockName());
+                    continue;
+                }
+                if(!stockKBars.get(stockKBars.size()-1).getDateStr().equals(DateUtil.format(date,DateUtil.yyyy_MM_dd))){
+                    log.info("复盘数据 没有获取到当日k线数据 stockCode:{} stockName:{}", stockCode, stockPlankDaily.getStockName());
+                    continue;
+                }
+                CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
+                circulateInfoQuery.setStockCode(stockCode);
+                List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
+                if(CollectionUtils.isEmpty(circulateInfos)){
+                    return;
+                }
+                CirculateInfo circulateInfo = circulateInfos.get(0);
+                PlankTypeDTO plankTypeDTO = continuePlankTypeDto(stockKBars, circulateInfo);
+                stockPlankDaily.setRealPlanks(plankTypeDTO.getPlanks());
+                stockPlankDailyService.updateById(stockPlankDaily);
+
+            }catch (Exception e){
+                log.error(e.getMessage(),e);
+            }
+        }
+    }
+
 
     public void superFactor(Date date){
         Date date000000 = DateTimeUtils.getDate000000(date);
