@@ -97,6 +97,7 @@ public class StockPlankDailyQuery extends PagingQuery implements Serializable {
     private Integer continuePlankType;
 
     private Integer realPlanks;
+    private Integer middlePlanks;
 
     /**
      *  开始

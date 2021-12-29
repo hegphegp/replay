@@ -82,6 +82,7 @@ public class BaseTestCase {
         stockPlankDailyComponent.insertTime(date);
         //stockPlankDaily添加实际连板数
         stockPlankDailyComponent.realPlanks(date);
+        stockPlankDailyComponent.middlePlanks(date);
 
 
         //新版复盘
@@ -120,7 +121,8 @@ public class BaseTestCase {
 
     @Test
     public void test3() {
-        newStockComponent.catchNewStock();
+        stockPlankDailyComponent.middlePlanks(new Date());
+        //newStockComponent.catchNewStock();
         //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         //stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(DateUtil.parseDate("20210910",DateUtil.yyyyMMdd));
        //stockPlankDailyComponent.superFactor(DateUtil.parseDate("20210910",DateUtil.yyyyMMdd));
