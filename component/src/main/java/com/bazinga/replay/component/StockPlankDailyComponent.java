@@ -592,6 +592,9 @@ public class StockPlankDailyComponent {
         int planks = 0;
         int unPlanks = 0;
         for (StockKbar stockKbar:stockKbars){
+            if(stockKbar.getTradeQuantity()==null||stockKbar.getTradeQuantity()==0){
+                continue;
+            }
             if(nextKbar!=null){
                 boolean upperPrice = PriceUtil.isUpperPrice(nextKbar.getClosePrice(), stockKbar.getClosePrice());
                 if(!upperPrice){
