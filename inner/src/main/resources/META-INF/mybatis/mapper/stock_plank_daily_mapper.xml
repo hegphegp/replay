@@ -25,6 +25,7 @@
         <result column="series_planks" jdbcType="TINYINT" property="seriesPlanks"/>
         <result column="day15_high_low" jdbcType="DECIMAL" property="day15HighLow"/>
         <result column="real_planks" jdbcType="TINYINT" property="realPlanks"/>
+        <result column="middle_planks" jdbcType="TINYINT" property="middlePlanks"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
@@ -53,6 +54,7 @@
             series_planks,
             day15_high_low,
             real_planks,
+            middle_planks,
             create_time,
             update_time
         </sql>
@@ -91,6 +93,7 @@
             #{seriesPlanks, jdbcType=TINYINT},
             #{day15HighLow, jdbcType=DECIMAL},
             #{realPlanks, jdbcType=TINYINT},
+            #{middlePlanks, jdbcType=TINYINT},
             #{createTime, jdbcType=TIMESTAMP},
             #{updateTime, jdbcType=TIMESTAMP}
             )
@@ -162,6 +165,9 @@
             <if test="realPlanks != null">
                 real_planks = #{realPlanks, jdbcType=TINYINT},
             </if>
+            <if test="middlePlanks != null">
+                middle_planks = #{middlePlanks, jdbcType=TINYINT},
+            </if>
             <if test="createTime != null">
                 create_time = #{createTime, jdbcType=TIMESTAMP},
             </if>
@@ -199,6 +205,9 @@
         </if>
         <if test="realPlanks != null">
             and real_planks = #{realPlanks, jdbcType=TINYINT}
+        </if>
+        <if test="middlePlanks != null">
+            and middle_planks = #{middlePlanks, jdbcType=TINYINT}
         </if>
     </sql>
 

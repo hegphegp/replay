@@ -556,6 +556,63 @@ public class StockPlankDailyComponent {
             }
         }
     }
+    public void middlePlanks(Date date){
+        StockPlankDailyQuery query = new StockPlankDailyQuery();
+        query.setTradeDateFrom(DateTimeUtils.getDate000000(date));
+        query.setTradeDateTo(DateTimeUtils.getDate235959(date));
+        List<StockPlankDaily> stockPlankDailies = stockPlankDailyService.listByCondition(query);
+        for (StockPlankDaily stockPlankDaily:stockPlankDailies){
+            try {
+                String stockCode = stockPlankDaily.getStockCode();
+                StockKbarQuery kbarQuery = new StockKbarQuery();
+                kbarQuery.setStockCode(stockCode);
+                kbarQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
+                List<StockKbar> stockKBars = stockKbarService.listByCondition(kbarQuery);
+                if (CollectionUtils.isEmpty(stockKBars)) {
+                    log.info("复盘数据 没有获取到k线数据 stockCode:{} stockName:{}", stockCode, stockPlankDaily.getStockName());
+                    continue;
+                }
+                if(!stockKBars.get(0).getKbarDate().equals(DateUtil.format(date,DateUtil.yyyyMMdd))){
+                    log.info("复盘数据 没有获取到当日k线数据 stockCode:{} stockName:{}", stockCode, stockPlankDaily.getStockName());
+                    continue;
+                }
+
+                Integer middlePlanks = calMiddlePlanks(stockKBars);
+                stockPlankDaily.setMiddlePlanks(middlePlanks);
+                stockPlankDailyService.updateById(stockPlankDaily);
+
+            }catch (Exception e){
+                log.error(e.getMessage(),e);
+            }
+        }
+    }
+
+    public Integer calMiddlePlanks(List<StockKbar> stockKbars){
+        StockKbar  nextKbar = null;
+        int planks = 0;
+        int unPlanks = 0;
+        for (StockKbar stockKbar:stockKbars){
+            if(stockKbar.getTradeQuantity()==null||stockKbar.getTradeQuantity()==0){
+                continue;
+            }
+            if(nextKbar!=null){
+                boolean upperPrice = PriceUtil.isUpperPrice(nextKbar.getClosePrice(), stockKbar.getClosePrice());
+                if(!upperPrice){
+                    upperPrice = PriceUtil.isUpperPrice(nextKbar.getAdjClosePrice(), stockKbar.getAdjClosePrice());
+                }
+                if(upperPrice){
+                    planks++;
+                }else{
+                    unPlanks++;
+                }
+                if(unPlanks>=2){
+                    break;
+                }
+            }
+            nextKbar = stockKbar;
+        }
+        return planks;
+    }
 
 
     public void superFactor(Date date){
