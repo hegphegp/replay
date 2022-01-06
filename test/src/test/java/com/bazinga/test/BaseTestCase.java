@@ -63,6 +63,7 @@ public class BaseTestCase {
     private TradeDatePoolService tradeDatePoolService;
     @Autowired
     private PlanksInfoComponent planksInfoComponent;
+
     @Test
     public void test1() {
         //无敌数据
@@ -116,6 +117,11 @@ public class BaseTestCase {
     @Test
     public void test6() {
         synInfoComponent.synTbondInfo();
+    }
+
+    @Test
+    public void test7() {
+        synInfoComponent.synZiDingYiInfo();
     }
 
 
