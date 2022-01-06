@@ -480,5 +480,47 @@ public class StockKbarComponent {
         return list;
     }
 
+    //最多500条
+    public List<StockKbar> getStockKBarRemoveNewDays(String stockCode,int size,int days) {
+        List<StockKbar> list = Lists.newArrayList();
+        StockKbarQuery stockKbarQuery = new StockKbarQuery();
+        stockKbarQuery.setStockCode(stockCode);
+        stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
+        stockKbarQuery.setLimit(size);
+        List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
+        if(CollectionUtils.isEmpty(stockKbars)){
+            return list;
+        }
+        List<StockKbar> kbars = Lists.reverse(stockKbars);
+        if(kbars.size()==size){
+            List<StockKbar> result = kbars.subList(kbars.size()-days, kbars.size());
+            return result;
+        }
+        BigDecimal preEndPrice = null;
+        StockKbar firstKbar = null;
+        boolean flag = false;
+        for (StockKbar kbar:kbars){
+            if(preEndPrice!=null){
+                boolean upperPrice = PriceUtil.isUpperPrice(kbar.getStockCode(), kbar.getHighPrice(), preEndPrice);
+                if(!flag) {
+                    if (kbar.getLowPrice().compareTo(kbar.getHighPrice()) != 0 || !upperPrice) {
+                        list.add(firstKbar);
+                        flag = true;
+                    }
+                }
+                if(flag){
+                    list.add(kbar);
+                }
+            }
+            preEndPrice = kbar.getClosePrice();
+            firstKbar = kbar;
+        }
+        if(list.size()>days){
+            List<StockKbar> result = list.subList(list.size() - days, list.size());
+            return result;
+        }
+        return list;
+    }
+
 
 }

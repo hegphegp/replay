@@ -121,7 +121,9 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        synInfoComponent.synZiDingYiInfo();
+        //synInfoComponent.synZiDingYiInfo();
+        stockCommonReplayComponent.highRaiseStockInfo(new Date());
+        //List<StockKbar> kbars = stockKbarComponent.getStockKBarRemoveNewDays("601068", 50, 11);
     }
 
 
