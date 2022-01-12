@@ -95,8 +95,8 @@ public class BaseTestCase {
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         badPlankComponent.badPlankJudge(date);
         stockPlankDailyComponent.superFactor(date);
-        blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
-        hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
+        /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
+        hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
     }
 
     @Test

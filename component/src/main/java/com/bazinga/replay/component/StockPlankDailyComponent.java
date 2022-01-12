@@ -589,6 +589,9 @@ public class StockPlankDailyComponent {
 
 
     public static Integer calTodayPlank(List<StockKbar> stockKbarList) {
+        if(stockKbarList.size()<2){
+            return 1;
+        }
         stockKbarList = Lists.reverse(stockKbarList);
         int planks = 1;
         int unPlanks = 0;
