@@ -568,7 +568,7 @@ public class StockPlankDailyComponent {
                 kbarQuery.setStockCode(stockCode);
                 kbarQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
                 List<StockKbar> stockKBars = stockKbarService.listByCondition(kbarQuery);
-                if (CollectionUtils.isEmpty(stockKBars)) {
+                if (CollectionUtils.isEmpty(stockKBars) || stockKBars.size()<7) {
                     log.info("复盘数据 没有获取到k线数据 stockCode:{} stockName:{}", stockCode, stockPlankDaily.getStockName());
                     continue;
                 }
