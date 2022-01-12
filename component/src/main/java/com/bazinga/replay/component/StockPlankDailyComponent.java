@@ -577,7 +577,7 @@ public class StockPlankDailyComponent {
                     continue;
                 }
 
-                Integer middlePlanks = calMiddlePlanks(stockKBars);
+                Integer middlePlanks = calTodayPlank(stockKBars);
                 stockPlankDaily.setMiddlePlanks(middlePlanks);
                 stockPlankDailyService.updateById(stockPlankDaily);
 
@@ -585,6 +585,35 @@ public class StockPlankDailyComponent {
                 log.error(e.getMessage(),e);
             }
         }
+    }
+
+
+    public static Integer calTodayPlank(List<StockKbar> stockKbarList) {
+        stockKbarList = Lists.reverse(stockKbarList);
+        int planks = 1;
+        int unPlanks = 0;
+        boolean prePlank = true;
+        for (int i = stockKbarList.size() - 2; i > 0; i--) {
+            StockKbar stockKbar = stockKbarList.get(i);
+            StockKbar preStockKbar = stockKbarList.get(i - 1);
+            if (PriceUtil.isUpperPrice(stockKbar.getClosePrice(), preStockKbar.getClosePrice())) {
+                planks++;
+                prePlank = true;
+            } else {
+                unPlanks++;
+                if(unPlanks>=2){
+                    if(prePlank){
+                        return planks;
+                    }else {
+                        return planks;
+                    }
+                }
+                prePlank = false;
+
+            }
+
+        }
+        return planks;
     }
 
     public Integer calMiddlePlanks(List<StockKbar> stockKbars){
