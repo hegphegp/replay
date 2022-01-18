@@ -320,8 +320,8 @@ public class SynInfoComponent {
             List<ZiDingYiBlockInfoExcelDTO> dataList = new Excel2JavaPojoUtil(file).excel2JavaPojo(ZiDingYiBlockInfoExcelDTO.class);
             dataList.forEach(item -> {
                 BlockStockDetail detail = new BlockStockDetail();
-                detail.setBlockCode("880748");
-                detail.setBlockName("元宇宙");
+                detail.setBlockCode("999000");
+                detail.setBlockName("自定义板块");
                 detail.setStockCode(item.getStockCode());
                 detail.setStockName(item.getStockName());
                 detail.setCreateTime(new Date());
