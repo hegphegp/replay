@@ -67,7 +67,7 @@ public class BaseTestCase {
     @Test
     public void test1() {
         //无敌数据
-        Date date = new Date();
+        Date date = DateUtil.parseDate("2022-01-21 15:30:05",DateUtil.DEFAULT_FORMAT);
         newStockComponent.catchNewStock();
         plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(date);

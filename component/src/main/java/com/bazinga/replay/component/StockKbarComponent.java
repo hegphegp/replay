@@ -231,7 +231,11 @@ public class StockKbarComponent {
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
         circulateInfos.forEach(item -> {
             log.info("更新K线数据开始 stockCode ={}", item.getStockCode());
-            updateKbarDataDaily(item.getStockCode(), item.getStockName());
+            try {
+                updateKbarDataDaily(item.getStockCode(), item.getStockName());
+            }catch (Exception e){
+                log.info(e.getMessage());
+            }
         }); }
 
     public void batchKbarDataInit() {
