@@ -69,7 +69,7 @@ public class BaseTestCase {
         //无敌数据
         Date date = new Date();
         newStockComponent.catchNewStock();
-        plankChenJiaoEComponent.exportData();
+        //plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(date);
         stockReplayDailyComponent.calPreDateAvgPrice(date);
         stockPlankDailyComponent.stockPlankDailyStatistic(date);
