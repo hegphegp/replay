@@ -63,6 +63,8 @@ public class BaseTestCase {
     private TradeDatePoolService tradeDatePoolService;
     @Autowired
     private PlanksInfoComponent planksInfoComponent;
+    @Autowired
+    private StockAttributeReplayComponent stockAttributeReplayComponent;
 
     @Test
     public void test1() {
@@ -93,8 +95,11 @@ public class BaseTestCase {
         stockCommonReplayComponent.forTwoPlankWuDi(date);
         stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
         badPlankComponent.badPlankJudge(date);
         stockPlankDailyComponent.superFactor(date);
+        stockAttributeReplayComponent.saveStockAttributeReplay(date);
+
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
     }
@@ -110,6 +115,11 @@ public class BaseTestCase {
     }
 
     @Test
+    public void test8() {
+        synInfoComponent.synMarketInfoZz500();
+    }
+
+    @Test
     public void test5() {
         synInfoComponent.synTbondInfo();
     }
@@ -121,7 +131,10 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        synInfoComponent.synZiDingYiInfo();
+        stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-02-18 15:30:30",DateUtil.DEFAULT_FORMAT));
+
+        //stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
+        //synInfoComponent.synZiDingYiInfo();
         //stockCommonReplayComponent.highRaiseStockInfo(new Date());
         //List<StockKbar> kbars = stockKbarComponent.getStockKBarRemoveNewDays("601068", 50, 11);
     }
@@ -129,7 +142,9 @@ public class BaseTestCase {
 
     @Test
     public void test3() {
-        stockPlankDailyComponent.middlePlanks(new Date());
+        /*DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, "000001", 0, 800);
+        stockPlankDailyComponent.middlePlanks(new Date());*/
+        stockKbarComponent.batchKbarDataInit();
         //newStockComponent.catchNewStock();
         //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         //stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(DateUtil.parseDate("20210910",DateUtil.yyyyMMdd));

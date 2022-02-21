@@ -247,7 +247,7 @@ public class StockKbarComponent {
             query.setStockCode(item.getStockCode());
             int count = stockKbarService.countByCondition(query);
             if (count == 0) {
-                initAndSaveKbarData(item.getStockCode(), item.getStockName(), 400);
+                initAndSaveKbarData(item.getStockCode(), item.getStockName(), 800);
             }
         });
     }
@@ -397,15 +397,16 @@ public class StockKbarComponent {
             StockAverageLineQuery query = new StockAverageLineQuery();
             query.setStockCode(item.getStockCode());
             System.out.println(item.getStockCode());
-            int count = stockAverageLineService.countByCondition(query);
-            if (count == 0) {
-                //calAvgLine(item.getStock(), item.getStockName(), 60);
-                for (int i = 5; i <=60 ; i++) {
+
+                int count = stockAverageLineService.countByCondition(query);
+                if (count == 0) {
+                    //calAvgLine(item.getStock(), item.getStockName(), 60);
+                /*for (int i = 5; i <=60 ; i++) {
                     calAvgLine(item.getStockCode(), item.getStockName(), i);
+                }*/
+                    //calAvgLine(item.getStock(), item.getStockName(), 10);
+                    calAvgLine(item.getStockCode(), item.getStockName(), 5);
                 }
-                //calAvgLine(item.getStock(), item.getStockName(), 10);
-                //calAvgLine(item.getStock(), item.getStockName(), 5);
-            }
 
         });
     }
