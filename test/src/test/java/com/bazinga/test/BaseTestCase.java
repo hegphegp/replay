@@ -144,9 +144,9 @@ public class BaseTestCase {
     public void test3() {
         /*DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, "000001", 0, 800);
         stockPlankDailyComponent.middlePlanks(new Date());*/
-        stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
+       /* stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
-        stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);*/
         //stockKbarComponent.batchKbarDataInit();
         //newStockComponent.catchNewStock();
         //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
