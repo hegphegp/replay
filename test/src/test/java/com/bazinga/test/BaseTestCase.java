@@ -75,6 +75,8 @@ public class BaseTestCase {
         stockReplayDailyComponent.stockReplayDaily(date);
         stockReplayDailyComponent.calPreDateAvgPrice(date);
         stockPlankDailyComponent.stockPlankDailyStatistic(date);
+        stockPlankDailyComponent.stockPlankDailyStatistic(date);
+        stockPlankDailyComponent.stockPlankDailyStatistic(date);
         plankExchangeDailyComponent.plankExchangeDaily(date);
         stockKbarComponent.batchUpdateDaily();
         stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(date);
@@ -99,6 +101,7 @@ public class BaseTestCase {
         badPlankComponent.badPlankJudge(date);
         stockPlankDailyComponent.superFactor(date);
         stockAttributeReplayComponent.saveStockAttributeReplay(date);
+        stockPlankDailyComponent.handleStopTradeStock(date);
 
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
@@ -131,7 +134,9 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-02-18 15:30:30",DateUtil.DEFAULT_FORMAT));
+        Date date = new Date();
+        stockPlankDailyComponent.handleStopTradeStock(date);
+        //stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-02-18 15:30:30",DateUtil.DEFAULT_FORMAT));
 
         //stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
         //synInfoComponent.synZiDingYiInfo();

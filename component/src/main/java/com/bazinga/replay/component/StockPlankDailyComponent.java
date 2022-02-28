@@ -25,16 +25,14 @@ import com.tradex.enums.KCate;
 import com.tradex.model.suport.DataTable;
 import com.tradex.util.TdxHqUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -72,6 +70,9 @@ public class StockPlankDailyComponent {
         date = DateTimeUtils.getDate000000(date);
         List<CirculateInfo> circulateInfos = circulateInfoComponent.getMainAndGrowth();
         for (CirculateInfo circulateInfo:circulateInfos){
+            if(!circulateInfo.getStockCode().equals("603056")){
+                continue;
+            }
             String stockCode = circulateInfo.getStockCode();
             String stockName = circulateInfo.getStockName();
             try {
@@ -82,10 +83,6 @@ public class StockPlankDailyComponent {
                 log.info("复盘数据 k线数据 stockCode:{} stockName:{} kbars:{}", stockCode, stockName, JSONObject.toJSONString(stockKBars));
                 if (CollectionUtils.isEmpty(stockKBars)) {
                     log.info("复盘数据 没有获取到k线数据 stockCode:{} stockName:{}", stockCode, stockName);
-                    continue;
-                }
-                if(!stockKBars.get(stockKBars.size()-1).getDateStr().equals(DateUtil.format(date,DateUtil.yyyy_MM_dd))){
-                    log.info("复盘数据 没有获取到当日k线数据 stockCode:{} stockName:{}", stockCode, stockName);
                     continue;
                 }
                 PlankTypeDTO plankTypeDTO = continuePlankTypeDto(stockKBars, circulateInfo);
@@ -103,7 +100,58 @@ public class StockPlankDailyComponent {
         }
     }
 
+
+    public void handleStopTradeStock(Date date){
+        boolean isTradeDate = commonComponent.isTradeDate(date);
+        if(!isTradeDate){
+            return;
+        }
+        date = DateTimeUtils.getDate000000(date);
+        List<CirculateInfo> circulateInfos = circulateInfoComponent.getMainAndGrowth();
+        for (CirculateInfo circulateInfo:circulateInfos){
+            /*if(!circulateInfo.getStockCode().equals("603056")){
+                continue;
+            }*/
+            String stockCode = circulateInfo.getStockCode();
+            String stockName = circulateInfo.getStockName();
+            try {
+                List<KBarDTO> stockKBars = getStockKBars(circulateInfo.getStockCode());
+                log.info("复盘数据 k线数据 stockCode:{} stockName:{} kbars:{}", stockCode, stockName, JSONObject.toJSONString(stockKBars));
+                if (CollectionUtils.isEmpty(stockKBars)) {
+                    log.info("复盘数据 没有获取到k线数据 stockCode:{} stockName:{}", stockCode, stockName);
+                    continue;
+                }
+                KBarDTO kBarDTO = stockKBars.get(stockKBars.size() - 1);
+                KBarDTO preKbarDTO = stockKBars.get(stockKBars.size() - 2);
+                if(kBarDTO.getDateStr().equals(DateUtil.format(date,DateUtil.yyyy_MM_dd))&&(kBarDTO.getTotalExchange()==null||kBarDTO.getTotalExchange()<1)){
+                    StockPlankDailyQuery query = new StockPlankDailyQuery();
+                    query.setUniqueKey(stockCode+"_"+DateUtil.format(preKbarDTO.getDate(),DateUtil.yyyyMMdd));
+                    List<StockPlankDaily> dailies = stockPlankDailyService.listByCondition(query);
+                    if(!CollectionUtils.isEmpty(dailies)){
+                        StockPlankDaily stockPlankDaily = new StockPlankDaily();
+                        BeanUtils.copyProperties(stockPlankDaily,dailies.get(0));
+                        stockPlankDaily.setId(null);
+                        stockPlankDaily.setTradeDate(DateTimeUtils.getDate000000(date));
+                        stockPlankDaily.setUniqueKey(stockCode+"_"+DateUtil.format(date,DateUtil.yyyyMMdd));
+                        stockPlankDaily.setCreateTime(new Date());
+                        stockPlankDailyService.save(stockPlankDaily);
+                    }
+                }
+            }catch (Exception e){
+                log.info("复盘数据 异常 stockCode:{} stockName:{} e：{}", stockCode, stockName,e);
+            }
+
+        }
+    }
+
     public void saveStockPlankDaily(String stockCode,String stockName,Date date,PlankTypeDTO plankTypeDTO,PlankTypeEnum plankTypeEnum){
+        StockPlankDailyQuery query = new StockPlankDailyQuery();
+        query.setUniqueKey(stockCode+"_"+DateUtil.format(date,DateUtil.yyyyMMdd));
+        List<StockPlankDaily> dailies = stockPlankDailyService.listByCondition(query);
+        if(!CollectionUtils.isEmpty(dailies)){
+            log.info("stockPlankDaily复盘已经存在stockCode:{}",stockCode);
+            return;
+        }
         StockPlankDaily daily = new StockPlankDaily();
         daily.setStockCode(stockCode);
         daily.setStockName(stockName);
@@ -534,10 +582,6 @@ public class StockPlankDailyComponent {
                 log.info("复盘数据 k线数据 stockCode:{} stockName:{} kbars:{}", stockCode, stockPlankDaily.getStockName(), JSONObject.toJSONString(stockKBars));
                 if (CollectionUtils.isEmpty(stockKBars)) {
                     log.info("复盘数据 没有获取到k线数据 stockCode:{} stockName:{}", stockCode, stockPlankDaily.getStockName());
-                    continue;
-                }
-                if(!stockKBars.get(stockKBars.size()-1).getDateStr().equals(DateUtil.format(date,DateUtil.yyyy_MM_dd))){
-                    log.info("复盘数据 没有获取到当日k线数据 stockCode:{} stockName:{}", stockCode, stockPlankDaily.getStockName());
                     continue;
                 }
                 CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
