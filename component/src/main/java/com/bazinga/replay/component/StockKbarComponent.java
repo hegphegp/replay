@@ -16,6 +16,7 @@ import com.bazinga.replay.service.*;
 import com.bazinga.util.DateFormatUtils;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.PriceUtil;
+import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.tradex.enums.KCate;
@@ -34,6 +35,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -61,6 +63,8 @@ public class StockKbarComponent {
     @Autowired
     private StockAverageLineService stockAverageLineService;
 
+    private static final ExecutorService AVGLINE_POOL = ThreadPoolUtils.create(8, 16, 512, "calAvgLinePool");
+
     public Map<String,Long> getCybMinQuantity(){
         Map<String,Long> resultMap = Maps.newHashMap();
         TradeDatePoolQuery tradeQuery = new TradeDatePoolQuery();
@@ -85,7 +89,53 @@ public class StockKbarComponent {
 
     }
 
+    public void batchInitAndSaveKbarDate(String stockCode,String stockName,int days){
+        int onceDays = 400;
+        int index = (days / onceDays)+1;
+        List<StockKbar> revers = Lists.newArrayList();
+        for (int i=0;i<index;i++){
+            DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, stockCode, onceDays*i, onceDays);
+            List<StockKbar> stockKbarList = StockKbarConvert.convert(dataTable, stockCode, stockName);
+            if(!CollectionUtils.isEmpty(stockKbarList)){
+                List<StockKbar> kbars = Lists.reverse(stockKbarList);
+                revers.addAll(kbars);
+            }
+        }
+        if(CollectionUtils.isEmpty(revers)){
+            return;
+        }
+        List<StockKbar> stockKbarList = Lists.reverse(revers);
+        Map<String, AdjFactorDTO> adjFactorMap = getAdjFactorMap(stockCode, null);
+        if (adjFactorMap == null || adjFactorMap.size() == 0) {
+            log.info("stockCode ={} http方式获取复权因子失败", stockCode);
+            return;
+        }
+        if(adjFactorMap.get(stockKbarList.get(stockKbarList.size() - 1).getKbarDate())==null){
+            return;
+        }
+        BigDecimal maxAdjFactor = adjFactorMap.get(stockKbarList.get(stockKbarList.size() - 1).getKbarDate()).getAdjFactor();
+        transactionTemplate.execute((TransactionCallback<Void>) status -> {
+            try {
+                stockKbarList.forEach(item -> {
+                    BigDecimal adjFactor = adjFactorMap.get(item.getKbarDate()).getAdjFactor();
+                    item.setAdjFactor(adjFactor);
+                    BigDecimal preFactor = adjFactor.divide(maxAdjFactor, 10, BigDecimal.ROUND_HALF_UP);
+                    item.setAdjOpenPrice(item.getOpenPrice().multiply(preFactor).setScale(2, RoundingMode.HALF_UP));
+                    item.setAdjClosePrice(item.getClosePrice().multiply(preFactor).setScale(2, RoundingMode.HALF_UP));
+                    item.setAdjHighPrice(item.getHighPrice().multiply(preFactor).setScale(2, RoundingMode.HALF_UP));
+                    item.setAdjLowPrice(item.getLowPrice().multiply(preFactor).setScale(2, RoundingMode.HALF_UP));
+                    stockKbarService.save(item);
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                status.setRollbackOnly();
+                log.info("rollback transaction: " + status);
+            }
+            return null;
+        });
 
+
+    }
 
 
     public void initAndSaveKbarData(String stockCode, String stockName, int days) {
@@ -247,7 +297,7 @@ public class StockKbarComponent {
             query.setStockCode(item.getStockCode());
             int count = stockKbarService.countByCondition(query);
             if (count == 0) {
-                initAndSaveKbarData(item.getStockCode(), item.getStockName(), 800);
+                batchInitAndSaveKbarDate(item.getStockCode(), item.getStockName(), 1300);
             }
         });
     }
@@ -262,9 +312,11 @@ public class StockKbarComponent {
     }
 
     public static void main(String[] args) {
-        Map<String, AdjFactorDTO> adjFactorList = getAdjFactorMap("600095", "20210522");
+        int i = 15/20;
+        System.out.println(i);
+        //Map<String, AdjFactorDTO> adjFactorList = getAdjFactorMap("600095", "20210522");
       //  Map<String, String> notices = getNotices("600095", "20210525");
-        System.out.println(JSONObject.toJSONString(adjFactorList));
+        //System.out.println(JSONObject.toJSONString(adjFactorList));
     }
 
     public static Map<String,String> getNotices(String stockCode, String kbarDate ){
@@ -394,10 +446,10 @@ public class StockKbarComponent {
         CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
         circulateInfos.forEach(item -> {
-            StockAverageLineQuery query = new StockAverageLineQuery();
-            query.setStockCode(item.getStockCode());
-            System.out.println(item.getStockCode());
-
+            AVGLINE_POOL.execute(() -> {
+                StockAverageLineQuery query = new StockAverageLineQuery();
+                query.setStockCode(item.getStockCode());
+                System.out.println(item.getStockCode()+"开始");
                 int count = stockAverageLineService.countByCondition(query);
                 if (count == 0) {
                     //calAvgLine(item.getStock(), item.getStockName(), 60);
@@ -405,8 +457,11 @@ public class StockKbarComponent {
                     calAvgLine(item.getStockCode(), item.getStockName(), i);
                 }*/
                     //calAvgLine(item.getStock(), item.getStockName(), 10);
-                    calAvgLine(item.getStockCode(), item.getStockName(), 5);
+
+                        calAvgLine(item.getStockCode(), item.getStockName(), 5);
                 }
+                System.out.println(item.getStockCode()+"结束");
+            });
 
         });
     }

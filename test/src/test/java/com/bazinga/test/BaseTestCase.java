@@ -134,7 +134,8 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        plankChenJiaoEComponent.exportData();
+        //plankChenJiaoEComponent.exportData();
+        //stockKbarComponent.batchKbarDataInit();
         /*Date date = new Date();
         stockPlankDailyComponent.handleStopTradeStock(date);*/
         //stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-02-18 15:30:30",DateUtil.DEFAULT_FORMAT));
