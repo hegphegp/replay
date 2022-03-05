@@ -416,7 +416,7 @@ public class StockKbarComponent {
             return null;
         }
         if (!kbarDate.equals(stockKbarList.get(0).getKbarDate())) {
-            log.info("没有该交易日的K线数据 stockCode ={}, kbarDate ={}", stockCode, kbarDate);
+            //log.info("没有该交易日的K线数据 stockCode ={}, kbarDate ={}", stockCode, kbarDate);
             return null;
         }
         return stockKbarList.stream().map(StockKbar::getAdjClosePrice).mapToDouble(BigDecimal::doubleValue).average().getAsDouble();
@@ -445,7 +445,10 @@ public class StockKbarComponent {
     public void batchcalAvgLine() {
         CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
-        circulateInfos.forEach(item -> {
+        int index = 0;
+        for (CirculateInfo item:circulateInfos) {
+            index = index + 1;
+            System.out.println(index + "=======================");
             AVGLINE_POOL.execute(() -> {
                 StockAverageLineQuery query = new StockAverageLineQuery();
                 query.setStockCode(item.getStockCode());
@@ -453,17 +456,16 @@ public class StockKbarComponent {
                 int count = stockAverageLineService.countByCondition(query);
                 if (count == 0) {
                     //calAvgLine(item.getStock(), item.getStockName(), 60);
-                /*for (int i = 5; i <=60 ; i++) {
-                    calAvgLine(item.getStockCode(), item.getStockName(), i);
-                }*/
+                    /*for (int i = 5; i <=60 ; i++) {
+                        calAvgLine(item.getStockCode(), item.getStockName(), i);
+                    }*/
                     //calAvgLine(item.getStock(), item.getStockName(), 10);
 
-                        calAvgLine(item.getStockCode(), item.getStockName(), 5);
+                    calAvgLine(item.getStockCode(), item.getStockName(), 5);
                 }
                 System.out.println(item.getStockCode()+"结束");
             });
-
-        });
+        }
     }
 
     public Double avgLineResult(String stockCode, String kbarDate) {
