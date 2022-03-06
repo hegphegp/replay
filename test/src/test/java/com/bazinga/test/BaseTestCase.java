@@ -5,9 +5,12 @@ import com.bazinga.enums.PlankTypeEnum;
 import com.bazinga.replay.component.*;
 import com.bazinga.replay.dto.PlankTypeDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
+import com.bazinga.replay.model.CirculateInfo;
 import com.bazinga.replay.model.StockKbar;
 import com.bazinga.replay.model.TradeDatePool;
+import com.bazinga.replay.query.CirculateInfoQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
+import com.bazinga.replay.service.CirculateInfoService;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
@@ -65,6 +68,8 @@ public class BaseTestCase {
     private PlanksInfoComponent planksInfoComponent;
     @Autowired
     private StockAttributeReplayComponent stockAttributeReplayComponent;
+    @Autowired
+    private CirculateInfoService circulateInfoService;
 
     @Test
     public void test1() {
@@ -144,6 +149,14 @@ public class BaseTestCase {
         //synInfoComponent.synZiDingYiInfo();
         //stockCommonReplayComponent.highRaiseStockInfo(new Date());
         //List<StockKbar> kbars = stockKbarComponent.getStockKBarRemoveNewDays("601068", 50, 11);
+        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
+        for (CirculateInfo circulateInfo:circulateInfos) {
+            System.out.println(circulateInfo.getStockCode());
+            stockKbarComponent.batchKbarDataInitToStock(circulateInfo.getStockCode(), circulateInfo.getStockName());
+        }
+        stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
     }
 
 
