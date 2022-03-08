@@ -73,6 +73,30 @@ public class StockAttributeReplay implements Serializable {
     private BigDecimal avgRangeDay10;
 
     /**
+     * 5日涨幅
+     *
+     * @允许为空   YES
+     * @是否索引   NO
+     */
+    private BigDecimal rateDay5;
+
+    /**
+     * 是不是新股 180天k线
+     */
+    private Integer marketNew;
+    /**
+     * 市值
+     */
+    private BigDecimal marketValue;
+    /**
+     * 10日内涨停数量
+     */
+    private Integer planksDay10;
+
+    private BigDecimal highRate;
+    private BigDecimal upperShadowRate;
+
+    /**
      * 
      *
      * @允许为空   NO
