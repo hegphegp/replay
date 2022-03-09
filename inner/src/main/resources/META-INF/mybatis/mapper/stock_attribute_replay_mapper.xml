@@ -15,6 +15,7 @@
         <result column="planks_day10" jdbcType="TINYINT" property="planksDay10"/>
         <result column="high_rate" jdbcType="DECIMAL" property="highRate"/>
         <result column="upper_shadow_rate" jdbcType="DECIMAL" property="upperShadowRate"/>
+        <result column="avg_rate5" jdbcType="DECIMAL" property="avgRate5"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
@@ -33,6 +34,7 @@
             planks_day10,
             high_rate,
             upper_shadow_rate,
+            avg_rate5,
             create_time,
             update_time
         </sql>
@@ -86,6 +88,9 @@
             <if test="upperShadowRate != null">
                 upper_shadow_rate = #{upperShadowRate, jdbcType=DECIMAL},
             </if>
+            <if test="avgRate5 != null">
+                avg_rate5 = #{avgRate5, jdbcType=DECIMAL},
+            </if>
         <if test="createTime != null">
             create_time = #{createTime, jdbcType=TIMESTAMP},
         </if>
@@ -110,6 +115,7 @@
         #{planksDay10, jdbcType=TINYINT},
         #{highRate, jdbcType=DECIMAL},
         #{upperShadowRate, jdbcType=DECIMAL},
+        #{avgRate5, jdbcType=DECIMAL},
             #{createTime, jdbcType=TIMESTAMP},
             #{updateTime, jdbcType=TIMESTAMP}
             )
@@ -151,7 +157,9 @@
                 <if test="upperShadowRate != null">
                     upper_shadow_rate = #{upperShadowRate, jdbcType=DECIMAL},
                 </if>
-
+                <if test="avgRate5 != null">
+                    avg_rate5 = #{avgRate5, jdbcType=DECIMAL},
+                </if>
             <if test="createTime != null">
                 create_time = #{createTime, jdbcType=TIMESTAMP},
             </if>

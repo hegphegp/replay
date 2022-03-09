@@ -441,6 +441,21 @@ public class StockKbarComponent {
 
     }
 
+    public void calOneDayAvgLine(String stockCode, String stockName, int days,Date date) {
+        String kbarDate = DateFormatUtils.format(date, DateUtil.yyyyMMdd);
+        Double avgPrice = calDaysAvg(stockCode, kbarDate, days);
+        if (avgPrice != null) {
+            StockAverageLine stockAverageLine = new StockAverageLine();
+            stockAverageLine.setAveragePrice(new BigDecimal(avgPrice).setScale(2, RoundingMode.HALF_UP));
+            stockAverageLine.setDayType(days);
+            stockAverageLine.setKbarDate(kbarDate);
+            stockAverageLine.setStockName(stockName);
+            stockAverageLine.setUniqueKey(stockCode + SymbolConstants.UNDERLINE + kbarDate + SymbolConstants.UNDERLINE + days);
+            stockAverageLine.setStockCode(stockCode);
+            stockAverageLineService.save(stockAverageLine);
+        }
+    }
+
 
     public void batchcalAvgLine() {
         CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
@@ -462,6 +477,23 @@ public class StockKbarComponent {
                     //calAvgLine(item.getStock(), item.getStockName(), 10);
 
                     calAvgLine(item.getStockCode(), item.getStockName(), 5);
+                }
+                System.out.println(item.getStockCode()+"结束");
+            });
+        }
+    }
+
+    public void calCurrentDayAvgLine(Date date) {
+        CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
+        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
+        int index = 0;
+        for (CirculateInfo item:circulateInfos) {
+            index = index + 1;
+            System.out.println(index + "=======================");
+            AVGLINE_POOL.execute(() -> {
+                StockAverageLine avgLine = stockAverageLineService.getByUniqueKey(item.getStockCode() + "" + DateUtil.format(date, DateUtil.yyyyMMdd)+ "" + 5);
+                if (avgLine == null) {
+                    calOneDayAvgLine(item.getStockCode(), item.getStockName(), 5,date);
                 }
                 System.out.println(item.getStockCode()+"结束");
             });

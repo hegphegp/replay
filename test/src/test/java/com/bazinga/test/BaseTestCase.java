@@ -105,6 +105,7 @@ public class BaseTestCase {
         stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
         badPlankComponent.badPlankJudge(date);
         stockPlankDailyComponent.superFactor(date);
+        stockKbarComponent.calCurrentDayAvgLine(date);
         stockAttributeReplayComponent.saveStockAttributeReplay(date);
         stockPlankDailyComponent.handleStopTradeStock(date);
 
@@ -139,6 +140,7 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
+        stockKbarComponent.calCurrentDayAvgLine(new Date());
         stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
         //plankChenJiaoEComponent.exportData();
         //stockKbarComponent.batchKbarDataInit();

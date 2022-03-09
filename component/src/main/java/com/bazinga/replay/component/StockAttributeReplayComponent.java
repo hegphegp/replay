@@ -5,17 +5,12 @@ import com.bazinga.constant.SymbolConstants;
 import com.bazinga.replay.convert.KBarDTOConvert;
 import com.bazinga.replay.dto.KBarDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
-import com.bazinga.replay.model.CirculateInfo;
-import com.bazinga.replay.model.StockAttributeReplay;
-import com.bazinga.replay.model.StockCommonReplay;
-import com.bazinga.replay.model.StockKbar;
+import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.CirculateInfoQuery;
+import com.bazinga.replay.query.StockAverageLineQuery;
 import com.bazinga.replay.query.StockCommonReplayQuery;
 import com.bazinga.replay.query.StockKbarQuery;
-import com.bazinga.replay.service.CirculateInfoService;
-import com.bazinga.replay.service.StockAttributeReplayService;
-import com.bazinga.replay.service.StockCommonReplayService;
-import com.bazinga.replay.service.StockKbarService;
+import com.bazinga.replay.service.*;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.PriceUtil;
 import com.google.common.collect.Lists;
@@ -47,6 +42,8 @@ public class StockAttributeReplayComponent {
 
     @Autowired
     private StockKbarService stockKbarService;
+    @Autowired
+    private StockAverageLineService stockAverageLineService;
 
 
     public void saveStockAttributeReplay(Date date){
@@ -71,7 +68,7 @@ public class StockAttributeReplayComponent {
                 Integer planksDay10 = calPlanksDay10(stockKBars, circulateInfo.getStockCode());
                 BigDecimal highRate = calHighRate(stockKBars);
                 BigDecimal upperShadowRate = calUpperShadowRate(stockKBars);
-
+                BigDecimal avgRate5 = calAvgRate5(stockKBars, circulateInfo);
 
                 StockAttributeReplay stockAttributeReplay = new StockAttributeReplay();
                 stockAttributeReplay.setStockCode(circulateInfo.getStockCode());
@@ -85,6 +82,7 @@ public class StockAttributeReplayComponent {
                 stockAttributeReplay.setPlanksDay10(planksDay10);
                 stockAttributeReplay.setHighRate(highRate);
                 stockAttributeReplay.setUpperShadowRate(upperShadowRate);
+                stockAttributeReplay.setAvgRate5(avgRate5);
                 stockAttributeReplay.setCreateTime(new Date());
                 stockAttributeReplayService.save(stockAttributeReplay);
             }catch (Exception e){
@@ -184,6 +182,18 @@ public class StockAttributeReplayComponent {
         StockKbar stockKbar = stockKbars.get(0);
         BigDecimal marketValue = new BigDecimal(circulateInfo.getCirculate()).multiply(stockKbar.getClosePrice()).setScale(2, BigDecimal.ROUND_HALF_UP);
         return marketValue;
+    }
+
+    public BigDecimal calAvgRate5(List<StockKbar> stockKbars,CirculateInfo circulateInfo){
+        if(CollectionUtils.isEmpty(stockKbars)||stockKbars.size()<1){
+            return null;
+        }
+        StockKbar stockKbar = stockKbars.get(0);
+        StockAverageLine stockAverageLine = stockAverageLineService.getByUniqueKey(circulateInfo.getStockCode() + "_" + stockKbar.getKbarDate()+"_"+5);
+        if(stockAverageLine!=null){
+            return stockAverageLine.getAveragePrice();
+        }
+        return null;
     }
 
     public boolean isMarketNew(String stockCode){

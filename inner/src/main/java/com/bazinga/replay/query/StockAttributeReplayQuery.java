@@ -69,6 +69,7 @@ public class StockAttributeReplayQuery extends PagingQuery implements Serializab
 
     private BigDecimal highRate;
     private BigDecimal upperShadowRate;
+    private BigDecimal avgRate5;
 
     /**
      *  开始
