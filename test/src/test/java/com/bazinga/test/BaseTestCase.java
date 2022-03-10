@@ -140,7 +140,7 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockKbarComponent.calCurrentDayAvgLine(new Date());
+        //stockKbarComponent.calCurrentDayAvgLine(new Date());
         stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
         //plankChenJiaoEComponent.exportData();
         //stockKbarComponent.batchKbarDataInit();

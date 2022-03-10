@@ -16,6 +16,7 @@
         <result column="high_rate" jdbcType="DECIMAL" property="highRate"/>
         <result column="upper_shadow_rate" jdbcType="DECIMAL" property="upperShadowRate"/>
         <result column="avg_rate5" jdbcType="DECIMAL" property="avgRate5"/>
+        <result column="high_time" jdbcType="VARCHAR" property="highTime"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
@@ -35,6 +36,7 @@
             high_rate,
             upper_shadow_rate,
             avg_rate5,
+            high_time,
             create_time,
             update_time
         </sql>
@@ -91,6 +93,9 @@
             <if test="avgRate5 != null">
                 avg_rate5 = #{avgRate5, jdbcType=DECIMAL},
             </if>
+            <if test="highTime != null">
+                high_time = #{highTime, jdbcType=VARCHAR},
+            </if>
         <if test="createTime != null">
             create_time = #{createTime, jdbcType=TIMESTAMP},
         </if>
@@ -116,6 +121,7 @@
         #{highRate, jdbcType=DECIMAL},
         #{upperShadowRate, jdbcType=DECIMAL},
         #{avgRate5, jdbcType=DECIMAL},
+        #{highTime, jdbcType=VARCHAR},
             #{createTime, jdbcType=TIMESTAMP},
             #{updateTime, jdbcType=TIMESTAMP}
             )
@@ -159,6 +165,9 @@
                 </if>
                 <if test="avgRate5 != null">
                     avg_rate5 = #{avgRate5, jdbcType=DECIMAL},
+                </if>
+                <if test="highTime != null">
+                    high_time = #{highTime, jdbcType=VARCHAR},
                 </if>
             <if test="createTime != null">
                 create_time = #{createTime, jdbcType=TIMESTAMP},

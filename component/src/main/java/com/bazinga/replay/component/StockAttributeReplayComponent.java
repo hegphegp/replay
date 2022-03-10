@@ -44,6 +44,8 @@ public class StockAttributeReplayComponent {
     private StockKbarService stockKbarService;
     @Autowired
     private StockAverageLineService stockAverageLineService;
+    @Autowired
+    private CurrentDayTransactionDataComponent currentDayTransactionDataComponent;
 
 
     public void saveStockAttributeReplay(Date date){
@@ -69,6 +71,7 @@ public class StockAttributeReplayComponent {
                 BigDecimal highRate = calHighRate(stockKBars);
                 BigDecimal upperShadowRate = calUpperShadowRate(stockKBars);
                 BigDecimal avgRate5 = calAvgRate5(stockKBars, circulateInfo);
+                String highTime = calHighTime(circulateInfo.getStockCode());
 
                 StockAttributeReplay stockAttributeReplay = new StockAttributeReplay();
                 stockAttributeReplay.setStockCode(circulateInfo.getStockCode());
@@ -84,6 +87,7 @@ public class StockAttributeReplayComponent {
                 stockAttributeReplay.setUpperShadowRate(upperShadowRate);
                 stockAttributeReplay.setAvgRate5(avgRate5);
                 stockAttributeReplay.setCreateTime(new Date());
+                stockAttributeReplay.setHighTime(highTime);
                 stockAttributeReplayService.save(stockAttributeReplay);
             }catch (Exception e){
                 log.error(e.getMessage(),e);
@@ -207,6 +211,22 @@ public class StockAttributeReplayComponent {
         }catch (Exception e) {
             return false;
         }
+    }
+
+    public String calHighTime(String stockCode){
+        List<ThirdSecondTransactionDataDTO> datas = currentDayTransactionDataComponent.getData(stockCode);
+        if(CollectionUtils.isEmpty(datas)){
+            return null;
+        }
+        String highTime = null;
+        BigDecimal highPrice = null;
+        for (ThirdSecondTransactionDataDTO data:datas){
+            if(highPrice==null||data.getTradePrice().compareTo(highPrice)==1){
+                highPrice = data.getTradePrice();
+                highTime = data.getTradeTime();
+            }
+        }
+        return highTime;
     }
     public List<StockKbar> getStockKBars(String stockCode){
         StockKbarQuery stockKbarQuery = new StockKbarQuery();

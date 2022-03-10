@@ -96,6 +96,7 @@ public class StockAttributeReplay implements Serializable {
     private BigDecimal highRate;
     private BigDecimal upperShadowRate;
     private BigDecimal avgRate5;
+    private String highTime;
 
     /**
      * 
