@@ -140,8 +140,10 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
+        //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",800);
+        stockKbarComponent.calAvgLine("999999","上证指数",24);
         //stockKbarComponent.calCurrentDayAvgLine(new Date());
-        stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
+        //stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
         //plankChenJiaoEComponent.exportData();
         //stockKbarComponent.batchKbarDataInit();
         /*Date date = new Date();
