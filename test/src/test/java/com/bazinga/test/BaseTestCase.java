@@ -140,12 +140,12 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",800);
+        //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",800);
         //stockKbarComponent.calAvgLine("999999","上证指数",24);
         //stockKbarComponent.calCurrentDayAvgLine(new Date());
         //stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
         //plankChenJiaoEComponent.exportData();
-        //stockKbarComponent.batchKbarDataInit();
+        stockKbarComponent.batchKbarDataInit();
         /*Date date = new Date();
         stockPlankDailyComponent.handleStopTradeStock(date);*/
         //stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-02-18 15:30:30",DateUtil.DEFAULT_FORMAT));
