@@ -146,6 +146,7 @@ public class StockAttributeReplayComponent {
         if(CollectionUtils.isEmpty(stockKbars)){
             return null;
         }
+        int planks = 0;
         int i = 0;
         StockKbar nextKbar = null;
         for (StockKbar stockKbar:stockKbars){
@@ -153,12 +154,12 @@ public class StockAttributeReplayComponent {
             if(nextKbar!=null&&i<=11){
                 boolean upperPrice = PriceUtil.isUpperPrice(stockCode, nextKbar.getClosePrice(), stockKbar.getClosePrice());
                 if(upperPrice){
-                    i++;
+                    planks++;
                 }
             }
             nextKbar = stockKbar;
         }
-        return i;
+        return planks;
     }
 
     public BigDecimal calHighRate(List<StockKbar> stockKbars){
