@@ -75,14 +75,14 @@ public class BaseTestCase {
     public void test1() {
         //无敌数据
         Date date = new Date();
-        newStockComponent.catchNewStock();
+        /*newStockComponent.catchNewStock();
         plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(date);
         stockReplayDailyComponent.calPreDateAvgPrice(date);
         stockPlankDailyComponent.stockPlankDailyStatistic(date);
         stockPlankDailyComponent.stockPlankDailyStatistic(date);
         stockPlankDailyComponent.stockPlankDailyStatistic(date);
-        plankExchangeDailyComponent.plankExchangeDaily(date);
+        plankExchangeDailyComponent.plankExchangeDaily(date);*/
         stockKbarComponent.batchUpdateDaily();
         stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(date);
         stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(date);

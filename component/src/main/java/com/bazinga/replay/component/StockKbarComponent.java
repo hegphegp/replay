@@ -324,7 +324,7 @@ public class StockKbarComponent {
         Map<String, Object> paramMap = new HashMap<>();
 
         paramMap.put("api_name", "adj_factor");
-        paramMap.put("token", "f9d25f4ab3f0abe5e04fdf76c32e8c8a5cc94e384774da025098ec6e");
+        paramMap.put("token", "fb5a3049bfc93659682fd10dfb14cafad3ce69637b36bc94a3f45916");
         Map<String, String> paramsdate = new HashMap<>();
         String tsStockCode = stockCode.startsWith("6") ? stockCode + ".SH" : stockCode + ".SZ";
         paramsdate.put("ts_code", tsStockCode);
@@ -362,7 +362,7 @@ public class StockKbarComponent {
     public static Map<String, AdjFactorDTO> getAdjFactorMap(String stockCode, String kbarDateFrom) {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("api_name", "adj_factor");
-        paramMap.put("token", "f9d25f4ab3f0abe5e04fdf76c32e8c8a5cc94e384774da025098ec6e");
+        paramMap.put("token", "fb5a3049bfc93659682fd10dfb14cafad3ce69637b36bc94a3f45916");
         Map<String, String> paramsdate = new HashMap<>();
         String tsStockCode = stockCode.startsWith("6") ? stockCode + ".SH" : stockCode + ".SZ";
         paramsdate.put("ts_code", tsStockCode);
