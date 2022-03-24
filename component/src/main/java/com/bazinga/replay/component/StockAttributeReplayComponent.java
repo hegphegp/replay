@@ -152,7 +152,7 @@ public class StockAttributeReplayComponent {
         for (StockKbar stockKbar:stockKbars){
             i++;
             if(nextKbar!=null&&i<=11){
-                boolean upperPrice = PriceUtil.isUpperPrice(stockCode, nextKbar.getClosePrice(), stockKbar.getClosePrice());
+                boolean upperPrice = PriceUtil.isUpperPrice(stockCode, nextKbar.getHighPrice(), stockKbar.getClosePrice());
                 if(upperPrice){
                     planks++;
                 }
