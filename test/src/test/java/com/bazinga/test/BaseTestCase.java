@@ -75,14 +75,14 @@ public class BaseTestCase {
     public void test1() {
         //无敌数据
         Date date = new Date();
-        /*newStockComponent.catchNewStock();
+        newStockComponent.catchNewStock();
         plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(date);
         stockReplayDailyComponent.calPreDateAvgPrice(date);
         stockPlankDailyComponent.stockPlankDailyStatistic(date);
         stockPlankDailyComponent.stockPlankDailyStatistic(date);
         stockPlankDailyComponent.stockPlankDailyStatistic(date);
-        plankExchangeDailyComponent.plankExchangeDaily(date);*/
+        plankExchangeDailyComponent.plankExchangeDaily(date);
         stockKbarComponent.batchUpdateDaily();
         stockPlankDailyComponent.calMax100DaysPriceForTwoPlank(date);
         stockPlankDailyComponent.calMin15DaysPriceForTwoPlank(date);
@@ -142,14 +142,13 @@ public class BaseTestCase {
     public void test7() {
         //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",800);
         //stockKbarComponent.calAvgLine("999999","上证指数",24);
-        //stockKbarComponent.calCurrentDayAvgLine(new Date());
+        stockKbarComponent.calCurrentDayAvgLine(new Date());
         //stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
         //plankChenJiaoEComponent.exportData();
-        stockKbarComponent.batchKbarDataInit();
+        //stockKbarComponent.batchKbarDataInit();
         /*Date date = new Date();
         stockPlankDailyComponent.handleStopTradeStock(date);*/
         //stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-02-18 15:30:30",DateUtil.DEFAULT_FORMAT));
-
         //stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
         //synInfoComponent.synZiDingYiInfo();
         //stockCommonReplayComponent.highRaiseStockInfo(new Date());

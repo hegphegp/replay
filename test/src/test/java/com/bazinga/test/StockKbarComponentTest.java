@@ -18,8 +18,8 @@ public class StockKbarComponentTest extends BaseTestCase {
     @Test
     public void test(){
 
-       // stockKbarComponent.batchUpdateDaily();
-        stockCommonReplayComponent.saveCommonReplay(new Date());
+        stockKbarComponent.batchUpdateDaily();
+        //stockCommonReplayComponent.saveCommonReplay(new Date());
     }
 
     @Test
