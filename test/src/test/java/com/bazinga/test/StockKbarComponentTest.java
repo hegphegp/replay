@@ -1,5 +1,6 @@
 package com.bazinga.test;
 
+import com.bazinga.replay.component.StockBollingComponent;
 import com.bazinga.replay.component.StockCommonReplayComponent;
 import com.bazinga.replay.component.StockKbarComponent;
 import org.junit.Test;
@@ -15,6 +16,9 @@ public class StockKbarComponentTest extends BaseTestCase {
     @Autowired
     private StockCommonReplayComponent stockCommonReplayComponent;
 
+    @Autowired
+    private StockBollingComponent stockBollingComponent;
+
     @Test
     public void test(){
 
@@ -25,5 +29,10 @@ public class StockKbarComponentTest extends BaseTestCase {
     @Test
     public void test2(){
         stockKbarComponent.batchcalAvgLine();
+    }
+
+    @Test
+    public void test3(){
+        stockBollingComponent.batchInitBoll();
     }
 }
