@@ -73,7 +73,7 @@ public class StockBollingComponent {
 
     }
 
-    private BigDecimal calStd(String stockCode, String kbarDate , int days){
+    public  BigDecimal calStd(String stockCode, String kbarDate , int days){
         StockAverageLineQuery query = new StockAverageLineQuery();
         query.addOrderBy("kbar_date", Sort.SortType.DESC);
         query.setStockCode(stockCode);
