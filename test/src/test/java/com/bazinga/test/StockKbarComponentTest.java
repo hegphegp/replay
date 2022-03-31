@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 
 public class StockKbarComponentTest extends BaseTestCase {
@@ -39,9 +40,8 @@ public class StockKbarComponentTest extends BaseTestCase {
 
     @Test
     public void test4(){
-        Double avg = stockKbarComponent.calDaysAvg("000537", "20220330", 20);
-        System.out.println(avg);
-        BigDecimal std = stockBollingComponent.calStd("300333", "20220105", 20);
-        System.out.println(std);
+
+        stockBollingComponent.initBoll("000537");
+
     }
 }

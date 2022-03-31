@@ -3,17 +3,12 @@ package com.bazinga.replay.component;
 
 import com.bazinga.base.Sort;
 import com.bazinga.constant.SymbolConstants;
-import com.bazinga.replay.model.CirculateInfo;
-import com.bazinga.replay.model.StockAverageLine;
-import com.bazinga.replay.model.StockBolling;
-import com.bazinga.replay.model.TradeDatePool;
+import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.CirculateInfoQuery;
 import com.bazinga.replay.query.StockAverageLineQuery;
+import com.bazinga.replay.query.StockKbarQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
-import com.bazinga.replay.service.CirculateInfoService;
-import com.bazinga.replay.service.StockAverageLineService;
-import com.bazinga.replay.service.StockKbarService;
-import com.bazinga.replay.service.TradeDatePoolService;
+import com.bazinga.replay.service.*;
 import com.bazinga.util.CommonUtil;
 import com.bazinga.util.DateFormatUtils;
 import com.bazinga.util.DateUtil;
@@ -23,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Component
@@ -42,6 +38,9 @@ public class StockBollingComponent {
     @Autowired
     private TradeDatePoolService tradeDatePoolService;
 
+    @Autowired
+    private StockBollingService stockBollingService;
+
 
     public void  batchInitBoll(){
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
@@ -50,7 +49,7 @@ public class StockBollingComponent {
         }
     }
 
-    private void initBoll(String stockCode){
+    public  void initBoll(String stockCode){
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
         for (TradeDatePool tradeDatePool : tradeDatePools) {
             String kbarDate = DateFormatUtils.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
@@ -63,7 +62,17 @@ public class StockBollingComponent {
                 }
                 log.info("stockCode{} std{}",stockCode,std);
                 StockBolling stockBolling = new StockBolling();
-
+                stockBolling.setStockCode(byUniqueKey.getStockCode());
+                stockBolling.setStockName(byUniqueKey.getStockName());
+                stockBolling.setDayType(20);
+                stockBolling.setMiddlePrice(byUniqueKey.getAveragePrice());
+                BigDecimal up = stockBolling.getMiddlePrice().add(std.multiply(new BigDecimal("2"))).setScale(2,RoundingMode.HALF_UP);
+                BigDecimal low = stockBolling.getMiddlePrice().subtract(std.multiply(new BigDecimal("2"))).setScale(2,RoundingMode.HALF_UP);
+                stockBolling.setUpPrice(up);
+                stockBolling.setLowPrice(low);
+                stockBolling.setKbarDate(byUniqueKey.getKbarDate());
+                stockBolling.setUniqueKey(uniqueKey);
+                stockBollingService.save(stockBolling);
             }
 
         }
@@ -74,25 +83,23 @@ public class StockBollingComponent {
     }
 
     public  BigDecimal calStd(String stockCode, String kbarDate , int days){
-        StockAverageLineQuery query = new StockAverageLineQuery();
+        StockKbarQuery query = new StockKbarQuery();
         query.addOrderBy("kbar_date", Sort.SortType.DESC);
         query.setStockCode(stockCode);
         query.setKbarDateTo(kbarDate);
-        query.setDayType(days);
-        query.addOrderBy("kbar_date", Sort.SortType.DESC);
         query.setLimit(days);
-        List<StockAverageLine> stockAverageLines = stockAverageLineService.listByCondition(query);
+        List<StockKbar> stockAverageLines = stockKbarService.listByCondition(query);
         if(CollectionUtils.isEmpty(stockAverageLines) || stockAverageLines.size() <20){
             return new BigDecimal("-1");
         }
-        BigDecimal avgPrice = stockAverageLines.stream().map(StockAverageLine::getAveragePrice).reduce(BigDecimal::add).get()
-                .divide(new BigDecimal(String.valueOf(days)),2,BigDecimal.ROUND_HALF_UP);
+        BigDecimal avgPrice = stockAverageLines.stream().map(StockKbar::getAdjClosePrice).reduce(BigDecimal::add).get()
+                .divide(new BigDecimal(String.valueOf(days)),4,BigDecimal.ROUND_HALF_UP);
 
         BigDecimal total = BigDecimal.ZERO;
-        for (StockAverageLine stockAverageLine : stockAverageLines) {
-            total = total.add(stockAverageLine.getAveragePrice().subtract(avgPrice).pow(2));
+        for (StockKbar stockKbar : stockAverageLines) {
+            total = total.add(stockKbar.getAdjClosePrice().subtract(avgPrice).pow(2));
         }
-        return CommonUtil.sqrt(total.divide(new BigDecimal(String.valueOf(days)),2,BigDecimal.ROUND_HALF_UP),2);
+        return CommonUtil.sqrt(total.divide(new BigDecimal(String.valueOf(days-1)),2,BigDecimal.ROUND_HALF_UP),4);
     }
 
 
