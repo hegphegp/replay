@@ -140,7 +140,10 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
+        DataTable securityBars = TdxHqUtil.getSecurityBars(KCate.DAY, "000001", 0, 100);
+        List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("000001", "20220401");
+        System.out.println(securityBars);
+        //stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
         //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",800);
         //stockKbarComponent.calAvgLine("999999","上证指数",24);
         //stockKbarComponent.calCurrentDayAvgLine(new Date());
