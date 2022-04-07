@@ -163,7 +163,9 @@ public class StockKbarComponent {
                     item.setAdjClosePrice(item.getClosePrice().multiply(preFactor).setScale(2, RoundingMode.HALF_UP));
                     item.setAdjHighPrice(item.getHighPrice().multiply(preFactor).setScale(2, RoundingMode.HALF_UP));
                     item.setAdjLowPrice(item.getLowPrice().multiply(preFactor).setScale(2, RoundingMode.HALF_UP));
-                    stockKbarService.save(item);
+                    if(item.getTradeQuantity()>0){
+                        stockKbarService.save(item);
+                    }
                 });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -255,7 +257,9 @@ public class StockKbarComponent {
                                         item.setAdjClosePrice(item.getClosePrice());
                                         item.setAdjHighPrice(item.getHighPrice());
                                         item.setAdjLowPrice(item.getLowPrice());
-                                        stockKbarService.save(item);
+                                        if(item.getTradeQuantity()>0){
+                                            stockKbarService.save(item);
+                                        }
                                     });
                         } catch (Exception e) {
                             e.printStackTrace();
