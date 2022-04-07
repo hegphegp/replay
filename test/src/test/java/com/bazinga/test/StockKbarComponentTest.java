@@ -3,6 +3,7 @@ package com.bazinga.test;
 import com.bazinga.replay.component.StockBollingComponent;
 import com.bazinga.replay.component.StockCommonReplayComponent;
 import com.bazinga.replay.component.StockKbarComponent;
+import com.bazinga.util.DateUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,7 +36,9 @@ public class StockKbarComponentTest extends BaseTestCase {
 
     @Test
     public void test3(){
-        stockBollingComponent.batchInitBoll();
+        //stockBollingComponent.batchInitBoll();
+        stockBollingComponent.calCurrentDayBoll(DateUtil.parseDate("20220406",DateUtil.yyyyMMdd));
+        stockBollingComponent.calCurrentDayBoll(new Date());
     }
 
     @Test
