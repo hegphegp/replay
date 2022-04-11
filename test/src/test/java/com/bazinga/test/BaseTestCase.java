@@ -140,7 +140,7 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
+        stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-04-08 15:30:00",DateUtil.DEFAULT_FORMAT));
         /*DataTable securityBars = TdxHqUtil.getSecurityBars(KCate.DAY, "000001", 0, 100);
         List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("000001", "20220401");
         System.out.println(securityBars);*/
