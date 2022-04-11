@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class StockKbarComponentTest extends BaseTestCase {
 
@@ -37,7 +38,14 @@ public class StockKbarComponentTest extends BaseTestCase {
     @Test
     public void test3(){
         //stockBollingComponent.batchInitBoll();
-        stockBollingComponent.calCurrentDayBoll(DateUtil.parseDate("20220406",DateUtil.yyyyMMdd));
+      //  stockKbarComponent.calCurrentDayAvgLine(new Date());
+       /* try {
+            TimeUnit.HOURS.sleep(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+        stockBollingComponent.calCurrentDayBoll(DateUtil.parseDate("20220407",DateUtil.yyyyMMdd));
+        stockBollingComponent.calCurrentDayBoll(DateUtil.parseDate("20220408",DateUtil.yyyyMMdd));
         stockBollingComponent.calCurrentDayBoll(new Date());
     }
 

@@ -77,7 +77,11 @@ public class StockBollingComponent {
                 stockBolling.setLowPrice(low);
                 stockBolling.setKbarDate(byUniqueKey.getKbarDate());
                 stockBolling.setUniqueKey(uniqueKey);
-                stockBollingService.save(stockBolling);
+                StockBolling stockBollingdb = stockBollingService.getByUniqueKey(uniqueKey);
+                if(stockBollingdb==null){
+                    stockBollingService.save(stockBolling);
+                }
+
             }
         }
 
