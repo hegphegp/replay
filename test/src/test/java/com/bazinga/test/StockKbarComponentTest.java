@@ -44,8 +44,7 @@ public class StockKbarComponentTest extends BaseTestCase {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }*/
-        stockBollingComponent.calCurrentDayBoll(DateUtil.parseDate("20220407",DateUtil.yyyyMMdd));
-        stockBollingComponent.calCurrentDayBoll(DateUtil.parseDate("20220408",DateUtil.yyyyMMdd));
+
         stockBollingComponent.calCurrentDayBoll(new Date());
     }
 
