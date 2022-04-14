@@ -143,12 +143,12 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-04-08 15:30:00",DateUtil.DEFAULT_FORMAT));
+        //stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-04-08 15:30:00",DateUtil.DEFAULT_FORMAT));
         /*DataTable securityBars = TdxHqUtil.getSecurityBars(KCate.DAY, "000001", 0, 100);
         List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("000001", "20220401");
         System.out.println(securityBars);*/
         //stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
-        //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",800);
+        //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1300);
         //stockKbarComponent.calAvgLine("999999","上证指数",24);
         //stockKbarComponent.calCurrentDayAvgLine(new Date());
         //stockAttributeReplayComponent.saveStockAttributeReplay(new Date());
