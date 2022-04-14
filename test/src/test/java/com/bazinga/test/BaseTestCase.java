@@ -70,6 +70,9 @@ public class BaseTestCase {
     private StockAttributeReplayComponent stockAttributeReplayComponent;
     @Autowired
     private CirculateInfoService circulateInfoService;
+    @Autowired
+    private StockBollingComponent stockBollingComponent;
+
 
     @Test
     public void test1() {
@@ -108,7 +111,7 @@ public class BaseTestCase {
         stockKbarComponent.calCurrentDayAvgLine(date);
         stockAttributeReplayComponent.saveStockAttributeReplay(date);
         stockPlankDailyComponent.handleStopTradeStock(date);
-
+        stockBollingComponent.calCurrentDayBoll(date);
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
     }
