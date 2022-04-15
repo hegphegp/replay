@@ -209,6 +209,8 @@ public class BaseTestCase {
         //planksInfoComponent.planksInfo(DateUtil.parseDate("20211206",DateUtil.yyyyMMdd));
         //stockPlankDailyComponent.realPlanks(new Date());
 
+        stockKbarComponent.batchKbarDataInit();
+
     }
 
 
