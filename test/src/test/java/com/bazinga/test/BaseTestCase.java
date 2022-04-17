@@ -19,6 +19,7 @@ import com.tradex.model.suport.DataTable;
 import com.tradex.util.TdxHqUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -143,6 +144,9 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
+        PythonInterpreter interpreter = new PythonInterpreter();
+        interpreter.exec("list = [5,2,3,9,4,6]");
+        interpreter.exec("print(sorted(list))");
         //stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-04-08 15:30:00",DateUtil.DEFAULT_FORMAT));
         /*DataTable securityBars = TdxHqUtil.getSecurityBars(KCate.DAY, "000001", 0, 100);
         List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("000001", "20220401");
