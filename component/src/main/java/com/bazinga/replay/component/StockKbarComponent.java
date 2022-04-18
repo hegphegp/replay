@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.bazinga.base.Sort;
 import com.bazinga.constant.SymbolConstants;
+import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.dto.AdjFactorDTO;
 import com.bazinga.replay.convert.StockKbarConvert;
 import com.bazinga.replay.dto.KBarDTO;
@@ -469,19 +470,7 @@ public class StockKbarComponent {
             index = index + 1;
             System.out.println(index + "=======================");
             AVGLINE_POOL.execute(() -> {
-                StockAverageLineQuery query = new StockAverageLineQuery();
-                query.setStockCode(item.getStockCode());
-                System.out.println(item.getStockCode()+"开始");
-                int count = stockAverageLineService.countByCondition(query);
-                if (count == 0) {
-                    //calAvgLine(item.getStock(), item.getStockName(), 60);
-                    /*for (int i = 5; i <=60 ; i++) {
-                        calAvgLine(item.getStockCode(), item.getStockName(), i);
-                    }*/
-                    //calAvgLine(item.getStock(), item.getStockName(), 10);
-
-                    calAvgLine(item.getStockCode(), item.getStockName(), 5);
-                }
+                calStockAvgLineOneTimes(item.getStockCode(),item.getStockName(),5);
                 System.out.println(item.getStockCode()+"结束");
             });
         }
@@ -501,6 +490,43 @@ public class StockKbarComponent {
                 }
                 System.out.println(item.getStockCode()+"结束");
             });
+        }
+    }
+
+    public void calStockAvgLineOneTimes(String stockCode,String stockName,int days){
+        System.out.println(stockCode+"开始");
+        StockKbarQuery query = new StockKbarQuery();
+        query.setStockCode(stockCode);
+        query.addOrderBy("kbar_date", Sort.SortType.ASC);
+        List<StockKbar> stockKbarList = stockKbarService.listByCondition(query);
+        if (CollectionUtils.isEmpty(stockKbarList) || stockKbarList.size() < days) {
+            return;
+        }
+        StockAverageLineQuery stockAverageLineQuery = new StockAverageLineQuery();
+        stockAverageLineQuery.setStockCode(stockCode);
+        int count = stockAverageLineService.countByCondition(stockAverageLineQuery);
+        if (count > 0) {
+            return;
+        }
+        LimitQueue<StockKbar> limitQueue = new LimitQueue<>(days);
+        for (StockKbar stockKbar:stockKbarList){
+            limitQueue.offer(stockKbar);
+            if(limitQueue.size()<days){
+                continue;
+            }
+            ArrayList<StockKbar> list = Lists.newArrayList();
+            list.addAll(limitQueue);
+            Double avgPrice = list.stream().map(StockKbar::getAdjClosePrice).mapToDouble(BigDecimal::doubleValue).average().getAsDouble();
+            if (avgPrice != null) {
+                StockAverageLine stockAverageLine = new StockAverageLine();
+                stockAverageLine.setAveragePrice(new BigDecimal(avgPrice).setScale(2, RoundingMode.HALF_UP));
+                stockAverageLine.setDayType(days);
+                stockAverageLine.setKbarDate(stockKbar.getKbarDate());
+                stockAverageLine.setStockName(stockName);
+                stockAverageLine.setUniqueKey(stockCode + SymbolConstants.UNDERLINE + stockKbar.getKbarDate() + SymbolConstants.UNDERLINE + days);
+                stockAverageLine.setStockCode(stockCode);
+                stockAverageLineService.save(stockAverageLine);
+            }
         }
     }
 

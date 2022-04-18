@@ -1,7 +1,9 @@
 package com.bazinga.test;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
 import com.bazinga.enums.PlankTypeEnum;
+import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.*;
 import com.bazinga.replay.dto.PlankTypeDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
@@ -14,16 +16,26 @@ import com.bazinga.replay.service.CirculateInfoService;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
+import com.google.common.collect.Lists;
 import com.tradex.enums.KCate;
 import com.tradex.model.suport.DataTable;
 import com.tradex.util.TdxHqUtil;
+import jnr.ffi.annotations.In;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.python.core.PyFunction;
+import org.python.core.PyInteger;
+import org.python.core.PyObject;
+import org.python.core.PyString;
 import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.sql.SQLOutput;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -144,9 +156,41 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        PythonInterpreter interpreter = new PythonInterpreter();
-        interpreter.exec("list = [5,2,3,9,4,6]");
-        interpreter.exec("print(sorted(list))");
+        //String[] arguments = new String[] {"python", "D://testPy/MyTest2.py","9895656"};
+        String[] arguments = new String[] {"python", "D://dashuju/gb_main_test.py","5.91","0","35765222","3.51","9:32","95209936","53","0","1.4","-5","-3.88","-3.72","-10.94","34","1.05","3.51"};
+        try {
+            Process process = Runtime.getRuntime().exec(arguments);
+            BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream(),
+                    "utf-8"));
+            String line = null;
+            while ((line = in.readLine()) != null) {
+                System.out.println(line+"jjjjjjjjjjjj");
+            }
+            in.close();
+            //java代码中的process.waitFor()返回值为0表示我们调用python脚本成功，
+            //返回值为1表示调用python脚本失败，这和我们通常意义上见到的0与1定义正好相反
+            int re = process.waitFor();
+            System.out.println(re+"============");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        /*PythonInterpreter interpreter = new PythonInterpreter();
+
+        interpreter.execfile("D:\\dashuju\\gb_main.py");
+        PyFunction pyFunction = interpreter.get("gb_main", PyFunction.class);
+        PyString[] pyArr = new PyString[]{new PyString("5.91"), new PyString("0"), new PyString("35765222"), new PyString(" 3.51"), new PyString("9:32"), new PyString("95209936"), new PyString("53"), new PyString("0"), new PyString("1.4"), new PyString("-5")
+                , new PyString("-3.88"), new PyString("-3.72"), new PyString("-10.94"), new PyString("34"), new PyString("1.05"), new PyString("3.51")};
+        PyObject pyObject = pyFunction.__call__(pyArr);
+        System.out.println(JSONObject.toJSONString(pyObject));*/
+       /* interpreter.execfile("D:\\testPy\\add.py");
+        PyFunction pyFunction = interpreter.get("add", PyFunction.class);
+        int a = 15; int b = 20;
+        PyObject pyObject = pyFunction.__call__(new PyInteger(a), new PyInteger(b));
+        System.out.println(pyObject);*/
+
+
         //stockAttributeReplayComponent.saveStockAttributeReplay(DateUtil.parseDate("2022-04-08 15:30:00",DateUtil.DEFAULT_FORMAT));
         /*DataTable securityBars = TdxHqUtil.getSecurityBars(KCate.DAY, "000001", 0, 100);
         List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("000001", "20220401");
@@ -173,6 +217,7 @@ public class BaseTestCase {
         stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);*/
+
     }
 
 
