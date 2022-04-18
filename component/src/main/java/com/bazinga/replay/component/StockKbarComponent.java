@@ -483,13 +483,13 @@ public class StockKbarComponent {
         for (CirculateInfo item:circulateInfos) {
             index = index + 1;
             System.out.println(index + "=======================");
-            AVGLINE_POOL.execute(() -> {
+            //AVGLINE_POOL.execute(() -> {
                 StockAverageLine avgLine = stockAverageLineService.getByUniqueKey(item.getStockCode() + "" + DateUtil.format(date, DateUtil.yyyyMMdd)+ "" + 5);
                 if (avgLine == null) {
                     calOneDayAvgLine(item.getStockCode(), item.getStockName(), 5,date);
                 }
                 System.out.println(item.getStockCode()+"结束");
-            });
+           // });
         }
     }
 
