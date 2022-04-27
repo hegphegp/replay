@@ -22,6 +22,7 @@ public class BusTest extends BaseTestCase {
     @Autowired
     private StockKbarComponent stockKbarComponent;
 
+
     @Test
     public void test(){
        // stockKbarComponent.batchUpdateDaily();
