@@ -12,7 +12,7 @@
 						   http://www.springframework.org/schema/tx/spring-tx.xsd
 						   http://www.springframework.org/schema/aop
 						   http://www.springframework.org/schema/aop/spring-aop.xsd">
-	<context:property-placeholder location="classpath:jdbc.properties" />
+	<context:property-placeholder location="classpath:jdbc.properties"  ignore-unresolvable="true"/>
 	<!-- 事务支持 -->
 	<tx:annotation-driven transaction-manager="transactionManager" />
 	

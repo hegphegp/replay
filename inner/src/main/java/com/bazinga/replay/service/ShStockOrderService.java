@@ -1,4 +1,4 @@
-package com.bazinga.replay.dao;
+package com.bazinga.replay.service;
 
 import com.bazinga.base.PagingResult;
 import com.bazinga.replay.model.ShStockOrder;
@@ -8,20 +8,20 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 〈ShStockOrder DAO〉<p>
+ * 〈ShStockOrder Service〉<p>
  * 〈功能详细描述〉
  *
  * @author
  * @date 2022-04-26
  */
-public interface ShStockOrderDAO {
+public interface ShStockOrderService {
 
     /**
      * 新增一条记录
      *
      * @param record 保存对象
      */
-    int insert(ShStockOrder record);
+    ShStockOrder save(ShStockOrder record);
 
     
     /**
@@ -29,7 +29,7 @@ public interface ShStockOrderDAO {
      *
      * @param dateTrade 
      */
-    List<ShStockOrder> selectByDateTrade(Date dateTrade);
+    List<ShStockOrder> getByDateTrade(Date dateTrade);
 
     /**
      * 根据分表键更新数据
@@ -43,20 +43,19 @@ public interface ShStockOrderDAO {
      *
      * @param query 查询参数
      */
-    List<ShStockOrder> selectByCondition(ShStockOrderQuery query);
+    List<ShStockOrder> listByCondition(ShStockOrderQuery query);
 
     /**
      * 根据查询参数查询数据总量
      *
      * @param query 查询参数
      */
-     Integer countByCondition(ShStockOrderQuery query);
-
+    int countByCondition(ShStockOrderQuery query);
 
     /**
-    * 根据查询参数和分表序号查询数据
+    * 根据查询参数和表序号查询数据
     *
     * @param query 查询参数
     */
-    PagingResult<ShStockOrderQuery, ShStockOrder> selectByConditionWithTable(ShStockOrderQuery query);
+    PagingResult<ShStockOrderQuery, ShStockOrder> listWithTable(ShStockOrderQuery query);
 }

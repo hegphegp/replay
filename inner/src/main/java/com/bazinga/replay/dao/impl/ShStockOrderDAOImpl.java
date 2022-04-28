@@ -49,10 +49,10 @@ public class ShStockOrderDAOImpl extends SqlSessionDaoSupport implements ShStock
 
     
     @Override
-    public ShStockOrder selectByDateTrade(Date dateTrade) {
+    public List<ShStockOrder> selectByDateTrade(Date dateTrade) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("dateTrade", dateTrade);
-        return this.getSqlSession().selectOne( MAPPER_NAME + ".selectByDateTrade", params);
+        return this.getSqlSession().selectList( MAPPER_NAME + ".selectByDateTrade", params);
     }
 
     @Override

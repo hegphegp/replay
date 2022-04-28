@@ -18,10 +18,12 @@
     <rdb:data-source id="shardingDataSource">
         <rdb:sharding-rule data-sources="dataSource">
             <rdb:table-rules>
-                <rdb:table-rule logic-table="sh_stock_order" actual-tables="sh_stock_order_1,sh_stock_order_2"  table-strategy="tableShardingStrategy"/>
+                <rdb:table-rule logic-table="sh_stock_order" actual-tables="${shareding.table.rule1}"  table-strategy="tableShardingStrategy"/>
             </rdb:table-rules>
         </rdb:sharding-rule>
-
+        <rdb:props>
+            <prop key="sql.show">true</prop>
+        </rdb:props>
     </rdb:data-source>
 
 
