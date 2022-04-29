@@ -27,7 +27,7 @@
     </rdb:data-source>
 
 
-    <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="shardingDataSource"/>
         <property name="configLocation" value="classpath:META-INF/mybatis/replay-configuration.xml"/>
         <property name="mapperLocations" value="classpath*:META-INF/mybatis/mapper/*.xml"/>

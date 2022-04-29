@@ -5,6 +5,7 @@ import com.dangdang.ddframe.rdb.sharding.api.ShardingValue;
 import com.dangdang.ddframe.rdb.sharding.api.strategy.table.SingleKeyTableShardingAlgorithm;
 import io.shardingsphere.api.algorithm.sharding.PreciseShardingValue;
 import io.shardingsphere.api.algorithm.sharding.standard.PreciseShardingAlgorithm;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Date;
@@ -14,7 +15,7 @@ public class ShStockOrderShardingAlgorithm implements SingleKeyTableShardingAlgo
     @Override
     public String doEqualSharding(Collection<String> tableNames, ShardingValue<Date> shardingValue) {
         for (String tableName : tableNames) {
-            String format = DateUtil.format(shardingValue.getValue(), DateUtil.yyyy_MM);
+            String format = DateUtil.format(shardingValue.getValue(), DateUtil.yyyy_MM_dd_);
             if (tableName.endsWith(format)) {
                 return tableName;
             }
