@@ -3,9 +3,8 @@ package com.bazinga.replay.sharding;
 import com.bazinga.util.DateUtil;
 import com.dangdang.ddframe.rdb.sharding.api.ShardingValue;
 import com.dangdang.ddframe.rdb.sharding.api.strategy.table.SingleKeyTableShardingAlgorithm;
-import io.shardingsphere.api.algorithm.sharding.PreciseShardingValue;
-import io.shardingsphere.api.algorithm.sharding.standard.PreciseShardingAlgorithm;
-import org.springframework.stereotype.Service;
+import com.dangdang.ddframe.rdb.sharding.api.strategy.table.TableShardingAlgorithm;
+import com.dangdang.ddframe.rdb.sharding.router.strategy.SingleKeyShardingAlgorithm;
 
 import java.util.Collection;
 import java.util.Date;

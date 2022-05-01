@@ -41,7 +41,7 @@ public class BusTest extends BaseTestCase {
        // stockKbarComponent.batchUpdateDaily();
 
       //  dragonTigerDailyComponent.save2Db();
-        List<ShStockOrder> byDateTrade = shStockOrderService.getByDateTrade(DateUtil.parseDate("20220428",DateUtil.yyyyMMdd));
+        List<ShStockOrder> byDateTrade = shStockOrderService.getByDateTrade(DateUtil.parseDate("20220427",DateUtil.yyyyMMdd));
         System.out.println(JSONObject.toJSONString(byDateTrade));
 
 
