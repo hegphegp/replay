@@ -1,6 +1,7 @@
 package com.bazinga.test;
 
 import com.alibaba.fastjson.JSONObject;
+import com.bazinga.base.PagingResult;
 import com.bazinga.constant.SymbolConstants;
 import com.bazinga.replay.component.DragonTigerDailyComponent;
 import com.bazinga.replay.component.HistoryTransactionDataComponent;
@@ -9,6 +10,7 @@ import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.ShStockOrder;
 import com.bazinga.replay.model.StockKbar;
 import com.bazinga.replay.model.TradeDatePool;
+import com.bazinga.replay.query.ShStockOrderQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.ShStockOrderService;
 import com.bazinga.replay.service.TradeDatePoolService;
@@ -41,11 +43,18 @@ public class BusTest extends BaseTestCase {
        // stockKbarComponent.batchUpdateDaily();
 
       //  dragonTigerDailyComponent.save2Db();
-        List<ShStockOrder> byDateTrade = shStockOrderService.getByDateTrade(DateUtil.parseDate("20220427",DateUtil.yyyyMMdd));
-        System.out.println(JSONObject.toJSONString(byDateTrade));
 
 
+       ShStockOrderQuery query= new ShStockOrderQuery();
+        query.setDateTrade(DateUtil.parseDate("20220426",DateUtil.yyyyMMdd));
+       // query.setThscode("");
+        List<ShStockOrder> shStockOrders = shStockOrderService.listByCondition(query);
+        System.out.println(JSONObject.toJSONString(shStockOrders));
 
+
+        /*
+        PagingResult<ShStockOrderQuery, ShStockOrder> pagingResult= shStockOrderService.listWithTable(query);
+        JSONObject.toJSONString(pagingResult);*/
       /*  List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("113615", "20211103");
         System.out.println(JSONObject.toJSONString(data));*/
 

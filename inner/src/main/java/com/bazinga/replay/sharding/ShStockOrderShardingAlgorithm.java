@@ -1,34 +1,27 @@
 package com.bazinga.replay.sharding;
 
 import com.bazinga.util.DateUtil;
-import com.dangdang.ddframe.rdb.sharding.api.ShardingValue;
-import com.dangdang.ddframe.rdb.sharding.api.strategy.table.SingleKeyTableShardingAlgorithm;
-import com.dangdang.ddframe.rdb.sharding.api.strategy.table.TableShardingAlgorithm;
-import com.dangdang.ddframe.rdb.sharding.router.strategy.SingleKeyShardingAlgorithm;
+import org.apache.shardingsphere.api.sharding.standard.PreciseShardingAlgorithm;
+import org.apache.shardingsphere.api.sharding.standard.PreciseShardingValue;
+import org.springframework.stereotype.Service;
+
 
 import java.util.Collection;
 import java.util.Date;
 
-public class ShStockOrderShardingAlgorithm implements SingleKeyTableShardingAlgorithm<Date> {
+
+@Service
+public class ShStockOrderShardingAlgorithm implements PreciseShardingAlgorithm<Date> {
+
 
     @Override
-    public String doEqualSharding(Collection<String> tableNames, ShardingValue<Date> shardingValue) {
+    public String doSharding(Collection<String> tableNames, PreciseShardingValue<Date> preciseShardingValue) {
+
         for (String tableName : tableNames) {
-            String format = DateUtil.format(shardingValue.getValue(), DateUtil.yyyy_MM_dd_);
-            if (tableName.endsWith(format)) {
+            if(tableName.endsWith(DateUtil.format(preciseShardingValue.getValue(),DateUtil.MMdd))){
                 return tableName;
             }
         }
-        throw new IllegalArgumentException();
-    }
-
-    @Override
-    public Collection<String> doInSharding(Collection<String> collection, ShardingValue<Date> shardingValue) {
-        return null;
-    }
-
-    @Override
-    public Collection<String> doBetweenSharding(Collection<String> collection, ShardingValue<Date> shardingValue) {
         return null;
     }
 }

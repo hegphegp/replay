@@ -168,17 +168,22 @@
         <if test="mseq != null">
             and mseq = #{mseq, jdbcType=DECIMAL}
         </if>
+        <if test="dateTrade != null">
+            <![CDATA[
+            and date_trade = #{dateTrade, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
     </sql>
 
     <sql id="Range_Where_List">
-        <if test="dateTradeFrom != null">
+        <if test="timeTradeFrom != null">
             <![CDATA[
-            and date_trade >= #{dateTradeFrom, jdbcType=TIMESTAMP}
+            and timeTradeFrom >= #{timeTradeFrom, jdbcType=TIMESTAMP}
             ]]>
         </if>
-        <if test="dateTradeTo != null">
+        <if test="timeTradeTo != null">
             <![CDATA[
-            and date_trade <= #{dateTradeTo, jdbcType=TIMESTAMP}
+            and timeTradeTo <= #{timeTradeTo, jdbcType=TIMESTAMP}
             ]]>
         </if>
     </sql>

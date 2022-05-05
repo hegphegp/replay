@@ -62,7 +62,7 @@ public class ShStockOrderDAOImpl extends SqlSessionDaoSupport implements ShStock
 
     @Override
     public List<ShStockOrder> selectByCondition(ShStockOrderQuery query) {
-        Assert.isTrue(query.checkIndex, "请至少使用一个索引条件查询");
+       // Assert.isTrue(query.checkIndex, "请至少使用一个索引条件查询");
         return this.getSqlSession().selectList( MAPPER_NAME + ".selectByCondition", query);
     }
 
@@ -74,7 +74,7 @@ public class ShStockOrderDAOImpl extends SqlSessionDaoSupport implements ShStock
 
     @Override
     public PagingResult<ShStockOrderQuery, ShStockOrder> selectByConditionWithTable(ShStockOrderQuery query) {
-        Assert.isTrue(query.checkIndex, "请至少使用一个索引条件查询");
+       // Assert.isTrue(query.checkIndex, "请至少使用一个索引条件查询");
         return ShardingQueryUtils.query(query, tableSuffixes,
                 () -> getSqlSession().selectList( MAPPER_NAME + ".selectByConditionWithTable", query));
     }
