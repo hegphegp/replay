@@ -5,6 +5,7 @@ import com.bazinga.base.Sort;
 import com.bazinga.enums.PlankTypeEnum;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.*;
+import com.bazinga.replay.dto.AdjFactorDTO;
 import com.bazinga.replay.dto.PlankTypeDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.CirculateInfo;
@@ -38,6 +39,7 @@ import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 单元测试基类<p/>
@@ -85,6 +87,8 @@ public class BaseTestCase {
     private CirculateInfoService circulateInfoService;
     @Autowired
     private StockBollingComponent stockBollingComponent;
+    @Autowired
+    private StockListComponent stockListComponent;
 
 
     @Test
@@ -176,6 +180,9 @@ public class BaseTestCase {
             System.out.println(re+"============");
         } catch (Exception e) {
             e.printStackTrace();
+        }*/
+        Map<String, AdjFactorDTO> stocks = stockListComponent.getStocks();
+        System.out.println(stocks);
         }*/
 
 
