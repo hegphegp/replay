@@ -183,7 +183,6 @@ public class BaseTestCase {
         }*/
         Map<String, AdjFactorDTO> stocks = stockListComponent.getStocks();
         System.out.println(stocks);
-        }*/
 
 
         /*PythonInterpreter interpreter = new PythonInterpreter();
