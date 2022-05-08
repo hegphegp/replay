@@ -156,9 +156,10 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399006","创业扳指",1500);
         //String[] arguments = new String[] {"python", "D://dashuju/add.py","20","52"};
         //String[] arguments = new String[] {"python", "D://dashuju/gb_main_test.py","5.91","0","35765222","3.51","9:32","95209936","53","0","1.4","-5","-3.88","-3.72","-10.94","34","1.05","3.51"};
-        String[] arguments = new String[] {"python", "gb_main_test.py","--data_list 5.91 0 35765222 3.51 9:32 95209936 53 0 1.4 -5 -3.88 -3.72 -10.94 34 1.05 3.51"};
+        /*String[] arguments = new String[] {"python", "gb_main_test.py","--data_list 5.91 0 35765222 3.51 9:32 95209936 53 0 1.4 -5 -3.88 -3.72 -10.94 34 1.05 3.51"};
 
         try {
             Process process = Runtime.getRuntime().exec(arguments);
@@ -175,7 +176,7 @@ public class BaseTestCase {
             System.out.println(re+"============");
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
 
         /*PythonInterpreter interpreter = new PythonInterpreter();
@@ -227,7 +228,7 @@ public class BaseTestCase {
 
     @Test
     public void test3() {
-        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1200);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
         //stockKbarComponent.calCurrentDayAvgLine(DateUtil.parseDate("2022-04-18 15:30:30",DateUtil.DEFAULT_FORMAT));
         /*DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, "000001", 0, 800);
         stockPlankDailyComponent.middlePlanks(new Date());*/
