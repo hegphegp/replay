@@ -6,6 +6,7 @@ import com.bazinga.enums.PlankTypeEnum;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.*;
 import com.bazinga.replay.dto.AdjFactorDTO;
+import com.bazinga.replay.dto.CirculateDetailDTO;
 import com.bazinga.replay.dto.PlankTypeDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.CirculateInfo;
@@ -180,8 +181,8 @@ public class BaseTestCase {
         } catch (Exception e) {
             e.printStackTrace();
         }*/
-        Map<String, AdjFactorDTO> stocks = stockListComponent.getStocks();
-        System.out.println(stocks);
+        List<CirculateInfo> circulateInfos = stockListComponent.getCirculateInfo(new Date());
+        System.out.println(circulateInfos);
 
 
         /*PythonInterpreter interpreter = new PythonInterpreter();

@@ -69,10 +69,44 @@ public class StockListComponent {
 
     @Autowired
     private StockAverageLineService stockAverageLineService;
+    @Autowired
+    private CommonComponent commonComponent;
 
     private static final ExecutorService AVGLINE_POOL = ThreadPoolUtils.create(8, 16, 512, "calAvgLinePool");
-
-    public  Map<String, AdjFactorDTO> getStocks() {
+    public List<CirculateInfo> getCirculateInfo(Date date){
+        Date preTradeDate = commonComponent.preTradeDate(date);
+        List<CirculateDetailDTO> stocks = getStocks();
+        Map<String, CirculateDetailDTO> marketInfoMap = getMarketInfo(DateUtil.format(preTradeDate, DateUtil.yyyyMMdd));
+        List<CirculateInfo> circulateInfos = Lists.newArrayList();
+        for (CirculateDetailDTO circulateDetailDTO:stocks){
+            CirculateDetailDTO marketInfo = marketInfoMap.get(circulateDetailDTO.getStockCode());
+            CirculateInfo circulateInfo = new CirculateInfo();
+            circulateInfo.setStockCode(circulateDetailDTO.getStockCode());
+            circulateInfo.setStockName(circulateDetailDTO.getStockName());
+            if(marketInfo!=null) {
+                circulateInfo.setCirculate(marketInfo.getCirculate());
+                circulateInfo.setCirculateZ(marketInfo.getCirculateZ());
+            }else{
+                circulateInfo.setCirculate(100000000l);
+                circulateInfo.setCirculateZ(100000000l);
+            }
+            circulateInfo.setCreateTime(new Date());
+            circulateInfos.add(circulateInfo);
+        }
+        List<CirculateInfo> alls = circulateInfoService.listByCondition(new CirculateInfoQuery());
+        Map<String, CirculateInfo> map = new HashMap<>();
+        for (CirculateInfo all:alls){
+            map.put(all.getStockCode(),all);
+        }
+        for (CirculateInfo circulateInfo:circulateInfos){
+            CirculateInfo all = map.get(circulateInfo.getStockCode());
+            if(all==null){
+                System.out.println(circulateInfo.getStockCode()+"====="+circulateInfo.getStockName());
+            }
+        }
+        return circulateInfos;
+    }
+    public  List<CirculateDetailDTO> getStocks() {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("api_name", "stock_basic");
         paramMap.put("token", "fb5a3049bfc93659682fd10dfb14cafad3ce69637b36bc94a3f45916");
@@ -94,8 +128,7 @@ public class StockListComponent {
                 }
                 List<CirculateDetailDTO> circulateInfos = convertToCirculate(fields);
                 List<CirculateDetailDTO> list = filterCirculate(circulateInfos);
-                System.out.println(list.size());
-                return null;
+                return list;
             } catch (Exception e) {
                 log.error("第{}次获取复权因子异常 stockCode ={}",  e);
             }
@@ -110,15 +143,15 @@ public class StockListComponent {
         return null;
     }
 
-    public  Map<String, AdjFactorDTO> getMarketInfo(String stockCode) {
+    public  Map<String, CirculateDetailDTO> getMarketInfo(String tradeDate) {
         Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("api_name", "bak_basic");
-        paramMap.put("token", "fb5a3049bfc93659682fd10dfb14cafad3ce69637b36bc94a3f45916");
+        paramMap.put("api_name", "daily_basic");
+        paramMap.put("token", "defaba81e0cf69e4dba12d5c91cfe40cc3b59b9cb408bbd6aa6b5e34");
         Map<String, String> paramsdate = new HashMap<>();
-        paramMap.put("ts_code", stockCode);
-        //paramMap.put("trade_date", "20211012");
-       /* paramMap.put("params", paramsdate);
-        paramMap.put("fields", "trade_date,adj_factor");*/
+        //String tsStockCode = stockCode.startsWith("6") ? stockCode + ".SH" : stockCode + ".SZ";
+        //paramsdate.put("ts_code", tsStockCode);
+        paramsdate.put("trade_date",tradeDate);
+        paramMap.put("params", paramsdate);
         int times = 1;
         while (times <= LOOP_TIMES){
             try {
@@ -131,10 +164,10 @@ public class StockListComponent {
                 if (CollectionUtils.isEmpty(fields)) {
                     return null;
                 }
-
-                return null;
+                Map<String, CirculateDetailDTO> marketInfoMap = convertToMarketInfo(fields);
+                return marketInfoMap;
             } catch (Exception e) {
-                log.error("第{}次获取复权因子异常 stockCode ={}",  e);
+                log.error("第{}次获取复权因子异常 stockCode ={}", times, e);
             }
             times++;
             try {
@@ -147,13 +180,19 @@ public class StockListComponent {
         return null;
     }
 
+
+
     public List<CirculateDetailDTO> filterCirculate(List<CirculateDetailDTO> circulateInfos){
         Date tradeDateStart = getTradeDateStart();
         List<CirculateDetailDTO> list = Lists.newArrayList();
         for (CirculateDetailDTO circulateInfo:circulateInfos){
             if(MarketUtil.isAStocks(circulateInfo.getStockCode())){
-                if(circulateInfo.getStockName().contains("ST")){
-                    System.out.println(circulateInfo.getStockCode()+"==="+circulateInfo.getStockName());
+                if(circulateInfo.getStockName().contains("ST")||circulateInfo.getStockName().endsWith("退")||circulateInfo.getStockName().startsWith("退")){
+                   // System.out.println(circulateInfo.getStockCode()+"==="+circulateInfo.getStockName());
+                    continue;
+                }
+                List<String> disableStocks = Lists.newArrayList("601099", "600777");
+                if(disableStocks.contains(circulateInfo.getStockCode())){
                     continue;
                 }
                 if(MarketUtil.isChuangYe(circulateInfo.getStockCode())){
@@ -185,6 +224,23 @@ public class StockListComponent {
         return tradeDatePool.getTradeDate();
     }
 
+
+    public Map<String,CirculateDetailDTO> convertToMarketInfo(JSONArray jsonArray){
+        Map<String,CirculateDetailDTO> map = new HashMap<>();
+        for(int i = 0;i<jsonArray.size();i++){
+            JSONArray circulateArray = jsonArray.getJSONArray(i);
+            String stockCode = circulateArray.get(0).toString();
+            stockCode = stockCode.substring(0, 6);
+            long totalCirculate = new BigDecimal(circulateArray.get(13).toString()).multiply(new BigDecimal(10000)).longValue();
+            long circulateZ = new BigDecimal(circulateArray.get(15).toString()).multiply(new BigDecimal(10000)).longValue();
+            CirculateDetailDTO circulateInfo = new CirculateDetailDTO();
+            circulateInfo.setStockCode(stockCode);
+            circulateInfo.setCirculate(totalCirculate);
+            circulateInfo.setCirculateZ(circulateZ);
+            map.put(circulateInfo.getStockCode(),circulateInfo);
+        }
+        return map;
+    }
 
     public List<CirculateDetailDTO> convertToCirculate(JSONArray jsonArray){
         List<CirculateDetailDTO> circulates = Lists.newArrayList();
