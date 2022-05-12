@@ -103,6 +103,7 @@ public class StockListComponent {
             if(all==null){
                 System.out.println(circulateInfo.getStockCode()+"====="+circulateInfo.getStockName());
             }
+
         }
         return circulateInfos;
     }
