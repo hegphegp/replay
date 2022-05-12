@@ -83,12 +83,17 @@ public class StockListComponent {
             CirculateInfo circulateInfo = new CirculateInfo();
             circulateInfo.setStockCode(circulateDetailDTO.getStockCode());
             circulateInfo.setStockName(circulateDetailDTO.getStockName());
+            circulateInfo.setCreateTime(new Date());
+            Integer marketCode = MarketUtil.getMarketCode(circulateInfo.getStockCode());
+            circulateInfo.setMarketType(marketCode);
             if(marketInfo!=null) {
                 circulateInfo.setCirculate(marketInfo.getCirculate());
                 circulateInfo.setCirculateZ(marketInfo.getCirculateZ());
+                circulateInfo.setStockType(CommonUtil.getStockType(marketInfo.getCirculateZ().longValue()));
             }else{
                 circulateInfo.setCirculate(100000000l);
                 circulateInfo.setCirculateZ(100000000l);
+                circulateInfo.setStockType(CommonUtil.getStockType(circulateInfo.getCirculateZ().longValue()));
             }
             circulateInfo.setCreateTime(new Date());
             circulateInfos.add(circulateInfo);
@@ -103,7 +108,7 @@ public class StockListComponent {
             if(all==null){
                 System.out.println(circulateInfo.getStockCode()+"====="+circulateInfo.getStockName());
             }
-
+            circulateInfoService.save(circulateInfo);
         }
         return circulateInfos;
     }
