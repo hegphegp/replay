@@ -37,17 +37,13 @@ public class ShStockOrderQuery extends ShardingQuery implements Serializable {
     /**
      *  开始
      */
-    private Date dateTradeFrom;
-
-    /**
-     *  结束
-     */
-    private Date dateTradeTo;
-
+    private Date dateTrade;
     /**
      * 
      */
     private String timeTrade;
+    private String timeTradeFrom;
+    private String timeTradeTo;
 
     /**
      * 
