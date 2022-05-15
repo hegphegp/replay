@@ -46,7 +46,7 @@ public class BusTest extends BaseTestCase {
 
 
        ShStockOrderQuery query= new ShStockOrderQuery();
-        query.setDateTrade(DateUtil.parseDate("20220426",DateUtil.yyyyMMdd));
+        query.setDateTrade(DateUtil.parseDate("20220511",DateUtil.yyyyMMdd));
        // query.setThscode("");
         List<ShStockOrder> shStockOrders = shStockOrderService.listByCondition(query);
         System.out.println(JSONObject.toJSONString(shStockOrders));

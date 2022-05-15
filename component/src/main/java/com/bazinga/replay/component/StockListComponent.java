@@ -37,8 +37,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.json.JsonArray;
-import javax.json.JsonValue;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
