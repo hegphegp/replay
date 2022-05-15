@@ -5,6 +5,8 @@ import com.bazinga.base.Sort;
 import com.bazinga.enums.PlankTypeEnum;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.*;
+import com.bazinga.replay.dto.AdjFactorDTO;
+import com.bazinga.replay.dto.CirculateDetailDTO;
 import com.bazinga.replay.dto.PlankTypeDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.CirculateInfo;
@@ -38,6 +40,7 @@ import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 单元测试基类<p/>
@@ -85,6 +88,8 @@ public class BaseTestCase {
     private CirculateInfoService circulateInfoService;
     @Autowired
     private StockBollingComponent stockBollingComponent;
+    @Autowired
+    private StockListComponent stockListComponent;
 
 
     @Test
@@ -156,9 +161,12 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
+        stockListComponent.getCirculateInfo(new Date());
+        //stockKbarComponent.batchKbarDataInit();
+        //stockKbarComponent.initSpecialStockAndSaveKbarData("399006","创业扳指",1500);
         //String[] arguments = new String[] {"python", "D://dashuju/add.py","20","52"};
         //String[] arguments = new String[] {"python", "D://dashuju/gb_main_test.py","5.91","0","35765222","3.51","9:32","95209936","53","0","1.4","-5","-3.88","-3.72","-10.94","34","1.05","3.51"};
-        String[] arguments = new String[] {"python", "gb_main_test.py","--data_list 5.91 0 35765222 3.51 9:32 95209936 53 0 1.4 -5 -3.88 -3.72 -10.94 34 1.05 3.51"};
+        /*String[] arguments = new String[] {"python", "gb_main_test.py","--data_list 5.91 0 35765222 3.51 9:32 95209936 53 0 1.4 -5 -3.88 -3.72 -10.94 34 1.05 3.51"};
 
         try {
             Process process = Runtime.getRuntime().exec(arguments);
@@ -175,7 +183,9 @@ public class BaseTestCase {
             System.out.println(re+"============");
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
+        /*Map<String, AdjFactorDTO> stocks = stockListComponent.getStocks();
+        System.out.println(stocks);*/
 
 
         /*PythonInterpreter interpreter = new PythonInterpreter();
@@ -227,7 +237,7 @@ public class BaseTestCase {
 
     @Test
     public void test3() {
-        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1200);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
         //stockKbarComponent.calCurrentDayAvgLine(DateUtil.parseDate("2022-04-18 15:30:30",DateUtil.DEFAULT_FORMAT));
         /*DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, "000001", 0, 800);
         stockPlankDailyComponent.middlePlanks(new Date());*/
