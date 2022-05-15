@@ -161,7 +161,8 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockKbarComponent.batchKbarDataInit();
+        stockListComponent.getCirculateInfo(new Date());
+        //stockKbarComponent.batchKbarDataInit();
         //stockKbarComponent.initSpecialStockAndSaveKbarData("399006","创业扳指",1500);
         //String[] arguments = new String[] {"python", "D://dashuju/add.py","20","52"};
         //String[] arguments = new String[] {"python", "D://dashuju/gb_main_test.py","5.91","0","35765222","3.51","9:32","95209936","53","0","1.4","-5","-3.88","-3.72","-10.94","34","1.05","3.51"};

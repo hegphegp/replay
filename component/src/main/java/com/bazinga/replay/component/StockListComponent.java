@@ -103,13 +103,23 @@ public class StockListComponent {
         for (CirculateInfo all:alls){
             map.put(all.getStockCode(),all);
         }
+        Map<String, CirculateInfo> tushareStockMap = new HashMap<>();
+        int i = 0;
         for (CirculateInfo circulateInfo:circulateInfos){
+            tushareStockMap.put(circulateInfo.getStockCode(),circulateInfo);
             CirculateInfo all = map.get(circulateInfo.getStockCode());
             if(all==null){
-                System.out.println(circulateInfo.getStockCode()+"====="+circulateInfo.getStockName());
+                circulateInfoService.save(circulateInfo);
             }
-            circulateInfoService.save(circulateInfo);
         }
+        for (CirculateInfo circulateInfo:alls){
+            CirculateInfo tuShareStock = tushareStockMap.get(circulateInfo.getStockCode());
+            if(tuShareStock==null){
+                circulateInfoService.deleteById(circulateInfo.getId());
+                System.out.println(circulateInfo.getStockCode()+"=========");
+            }
+        }
+        System.out.println(i);
         return circulateInfos;
     }
     public  List<CirculateDetailDTO> getStocks() {
@@ -152,7 +162,7 @@ public class StockListComponent {
     public  Map<String, CirculateDetailDTO> getMarketInfo(String tradeDate) {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("api_name", "daily_basic");
-        paramMap.put("token", "defaba81e0cf69e4dba12d5c91cfe40cc3b59b9cb408bbd6aa6b5e34");
+        paramMap.put("token", "fb5a3049bfc93659682fd10dfb14cafad3ce69637b36bc94a3f45916");
         Map<String, String> paramsdate = new HashMap<>();
         //String tsStockCode = stockCode.startsWith("6") ? stockCode + ".SH" : stockCode + ".SZ";
         //paramsdate.put("ts_code", tsStockCode);
