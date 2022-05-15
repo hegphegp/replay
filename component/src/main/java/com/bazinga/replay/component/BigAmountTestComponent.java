@@ -138,12 +138,15 @@ public class BigAmountTestComponent {
         return list;
     }
 
-    public void getStockOrder(BigExchangeTestBuyDTO buyDTO){
-        if(buyDTO.getStockCode().startsWith("6")) {
+    public void getStockOrder(String stockCode,String tradeDate){
+        if(stockCode.startsWith("6")) {
             ShStockOrderQuery query = new ShStockOrderQuery();
-            query.setDateTrade(DateUtil.parseDate(buyDTO.getStockCode(), DateUtil.yyyyMMdd));
-            query.setThscode(buyDTO.getStockCode() + ".SH");
+            query.setDateTrade(DateUtil.parseDate(tradeDate, DateUtil.yyyyMMdd));
+            query.setThscode(stockCode + ".SH");
             List<ShStockOrder> shStockOrders = shStockOrderService.listByCondition(query);
+
+        }else{
+
         }
     }
 

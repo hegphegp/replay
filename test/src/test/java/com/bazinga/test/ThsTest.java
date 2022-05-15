@@ -27,7 +27,8 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        bigAmountTestComponent.plankExchangeAmountInfo();
+        bigAmountTestComponent.getStockOrder("601975","20220511");
+        //bigAmountTestComponent.plankExchangeAmountInfo();
     }
 
 
