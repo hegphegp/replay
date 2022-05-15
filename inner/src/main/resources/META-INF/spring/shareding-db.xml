@@ -18,7 +18,7 @@
     <!-- 配置sharding-jdbc的数据源 -->
     <sharding:data-source id="shardingDataSource">
         <!--data-source-names数据源Bean列表，多个Bean以逗号分隔-->
-        <sharding:sharding-rule data-source-names="thsDataSource,dataSource">
+        <sharding:sharding-rule data-source-names="thsDataSource,dataSource" default-data-source-name="dataSource">
             <!--table-rules表分片规则配置对象-->
             <sharding:table-rules>
                 <!--logic-table逻辑表名称-->
@@ -27,7 +27,7 @@
             </sharding:table-rules>
         </sharding:sharding-rule>
         <sharding:props>
-            <prop key="sql.show">true</prop>
+            <prop key="sql.show">false</prop>
         </sharding:props>
     </sharding:data-source>
 
