@@ -76,10 +76,10 @@ public class BigAmountTestComponent {
         String str = "";
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220511",DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20210518",DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220513",DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220329",DateUtil.yyyyMMdd))){
                 continue;
             }
             str = str+",stock_order_"+DateUtil.format(tradeDatePool.getTradeDate(),"yyyy")+"_"+DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.MMdd);
@@ -105,32 +105,31 @@ public class BigAmountTestComponent {
             }
             LimitQueue<StockKbar> limitQueue = new LimitQueue<>(20);
             StockKbar preKbar = null;
+            boolean preIsPlank = false;
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220410", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20210518", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220401", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220329", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 if(preKbar!=null) {
-                    boolean endPlank = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(),stockKbar.getKbarDate());
-                    if(endPlank && stockKbar.getHighPrice().compareTo(stockKbar.getLowPrice())!=0) {
+                   if(preIsPlank) {
                         BigExchangeTestBuyDTO buyDTO = map.get(stockKbar.getKbarDate());
-                       // String planks = calPlanks(limitQueue);
-                       // String buyTime = firstBuyTime(stockKbar, preKbar.getClosePrice());
                         if(buyDTO==null){
                             buyDTO = new BigExchangeTestBuyDTO();
                             buyDTO.setTradeDate(stockKbar.getKbarDate());
                             map.put(stockKbar.getKbarDate(),buyDTO);
                         }
-                        String buyTime = "09:35";
-                        if (buyTime != null) {
-                            if (!StringUtils.isBlank(buyTime)) {
-                                getStockOrder(circulateInfo.getStockCode(),stockKbar.getKbarDate(),buyDTO);
-                            }
-                        }
+                        getStockOrder(circulateInfo.getStockCode(),stockKbar.getKbarDate(),buyDTO);
+                    }
+                    boolean endPlank = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(),stockKbar.getKbarDate());
+                    if(endPlank){
+                        preIsPlank = true;
+                    }else{
+                        preIsPlank = false;
                     }
                 }
                 preKbar = stockKbar;
@@ -144,6 +143,7 @@ public class BigAmountTestComponent {
             ShStockOrderQuery query = new ShStockOrderQuery();
             query.setDateTrade(DateUtil.parseDate(tradeDate, DateUtil.yyyyMMdd));
             query.setThscode(stockCode + ".SH");
+            query.setLimit(10000);
             List<ShStockOrder> shStockOrders = shStockOrderService.listByCondition(query);
             if(CollectionUtils.isEmpty(shStockOrders)){
                 return;
@@ -156,7 +156,7 @@ public class BigAmountTestComponent {
                     String orderDirection = shStockOrder.getOrderDirection();
                     if(volume!=null&&orderPrice!=null&&StringUtils.isNotBlank(orderDirection)){
                         BigDecimal amount = orderPrice.multiply(volume);
-                        if(amount.compareTo(new BigDecimal(2000))!=-1){
+                        if(amount.compareTo(new BigDecimal(2000000))!=-1){
                            if(orderDirection.equals("B")){
                                buyDTO.setBigOrderAmountB(buyDTO.getBigOrderAmountB().add(amount));
                            }else{
@@ -182,7 +182,7 @@ public class BigAmountTestComponent {
                     String orderDirection = stockOrder.getOrderCode();
                     if(volume!=null&&orderPrice!=null){
                         BigDecimal amount = orderPrice.multiply(volume);
-                        if(amount.compareTo(new BigDecimal(2000))!=-1){
+                        if(amount.compareTo(new BigDecimal(2000000))!=-1){
                             if(orderDirection.equals("B")){
                                 buyDTO.setBigOrderAmountB(buyDTO.getBigOrderAmountB().add(amount));
                                 buyDTO.setBigOrderBTimes(buyDTO.getBigOrderBTimes()+1);

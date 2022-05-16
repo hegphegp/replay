@@ -28,11 +28,11 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        BigExchangeTestBuyDTO buyDTO = new BigExchangeTestBuyDTO();
-        buyDTO.setTradeDate("20220511");
-        bigAmountTestComponent.getStockOrder("601975","20220511",buyDTO);
+        /*BigExchangeTestBuyDTO buyDTO = new BigExchangeTestBuyDTO();
+        buyDTO.setTradeDate("20220425");
+        bigAmountTestComponent.getStockOrder("601975","20220425",buyDTO);*/
         //bigAmountTestComponent.getStockOrder("000548","20220511");
-        //bigAmountTestComponent.plankExchangeAmountInfo();
+        bigAmountTestComponent.plankExchangeAmountInfo();
         //bigAmountTestComponent.getChartStr();
     }
 
