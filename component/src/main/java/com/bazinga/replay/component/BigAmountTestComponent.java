@@ -76,13 +76,13 @@ public class BigAmountTestComponent {
         String str = "";
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220511",DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20210518",DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220513",DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220501",DateUtil.yyyyMMdd))){
                 continue;
             }
-            str = str+",stock_order_"+DateUtil.format(tradeDatePool.getTradeDate(),"yyyy")+"_"+DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.MMdd);
+            str = str+",thsDataSource.sh_stock_order_"+DateUtil.format(tradeDatePool.getTradeDate(),"yyyy")+"_"+DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.MMdd);
         }
         System.out.println(str);
     }
