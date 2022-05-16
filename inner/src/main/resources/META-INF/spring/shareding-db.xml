@@ -28,7 +28,7 @@
             </sharding:table-rules>
         </sharding:sharding-rule>
         <sharding:props>
-            <prop key="sql.show">false</prop>
+            <prop key="sql.show">true</prop>
         </sharding:props>
     </sharding:data-source>
 
