@@ -76,10 +76,10 @@ public class BigAmountTestComponent {
         String str = "";
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20210518",DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220511",DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220501",DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220513",DateUtil.yyyyMMdd))){
                 continue;
             }
             str = str+",stock_order_"+DateUtil.format(tradeDatePool.getTradeDate(),"yyyy")+"_"+DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.MMdd);
@@ -92,9 +92,9 @@ public class BigAmountTestComponent {
         int m = 0;
         for (CirculateInfo circulateInfo:circulateInfos){
             m++;
-            if(m>100){
+           /* if(m>100){
                 continue;
-            }
+            }*/
             System.out.println(circulateInfo.getStockCode());
             /*if(!circulateInfo.getStockCode().equals("605319")){
                 continue;
@@ -156,7 +156,7 @@ public class BigAmountTestComponent {
                     String orderDirection = shStockOrder.getOrderDirection();
                     if(volume!=null&&orderPrice!=null&&StringUtils.isNotBlank(orderDirection)){
                         BigDecimal amount = orderPrice.multiply(volume);
-                        if(amount.compareTo(new BigDecimal(2000000))!=-1){
+                        if(amount.compareTo(new BigDecimal(2000))!=-1){
                            if(orderDirection.equals("B")){
                                buyDTO.setBigOrderAmountB(buyDTO.getBigOrderAmountB().add(amount));
                            }else{
@@ -182,7 +182,7 @@ public class BigAmountTestComponent {
                     String orderDirection = stockOrder.getOrderCode();
                     if(volume!=null&&orderPrice!=null){
                         BigDecimal amount = orderPrice.multiply(volume);
-                        if(amount.compareTo(new BigDecimal(2000000))!=-1){
+                        if(amount.compareTo(new BigDecimal(2000))!=-1){
                             if(orderDirection.equals("B")){
                                 buyDTO.setBigOrderAmountB(buyDTO.getBigOrderAmountB().add(amount));
                                 buyDTO.setBigOrderBTimes(buyDTO.getBigOrderBTimes()+1);
