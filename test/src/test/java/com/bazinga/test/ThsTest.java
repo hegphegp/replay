@@ -1,6 +1,7 @@
 package com.bazinga.test;
 
 import com.bazinga.replay.component.*;
+import com.bazinga.replay.dto.BigExchangeTestBuyDTO;
 import com.bazinga.replay.service.CirculateInfoService;
 import com.bazinga.replay.service.TradeDatePoolService;
 import org.junit.Test;
@@ -27,8 +28,12 @@ public class ThsTest {
 
     @Test
     public void test1() {
+        BigExchangeTestBuyDTO buyDTO = new BigExchangeTestBuyDTO();
+        buyDTO.setTradeDate("20220511");
+        bigAmountTestComponent.getStockOrder("601975","20220511",buyDTO);
         //bigAmountTestComponent.getStockOrder("000548","20220511");
         //bigAmountTestComponent.plankExchangeAmountInfo();
+        //bigAmountTestComponent.getChartStr();
     }
 
 
