@@ -29,6 +29,7 @@ public class ThsTest {
     public void test1() {
         //bigAmountTestComponent.getStockOrder("000548","20220511");
         //bigAmountTestComponent.plankExchangeAmountInfo();
+        bigAmountTestComponent.getChartStr();
     }
 
 
