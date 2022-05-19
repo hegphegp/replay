@@ -64,9 +64,9 @@ public class BigAmountTestComponent {
         }
 
         String[] rowNames = {"index","交易日期","大单买金额","大单买次数","大单卖金额","大单卖次数"};
-        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("大单信息",rowNames,datas);
+        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("大单信息1",rowNames,datas);
         try {
-            poiExcelUtil.exportExcelUseExcelTitle("大单信息");
+            poiExcelUtil.exportExcelUseExcelTitle("大单信息1");
         }catch (Exception e){
             log.info(e.getMessage());
         }
@@ -79,7 +79,7 @@ public class BigAmountTestComponent {
             if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20210518",DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220329",DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220101",DateUtil.yyyyMMdd))){
                 continue;
             }
             str = str+",stock_order_"+DateUtil.format(tradeDatePool.getTradeDate(),"yyyy")+"_"+DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.MMdd);
@@ -112,7 +112,7 @@ public class BigAmountTestComponent {
                 if(date.before(DateUtil.parseDate("20210518", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220329", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 if(preKbar!=null) {

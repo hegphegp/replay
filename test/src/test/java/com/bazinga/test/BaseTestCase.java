@@ -165,11 +165,12 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
+        stockKbarComponent.batchKbarDataInit();
         //stockListComponent.getCirculateInfo(new Date());
-        StockKbarQuery kbarQuery = new StockKbarQuery();
+       /* StockKbarQuery kbarQuery = new StockKbarQuery();
         kbarQuery.setStockCode("000001");
         List<StockKbar> stockKbars = stockKbarService.listByCondition(kbarQuery);
-        System.out.println(stockKbars);
+        System.out.println(stockKbars);*/
 
         //stockKbarComponent.batchKbarDataInit();
         //stockKbarComponent.initSpecialStockAndSaveKbarData("399006","创业扳指",1500);
