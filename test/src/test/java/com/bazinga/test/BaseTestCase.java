@@ -13,8 +13,10 @@ import com.bazinga.replay.model.CirculateInfo;
 import com.bazinga.replay.model.StockKbar;
 import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.CirculateInfoQuery;
+import com.bazinga.replay.query.StockKbarQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.CirculateInfoService;
+import com.bazinga.replay.service.StockKbarService;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
@@ -90,6 +92,8 @@ public class BaseTestCase {
     private StockBollingComponent stockBollingComponent;
     @Autowired
     private StockListComponent stockListComponent;
+    @Autowired
+    private StockKbarService stockKbarService;
 
 
     @Test
@@ -161,7 +165,13 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockListComponent.getCirculateInfo(new Date());
+        stockKbarComponent.batchKbarDataInit();
+        //stockListComponent.getCirculateInfo(new Date());
+       /* StockKbarQuery kbarQuery = new StockKbarQuery();
+        kbarQuery.setStockCode("000001");
+        List<StockKbar> stockKbars = stockKbarService.listByCondition(kbarQuery);
+        System.out.println(stockKbars);*/
+
         //stockKbarComponent.batchKbarDataInit();
         //stockKbarComponent.initSpecialStockAndSaveKbarData("399006","创业扳指",1500);
         //String[] arguments = new String[] {"python", "D://dashuju/add.py","20","52"};
@@ -237,7 +247,7 @@ public class BaseTestCase {
 
     @Test
     public void test3() {
-        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399001","深圳成指",1500);
         //stockKbarComponent.calCurrentDayAvgLine(DateUtil.parseDate("2022-04-18 15:30:30",DateUtil.DEFAULT_FORMAT));
         /*DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, "000001", 0, 800);
         stockPlankDailyComponent.middlePlanks(new Date());*/
