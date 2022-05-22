@@ -28,6 +28,9 @@ public interface HistoryBlockInfoDAO {
      */
     HistoryBlockInfo selectByPrimaryKey(Long id);
 
+
+    void deleteByPrimaryKey(Long id);
+
     /**
      * 根据主键更新数据
      *

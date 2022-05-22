@@ -52,6 +52,9 @@ public class HistoryBlockInfo implements Serializable {
      */
     private Integer blockType;
 
+
+    private String marketDate;
+
     /**
      * 创建时间
      *

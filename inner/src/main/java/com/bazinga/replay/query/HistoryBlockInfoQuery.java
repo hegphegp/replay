@@ -36,6 +36,8 @@ public class HistoryBlockInfoQuery extends PagingQuery implements Serializable {
      */
     private Integer blockType;
 
+    private String marketDate;
+
     /**
      * 创建时间 开始
      */

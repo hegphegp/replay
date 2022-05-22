@@ -40,6 +40,12 @@ public class HistoryBlockInfoServiceImpl implements HistoryBlockInfoService {
     }
 
     @Override
+    public void deleteById(Long id) {
+        Assert.notNull(id, "主键不能为空");
+        historyBlockInfoDAO.deleteByPrimaryKey(id);
+    }
+
+    @Override
     public int updateById(HistoryBlockInfo record) {
         Assert.notNull(record, "待更新记录不能为空");
         record.setUpdateTime(new Date());

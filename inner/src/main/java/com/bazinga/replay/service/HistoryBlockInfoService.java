@@ -28,6 +28,9 @@ public interface HistoryBlockInfoService {
      */
     HistoryBlockInfo getById(Long id);
 
+
+    void deleteById(Long id);
+
     /**
      * 根据id更新一条数据
      *

@@ -40,7 +40,10 @@ public class HistoryBlockInfoDAOImpl extends SqlSessionDaoSupport implements His
     public HistoryBlockInfo selectByPrimaryKey(Long id) {
         return this.getSqlSession().selectOne( MAPPER_NAME + ".selectByPrimaryKey", id);
     }
-
+     @Override
+     public void deleteByPrimaryKey(Long id) {
+         this.getSqlSession().delete(MAPPER_NAME + ".deleteByPrimaryKey", id);
+     }
     @Override
     public int updateByPrimaryKeySelective(HistoryBlockInfo record) {
         return this.getSqlSession().update( MAPPER_NAME + ".updateByPrimaryKeySelective", record);

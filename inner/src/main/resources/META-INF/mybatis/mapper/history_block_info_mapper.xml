@@ -7,6 +7,7 @@
         <result column="block_code" jdbcType="VARCHAR" property="blockCode"/>
         <result column="block_name" jdbcType="VARCHAR" property="blockName"/>
         <result column="block_type" jdbcType="TINYINT" property="blockType"/>
+        <result column="market_date" jdbcType="VARCHAR" property="blockName"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
@@ -17,6 +18,7 @@
             block_code,
             block_name,
             block_type,
+            market_date,
             create_time,
             update_time
         </sql>
@@ -29,6 +31,11 @@
         where id = #{id}
     </select>
 
+    <select id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from history_block_info
+        where id = #{id}
+    </select>
+
 
     <insert id="insert" parameterType="com.bazinga.replay.model.HistoryBlockInfo" useGeneratedKeys="true" keyProperty="id">
         insert into history_block_info (<include refid="Base_Column_List" />)
@@ -37,6 +44,7 @@
             #{blockCode, jdbcType=VARCHAR},
             #{blockName, jdbcType=VARCHAR},
             #{blockType, jdbcType=TINYINT},
+            #{marketDate, jdbcType=VARCHAR},
             #{createTime, jdbcType=TIMESTAMP},
             #{updateTime, jdbcType=TIMESTAMP}
             )
@@ -53,6 +61,9 @@
             </if>
             <if test="blockType != null">
                 block_type = #{blockType, jdbcType=TINYINT},
+            </if>
+            <if test="marketDate != null">
+                market_Date = #{marketDate, jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 create_time = #{createTime, jdbcType=TIMESTAMP},
@@ -73,6 +84,9 @@
         </if>
         <if test="blockType != null">
             and block_type = #{blockType, jdbcType=TINYINT}
+        </if>
+        <if test="marketDate != null">
+            and market_Date = #{marketDate, jdbcType=VARCHAR}
         </if>
     </sql>
 
