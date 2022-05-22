@@ -38,15 +38,15 @@ public class ThsDataComponent {
 
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
-    public void zhuanZaiStocks(){
+    public void getBlockStocks(String blockCode){
         int ret = thsLogin();
-        quoteInfo();
+        dataPool(blockCode);
         thsLoginOut();
 
     }
 
-    public void quoteInfo(){
-        String quote_str = JDIBridge.THS_HistoryQuotes("000001.SZ","open,high,low,close","","2022-05-18","2022-05-19");
+    public void dataPool(String blockCode){
+        String quote_str = JDIBridge.THS_DataPool("indexConsRecord",blockCode+".TI;1990-02-01;2022-05-21;全部","date:Y,thscode:Y,securityName:Y,status:Y");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);
             System.out.println(JSONObject.toJSONString(jsonObject));
@@ -66,7 +66,7 @@ public class ThsDataComponent {
     public int thsLoginOut(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("ylz200", "620865");
+            int ret = JDIBridge.THS_iFinDLogin("ylz203", "182883");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);
