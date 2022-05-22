@@ -94,6 +94,8 @@ public class BaseTestCase {
     private StockListComponent stockListComponent;
     @Autowired
     private StockKbarService stockKbarService;
+    @Autowired
+    private HistoryBlockInfoComponent historyBlockInfoComponent;
 
 
     @Test
@@ -165,8 +167,9 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockKbarComponent.batchKbarDataInit();
-        //stockListComponent.getCirculateInfo(new Date());
+        historyBlockInfoComponent.initHistoryBlockInfo();
+        /*stockKbarComponent.batchKbarDataInit();
+        stockListComponent.getCirculateInfo(new Date());*/
        /* StockKbarQuery kbarQuery = new StockKbarQuery();
         kbarQuery.setStockCode("000001");
         List<StockKbar> stockKbars = stockKbarService.listByCondition(kbarQuery);
