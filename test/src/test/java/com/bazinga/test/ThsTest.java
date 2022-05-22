@@ -24,6 +24,8 @@ import java.util.Date;
 public class ThsTest {
     @Autowired
     private BigAmountTestComponent bigAmountTestComponent;
+    @Autowired
+    private ThsDataComponent thsDataComponent;
 
 
     @Test
@@ -32,8 +34,9 @@ public class ThsTest {
         buyDTO.setTradeDate("20220425");
         bigAmountTestComponent.getStockOrder("601975","20220425",buyDTO);*/
         //bigAmountTestComponent.getStockOrder("000548","20220511");
-        bigAmountTestComponent.plankExchangeAmountInfo();
+        //bigAmountTestComponent.plankExchangeAmountInfo();
         //bigAmountTestComponent.getChartStr();
+        thsDataComponent.initHistoryBlockStocks("885525");
     }
 
 

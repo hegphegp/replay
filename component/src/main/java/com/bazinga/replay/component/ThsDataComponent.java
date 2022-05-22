@@ -5,6 +5,8 @@ import Ths.JDIBridge;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
+import com.bazinga.replay.dto.BlockStockDTO;
+import com.bazinga.replay.model.HistoryBlockStocks;
 import com.bazinga.replay.model.ThsQuoteInfo;
 import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.TradeDatePoolQuery;
@@ -13,14 +15,15 @@ import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
 import com.bazinga.util.ThreadPoolUtils;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -38,20 +41,112 @@ public class ThsDataComponent {
 
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
-    public void zhuanZaiStocks(){
+    public String initHistoryBlockStocks(String blockCode){
         int ret = thsLogin();
-        quoteInfo();
+        List<BlockStockDTO> blockStockDTOS = getBlockStocks(blockCode);
         thsLoginOut();
+        String stocks = converToHistoryBlockStocks(blockStockDTOS);
+        return stocks;
 
     }
+    public String converToHistoryBlockStocks(List<BlockStockDTO> list){
+        if(CollectionUtils.isEmpty(list)){
+            return null;
+        }
+        Map<String,List<String>> inMap = new HashMap<>();
+        Map<String,List<String>> outMap = new HashMap<>();
+        for (BlockStockDTO blockStockDTO:list){
+            if(blockStockDTO.getStatus()==0){
+                List<String> stocks = inMap.get(blockStockDTO.getMarketDate());
+                if(stocks==null){
+                    stocks = new ArrayList<>();
+                    inMap.put(blockStockDTO.getMarketDate(),stocks);
+                }
+                stocks.add(blockStockDTO.getStockCode());
+            }
+            if(blockStockDTO.getStatus()==1){
+                List<String> stocks = outMap.get(blockStockDTO.getMarketDate());
+                if(stocks==null){
+                    stocks = new ArrayList<>();
+                    outMap.put(blockStockDTO.getMarketDate(),stocks);
+                }
+                stocks.add(blockStockDTO.getStockCode());
+            }
+        }
+        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
+        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
+        List<String> reals = Lists.newArrayList();
+        for (TradeDatePool tradeDatePool:tradeDatePools){
+            String dateStr = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+            List<String> ins = inMap.get(dateStr);
+            List<String> outs = outMap.get(dateStr);
+            for (String inStock : ins) {
+                if(reals.contains(inStock)) {
+                    reals.add(inStock);
+                }
+            }
+            for (String outStock : outs) {
+                if(reals.contains(outStock)) {
+                    reals.remove(outStock);
+                }
 
-    public void quoteInfo(){
-        String quote_str = JDIBridge.THS_HistoryQuotes("000001.SZ","open,high,low,close","","2022-05-18","2022-05-19");
+            }
+            String str = null;
+            if(reals.size()>0){
+                for (String stockCode:reals){
+                    if(str == null){
+                        str = stockCode;
+                    }else{
+                        str = str+","+stockCode;
+                    }
+                }
+            }
+            if(str!=null){
+                return str;
+            }
+        }
+        return null;
+    }
+
+    public List<BlockStockDTO> getBlockStocks(String blockCode){
+        ArrayList<BlockStockDTO> list = Lists.newArrayList();
+        String quote_str = JDIBridge.THS_DataPool("indexConsRecord",blockCode+".TI;1990-02-01;2022-05-19;全部","date:Y,thscode:Y,securityName:Y,status:Y");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);
-            System.out.println(JSONObject.toJSONString(jsonObject));
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return list;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            JSONArray dateJson = tableInfo.getJSONArray("date");
+            if(dateJson==null||dateJson.size()==0){
+                return list;
+            }
+            List<String> dates = tableInfo.getJSONArray("date").toJavaList(String.class);
+            List<String> stockCodes = tableInfo.getJSONArray("thscode").toJavaList(String.class);
+            List<String> names = tableInfo.getJSONArray("securityName").toJavaList(String.class);
+            List<String> types = tableInfo.getJSONArray("status").toJavaList(String.class);
+            int i = 0;
+            for (String time:dates){
+                BlockStockDTO blockStock = new BlockStockDTO();
+                blockStock.setMarketDate(time);
+                blockStock.setStockCode(stockCodes.get(i));
+                blockStock.setStockName(names.get(i));
+                if(types.get(i).equals("剔除")) {
+                    blockStock.setStatus(1);
+                }else{
+                    blockStock.setStatus(0);
+                }
+                list.add(blockStock);
+                i++;
+            }
         }
+        return list;
     }
+
+
     public int thsLogin(){
         try {
             System.load("E://iFinDJava.dll");

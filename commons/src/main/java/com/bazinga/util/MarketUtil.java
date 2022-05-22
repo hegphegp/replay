@@ -78,5 +78,48 @@ public class MarketUtil {
         return false;
     }
 
+    public static boolean isSh(String stockCode) {
+        if(StringUtils.isEmpty(stockCode)){
+            return false;
+        }
+        if(stockCode.startsWith("6")){
+            return true;
+        }
+        return false;
+    }
+    public static boolean isSz(String stockCode) {
+        if(StringUtils.isEmpty(stockCode)){
+            return false;
+        }
+        if(stockCode.startsWith("00")){
+            return true;
+        }
+        if(stockCode.startsWith("30")){
+            return true;
+        }
+        return false;
+    }
 
+
+    public static String thsToGeneralStock(String thsStock){
+        if(StringUtils.isBlank(thsStock)){
+            return null;
+        }
+        String replace = thsStock.replace(".SH", "");
+        String general = replace.replace(".SZ", "");
+        return general;
+    }
+
+    public static String generalToThsStock(String stock){
+        if(StringUtils.isBlank(stock)){
+            return null;
+        }
+        if(MarketUtil.isSh(stock)){
+            return stock+".SH";
+        }
+        if(MarketUtil.isSh(stock)){
+            return stock+".SZ";
+        }
+        return null;
+    }
 }
