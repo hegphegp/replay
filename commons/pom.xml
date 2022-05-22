@@ -333,6 +333,12 @@
             <version>4.1.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.bazinga</groupId>
+            <artifactId>thsjdi</artifactId>
+            <version>1.0</version>
+        </dependency>
+
     </dependencies>
 
 
