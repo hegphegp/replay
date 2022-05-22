@@ -63,19 +63,27 @@ public class HistoryBlockInfoComponent {
     private HistoryBlockInfoService historyBlockInfoService;
     @Autowired
     private HistoryBlockStocksService historyBlockStocksService;
+    @Autowired ThsDataComponent thsDataComponent;
 
-    private static final ExecutorService AVGLINE_POOL = ThreadPoolUtils.create(8, 16, 512, "calAvgLinePool");
     public void initHistoryBlockInfo(){
-        Date preTradeDate = commonComponent.preTradeDate(new Date());
         List<HistoryBlockInfo> blocks = getBlocks();
         saveHistoryBlockInfo(blocks);
-
+        for (HistoryBlockInfo historyBlockInfo:blocks){
+            System.out.println(historyBlockInfo.getBlockCode());
+            List<HistoryBlockStocks> historyBlockStocks = thsDataComponent.initHistoryBlockStocks(historyBlockInfo.getBlockCode(), historyBlockInfo.getBlockName());
+            saveBlockStocks(historyBlockStocks);
+        }
 
 
     }
 
-    public HistoryBlockStocks getBlocks(String blockCode) {
-        return null;
+    public void saveBlockStocks(List<HistoryBlockStocks> historyBlockStocks) {
+        if(historyBlockStocks==null){
+            return;
+        }
+        for (HistoryBlockStocks history:historyBlockStocks){
+            historyBlockStocksService.save(history);
+        }
     }
 
     public  List<HistoryBlockInfo> getBlocks() {
@@ -145,6 +153,9 @@ public class HistoryBlockInfoComponent {
             historyBlockInfo.setBlockName(blockName);
             historyBlockInfo.setMarketDate(marketDate);
             if(StringUtils.isBlank(blockType)){
+                continue;
+            }
+            if(historyBlockInfo.getBlockCode().startsWith("864")||historyBlockInfo.getBlockCode().startsWith("883")){
                 continue;
             }
             if(blockType.equals("N")) {

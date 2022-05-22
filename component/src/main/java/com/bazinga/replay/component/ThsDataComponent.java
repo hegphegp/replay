@@ -12,6 +12,7 @@ import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.ThsQuoteInfoService;
 import com.bazinga.replay.service.TradeDatePoolService;
+import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
 import com.bazinga.util.ThreadPoolUtils;
@@ -41,17 +42,18 @@ public class ThsDataComponent {
 
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
-    public String initHistoryBlockStocks(String blockCode){
+    public List<HistoryBlockStocks> initHistoryBlockStocks(String blockCode,String blockName){
         int ret = thsLogin();
         List<BlockStockDTO> blockStockDTOS = getBlockStocks(blockCode);
         thsLoginOut();
-        String stocks = converToHistoryBlockStocks(blockStockDTOS);
-        return stocks;
+        List<HistoryBlockStocks> historys = converToHistoryBlockStocks(blockCode, blockName, blockStockDTOS);
+        return historys;
 
     }
-    public String converToHistoryBlockStocks(List<BlockStockDTO> list){
+    public List<HistoryBlockStocks> converToHistoryBlockStocks(String blockCode,String blockName,List<BlockStockDTO> list){
+        List<HistoryBlockStocks> historys = Lists.newArrayList();
         if(CollectionUtils.isEmpty(list)){
-            return null;
+            return historys;
         }
         Map<String,List<String>> inMap = new HashMap<>();
         Map<String,List<String>> outMap = new HashMap<>();
@@ -73,24 +75,29 @@ public class ThsDataComponent {
                 stocks.add(blockStockDTO.getStockCode());
             }
         }
-        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
-        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
+        Date fisrtDate = DateUtil.parseDate("20170101", DateUtil.yyyyMMdd);
+        Date endDate = DateTimeUtils.getDate000000(new Date());
+        Date date = DateUtil.parseDate("19910101", DateUtil.yyyyMMdd);
         List<String> reals = Lists.newArrayList();
-        for (TradeDatePool tradeDatePool:tradeDatePools){
-            String dateStr = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+        for (int i=0; i<=20000;i++){
+            date = DateUtil.addDays(date,1);
+            String dateStr = DateUtil.format(date, DateUtil.yyyyMMdd);
             List<String> ins = inMap.get(dateStr);
             List<String> outs = outMap.get(dateStr);
-            for (String inStock : ins) {
-                if(reals.contains(inStock)) {
-                    reals.add(inStock);
+            if(!CollectionUtils.isEmpty(ins)) {
+                for (String inStock : ins) {
+                    if (!reals.contains(inStock)) {
+                        reals.add(inStock);
+                    }
                 }
             }
-            for (String outStock : outs) {
-                if(reals.contains(outStock)) {
-                    reals.remove(outStock);
-                }
+            if(!CollectionUtils.isEmpty(outs)) {
+                for (String outStock : outs) {
+                    if (reals.contains(outStock)) {
+                        reals.remove(outStock);
+                    }
 
+                }
             }
             String str = null;
             if(reals.size()>0){
@@ -103,10 +110,20 @@ public class ThsDataComponent {
                 }
             }
             if(str!=null){
-                return str;
+                HistoryBlockStocks historyBlockStocks = new HistoryBlockStocks();
+                historyBlockStocks.setBlockCode(blockCode);
+                historyBlockStocks.setBlockName(blockName);
+                historyBlockStocks.setCreateTime(new Date());
+                historyBlockStocks.setStocks(str);
+                historyBlockStocks.setTradeDate(dateStr);
+                if(date.before(fisrtDate)||date.after(endDate)) {
+                    continue;
+                }else {
+                    historys.add(historyBlockStocks);
+                }
             }
         }
-        return null;
+        return historys;
     }
 
     public List<BlockStockDTO> getBlockStocks(String blockCode){
@@ -130,9 +147,10 @@ public class ThsDataComponent {
             List<String> types = tableInfo.getJSONArray("status").toJavaList(String.class);
             int i = 0;
             for (String time:dates){
+                String stockCode = MarketUtil.thsToGeneralStock(stockCodes.get(i));
                 BlockStockDTO blockStock = new BlockStockDTO();
                 blockStock.setMarketDate(time);
-                blockStock.setStockCode(stockCodes.get(i));
+                blockStock.setStockCode(stockCode);
                 blockStock.setStockName(names.get(i));
                 if(types.get(i).equals("剔除")) {
                     blockStock.setStatus(1);
