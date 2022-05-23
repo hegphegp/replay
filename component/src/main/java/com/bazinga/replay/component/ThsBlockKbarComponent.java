@@ -4,12 +4,8 @@ package com.bazinga.replay.component;
 import Ths.JDIBridge;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.bazinga.base.Sort;
 import com.bazinga.replay.dto.BlockStockDTO;
 import com.bazinga.replay.model.HistoryBlockStocks;
-import com.bazinga.replay.model.ThsQuoteInfo;
-import com.bazinga.replay.model.TradeDatePool;
-import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.ThsQuoteInfoService;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateTimeUtils;
@@ -23,10 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author yunshan
@@ -34,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-public class ThsDataComponent {
+public class ThsBlockKbarComponent {
     @Autowired
     private ThsQuoteInfoService thsQuoteInfoService;
     @Autowired
@@ -164,71 +158,6 @@ public class ThsDataComponent {
         return list;
     }
 
-
-    public void  initStockIndex(String thscode,String tradeDate){
-        int ret = thsLogin();
-        BigDecimal diff = getMacdIndex(thscode, tradeDate, 100);
-        BigDecimal dea = getMacdIndex(thscode, tradeDate, 101);
-        BigDecimal macd = getMacdIndex(thscode, tradeDate, 102);
-        return;
-
-    }
-
-    public List<BlockStockDTO> getBlockKbars(String blockCode,String blockName){
-        ArrayList<BlockStockDTO> list = Lists.newArrayList();
-        String quote_str = JDIBridge.THS_HistoryQuotes(blockCode+".TI","open,close,high,low,volume,amount","","2017-10-01","2022-05-19");
-        if(!StringUtils.isEmpty(quote_str)){
-            JSONObject jsonObject = JSONObject.parseObject(quote_str);
-            JSONArray tables = jsonObject.getJSONArray("tables");
-            if(tables==null||tables.size()==0){
-                return list;
-            }
-            JSONObject tableJson = tables.getJSONObject(0);
-            JSONObject tableInfo = tableJson.getJSONObject("table");
-            JSONArray dateJson = tableInfo.getJSONArray("date");
-            if(dateJson==null||dateJson.size()==0){
-                return list;
-            }
-            List<BigDecimal> highs = tableInfo.getJSONArray("high").toJavaList(BigDecimal.class);
-            List<BigDecimal> lows = tableInfo.getJSONArray("low").toJavaList(BigDecimal.class);
-            List<BigDecimal> closes = tableInfo.getJSONArray("close").toJavaList(BigDecimal.class);
-            List<BigDecimal> opens = tableInfo.getJSONArray("open").toJavaList(BigDecimal.class);
-            List<BigDecimal> volumes = tableInfo.getJSONArray("volume").toJavaList(BigDecimal.class);
-            List<BigDecimal> amounts = tableInfo.getJSONArray("amount").toJavaList(BigDecimal.class);
-        }
-        return list;
-    }
-
-    /**
-     * DEA 101 DIFF 100  MACD 102
-     * @param blockCode
-     * @param tradeDate
-     * @param index
-     * @return
-     */
-    public BigDecimal getMacdIndex(String blockCode,String tradeDate,int index){
-        String quote_str = JDIBridge.THS_BasicData(blockCode,"ths_macd_index",tradeDate+",26,12,9,"+index+",100");
-        if(!StringUtils.isEmpty(quote_str)){
-            JSONObject jsonObject = JSONObject.parseObject(quote_str);
-            JSONArray tables = jsonObject.getJSONArray("tables");
-            if(tables==null||tables.size()==0){
-                return null;
-            }
-            JSONObject tableJson = tables.getJSONObject(0);
-            JSONObject tableInfo = tableJson.getJSONObject("table");
-            if(tableInfo==null){
-                return null;
-            }
-            List<BigDecimal> macdValues = tableInfo.getJSONArray("ths_macd_index").toJavaList(BigDecimal.class);
-            if(CollectionUtils.isEmpty(macdValues)){
-                return null;
-            }
-            BigDecimal macdValue = macdValues.get(0).setScale(2,BigDecimal.ROUND_HALF_UP);
-            return macdValue;
-
-        }
-        return null;
-    }
 
     public int thsLogin(){
         try {
