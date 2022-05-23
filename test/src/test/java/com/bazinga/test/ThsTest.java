@@ -36,7 +36,7 @@ public class ThsTest {
         //bigAmountTestComponent.getStockOrder("000548","20220511");
         //bigAmountTestComponent.plankExchangeAmountInfo();
         //bigAmountTestComponent.getChartStr();
-        thsDataComponent.initBlockKbars("885972","金属回收");
+        thsDataComponent.initStockIndex("000001.SH","金属回收");
     }
 
 
