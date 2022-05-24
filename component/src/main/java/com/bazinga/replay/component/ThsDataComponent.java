@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
 import com.bazinga.replay.dto.BlockStockDTO;
 import com.bazinga.replay.model.HistoryBlockStocks;
+import com.bazinga.replay.model.StockIndex;
 import com.bazinga.replay.model.ThsQuoteInfo;
 import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.TradeDatePoolQuery;
@@ -165,12 +166,29 @@ public class ThsDataComponent {
     }
 
 
-    public void  initStockIndex(String thscode,String tradeDate){
+    public List<StockIndex>  initStockIndex(String thscode,String stockName,List<String> tradeDates){
+        List<StockIndex> stockIndexList = Lists.newArrayList();
         int ret = thsLogin();
-        BigDecimal diff = getMacdIndex(thscode, tradeDate, 100);
-        BigDecimal dea = getMacdIndex(thscode, tradeDate, 101);
-        BigDecimal macd = getMacdIndex(thscode, tradeDate, 102);
-        return;
+        for (String tradeDate:tradeDates) {
+            System.out.println(tradeDate);
+            BigDecimal diff = getMacdIndex(thscode, tradeDate, 100);
+            BigDecimal dea = getMacdIndex(thscode, tradeDate, 101);
+            BigDecimal macd = getMacdIndex(thscode, tradeDate, 102);
+            String dateyyyyMMdd = DateUtil.format(DateUtil.parseDate(tradeDate, DateUtil.yyyy_MM_dd), DateUtil.yyyyMMdd);
+            String stockCode = MarketUtil.thsToGeneralStock(thscode);
+            StockIndex stockIndex = new StockIndex();
+            stockIndex.setStockCode(stockCode);
+            stockIndex.setStockName(stockName);
+            stockIndex.setKbarDate(dateyyyyMMdd);
+            stockIndex.setDea(dea);
+            stockIndex.setDiff(diff);
+            stockIndex.setMacd(macd);
+            stockIndex.setUniqueKey(stockCode+"_"+dateyyyyMMdd);
+            stockIndex.setCreateTime(new Date());
+            stockIndexList.add(stockIndex);
+        }
+        thsLoginOut();
+        return stockIndexList;
 
     }
 
