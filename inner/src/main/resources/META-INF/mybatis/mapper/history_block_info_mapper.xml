@@ -7,7 +7,7 @@
         <result column="block_code" jdbcType="VARCHAR" property="blockCode"/>
         <result column="block_name" jdbcType="VARCHAR" property="blockName"/>
         <result column="block_type" jdbcType="TINYINT" property="blockType"/>
-        <result column="market_date" jdbcType="VARCHAR" property="blockName"/>
+        <result column="market_date" jdbcType="VARCHAR" property="marketDate"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
@@ -63,7 +63,7 @@
                 block_type = #{blockType, jdbcType=TINYINT},
             </if>
             <if test="marketDate != null">
-                market_Date = #{marketDate, jdbcType=VARCHAR},
+                market_date = #{marketDate, jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 create_time = #{createTime, jdbcType=TIMESTAMP},

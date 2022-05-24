@@ -1,16 +1,25 @@
 package com.bazinga.test;
 
+import com.bazinga.base.Sort;
 import com.bazinga.replay.component.*;
 import com.bazinga.replay.dto.BigExchangeTestBuyDTO;
+import com.bazinga.replay.model.StockIndex;
+import com.bazinga.replay.model.TradeDatePool;
+import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.CirculateInfoService;
+import com.bazinga.replay.service.StockIndexService;
 import com.bazinga.replay.service.TradeDatePoolService;
+import com.bazinga.util.DateUtil;
+import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 单元测试基类<p/>
@@ -26,6 +35,12 @@ public class ThsTest {
     private BigAmountTestComponent bigAmountTestComponent;
     @Autowired
     private ThsDataComponent thsDataComponent;
+    @Autowired
+    private TradeDatePoolService tradeDatePoolService;
+    @Autowired
+    private StockIndexService stockIndexService;
+    @Autowired
+    private ThsStockIndexComponent thsStockIndexComponent;
 
 
     @Test
@@ -36,7 +51,7 @@ public class ThsTest {
         //bigAmountTestComponent.getStockOrder("000548","20220511");
         //bigAmountTestComponent.plankExchangeAmountInfo();
         //bigAmountTestComponent.getChartStr();
-        thsDataComponent.initStockIndex("000001.SH","金属回收");
+        thsStockIndexComponent.blockMACDIndex();
     }
 
 
