@@ -90,11 +90,12 @@ public class ThsStockIndexComponent {
         historyBlockInfoQuery.setBlockType(1);
         List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(historyBlockInfoQuery);
         for (HistoryBlockInfo blockInfo:historyBlockInfos){
+            System.out.println(blockInfo.getBlockCode());
             String blockCode = blockInfo.getBlockCode();
             String thsBlockCode = MarketUtil.generalToThsStock(blockCode);
             Date marketDate = DateUtil.parseDate(blockInfo.getMarketDate(), DateUtil.yyyyMMdd);
             StockIndexQuery stockIndexQuery = new StockIndexQuery();
-            stockIndexQuery.setStockCode(blockCode);
+            stockIndexQuery.setStockCode(thsBlockCode);
             List<String> initeds = Lists.newArrayList();
             List<StockIndex> stockIndices = stockIndexService.listByCondition(stockIndexQuery);
             if(stockIndices!=null) {
