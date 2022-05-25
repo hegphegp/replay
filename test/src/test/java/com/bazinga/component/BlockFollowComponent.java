@@ -3,6 +3,7 @@ package com.bazinga.component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
+import com.bazinga.dto.MarketMoneyDTO;
 import com.bazinga.dto.PlankTimePairDTO;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.CommonComponent;
@@ -11,16 +12,14 @@ import com.bazinga.replay.component.StockKbarComponent;
 import com.bazinga.replay.dto.AdjFactorDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.*;
-import com.bazinga.replay.query.CirculateInfoQuery;
-import com.bazinga.replay.query.HistoryBlockInfoQuery;
-import com.bazinga.replay.query.HistoryBlockStocksQuery;
-import com.bazinga.replay.query.StockKbarQuery;
+import com.bazinga.replay.query.*;
 import com.bazinga.replay.service.*;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -28,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import javax.sql.rowset.FilteredRowSet;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +59,7 @@ public class BlockFollowComponent {
     @Autowired
     private HistoryBlockStocksService historyBlockStocksService;
     public void relativeWithSZInfo(){
+        List<TradeDatePool> tradeDates = getTradeDates();
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
         Map<String, CirculateInfo> circulateInfoMap = getCirculateInfoMap(circulateInfos);
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
@@ -210,16 +211,62 @@ public class BlockFollowComponent {
         return planksTen;
     }
 
-    public Map<String,List<CirculateInfo>> circulateInfo(List<String> stocks,Map<String,CirculateInfo> circulateInfoMap,Map<String, StockKbar> stockMap){
+    public Map<String, List<MarketMoneyDTO>> getThreeBuyLevelStocks(List<String> stocks,Map<String,CirculateInfo> circulateInfoMap,Map<String, StockKbar> stockKbarMap){
+        Map<String, List<MarketMoneyDTO>> map = new HashMap<>();
+        List<MarketMoneyDTO> list = Lists.newArrayList();
+        for (String stock:stocks){
+            CirculateInfo circulateInfo = circulateInfoMap.get(stock);
+            StockKbar stockKbar = stockKbarMap.get(stock);
+            if(stockKbar!=null&&circulateInfo!=null) {
+                BigDecimal marketMoney = new BigDecimal(circulateInfo.getCirculateZ()).multiply(stockKbar.getOpenPrice()).setScale(2,BigDecimal.ROUND_HALF_UP);
+                MarketMoneyDTO marketMoneyDTO = new MarketMoneyDTO();
+                marketMoneyDTO.setStockCode(stock);
+                marketMoneyDTO.setStockName(circulateInfo.getStockName());
+                marketMoneyDTO.setCirculate(circulateInfo.getCirculateZ());
+                marketMoneyDTO.setMarketMoney(marketMoney);
+                list.add(marketMoneyDTO);
+            }
+        }
+        if(CollectionUtils.isEmpty(list)||list.size()<3){
+            return map;
+        }
+        List<MarketMoneyDTO> marketMoneyDTOS = MarketMoneyDTO.marketLevelSort(list);
 
-        return null;
+        if(marketMoneyDTOS.size()>60){
+            List<MarketMoneyDTO> marketMoneyDTOS1 = marketMoneyDTOS.subList(0, 20);
+            List<MarketMoneyDTO> marketMoneyDTOS3 = marketMoneyDTOS.subList(marketMoneyDTOS.size()-20,marketMoneyDTOS.size());
+        }
+        return map;
     }
+
+    public Map<String,List<Integer>> getLevelIndex(int size){
+        Map<String, List<Integer>> map = new HashMap<>();
+        if(size<=3){
+            map.put("frist",Lists.newArrayList(0,0));
+            map.put("frist",Lists.newArrayList(1,1));
+            map.put("frist",Lists.newArrayList(2,2));
+        }
+        Integer levelSize = Integer.valueOf(new BigDecimal(size).multiply(new BigDecimal("0.3")).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        map.put("frist",Lists.newArrayList(0,(levelSize-1)));
+        return map;
+    }
+
+
     public Map<String,CirculateInfo> getCirculateInfoMap(List<CirculateInfo> circulateInfos){
         Map<String, CirculateInfo> circulateInfoMap= new HashMap<>();
         for (CirculateInfo circulateInfo:circulateInfos){
             circulateInfoMap.put(circulateInfo.getStockCode(),circulateInfo);
         }
         return circulateInfoMap;
+    }
+
+    public List<TradeDatePool> getTradeDates(){
+        TradeDatePoolQuery query = new TradeDatePoolQuery();
+        query.setTradeDateFrom(DateUtil.parseDate("20220101",DateUtil.yyyyMMdd));
+        query.setTradeDateTo(DateUtil.parseDate("20220501",DateUtil.yyyyMMdd));
+        query.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(query);
+        return tradeDatePools;
     }
 
 
@@ -253,23 +300,6 @@ public class BlockFollowComponent {
         return list;
     }
 
-
-    public Map<String,List<StockKbar>> szRaiseInfo(){
-        Map<String, List<StockKbar>> map = new HashMap<>();
-        StockKbarQuery query = new StockKbarQuery();
-        query.setStockCode("999999");
-        query.addOrderBy("kbar_date", Sort.SortType.ASC);
-        List<StockKbar> stockKbars = stockKbarService.listByCondition(query);
-        LimitQueue<StockKbar> limitQueue = new LimitQueue<>(4);
-        for (StockKbar stockKbar:stockKbars){
-            limitQueue.offer(stockKbar);
-            List<StockKbar> kbars = limitQueueToList(limitQueue);
-            if(limitQueue.size()==4){
-                map.put(stockKbar.getKbarDate(),kbars);
-            }
-        }
-        return map;
-    }
 
     public List<StockKbar> limitQueueToList(LimitQueue<StockKbar> limitQueue){
         if(limitQueue.size()<2){
@@ -365,8 +395,10 @@ public class BlockFollowComponent {
     }
 
     public static void main(String[] args) {
-        long l = timeToLong("09:35", 0);
-        System.out.println(l);
+        ArrayList<Integer> integers = Lists.newArrayList(0, 1, 2, 3, 4, 5, 6, 7, 8);
+        List<Integer> integers1 = integers.subList(0, 1);
+        List<Integer> integers2 = integers.subList(6, integers.size());
+        System.out.println(111111);
     }
 
 
