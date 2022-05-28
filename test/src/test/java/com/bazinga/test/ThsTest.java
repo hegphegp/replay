@@ -1,6 +1,7 @@
 package com.bazinga.test;
 
 import com.bazinga.base.Sort;
+import com.bazinga.component.MacdCalComponent;
 import com.bazinga.replay.component.*;
 import com.bazinga.replay.dto.BigExchangeTestBuyDTO;
 import com.bazinga.replay.model.StockIndex;
@@ -41,6 +42,8 @@ public class ThsTest {
     private StockIndexService stockIndexService;
     @Autowired
     private ThsStockIndexComponent thsStockIndexComponent;
+    @Autowired
+    private MacdCalComponent macdCalComponent;
 
 
     @Test
@@ -51,7 +54,10 @@ public class ThsTest {
         //bigAmountTestComponent.getStockOrder("000548","20220511");
         //bigAmountTestComponent.plankExchangeAmountInfo();
         //bigAmountTestComponent.getChartStr();
-        thsStockIndexComponent.blockMACDIndex();
+        //thsStockIndexComponent.blockMACDIndex();
+        macdCalComponent.quoteToKbar();
+        //macdCalComponent.calMacd();
+        //macdCalComponent.macdExcel();
     }
 
 
