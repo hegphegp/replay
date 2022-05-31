@@ -27,6 +27,13 @@ public class MacdBuyDTO {
     private BigDecimal buyKbarAmount;
     private BigDecimal preKbarAmount;
 
+    private BigDecimal raiseRateDay5;
+    private BigDecimal highBar;
+    private BigDecimal sellBar;
+    private BigDecimal dropPercent;
+    private Integer sellIntelTime;
+    private int sellDropBuy;
+
 
 
 

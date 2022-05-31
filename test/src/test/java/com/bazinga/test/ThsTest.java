@@ -55,9 +55,9 @@ public class ThsTest {
         //bigAmountTestComponent.plankExchangeAmountInfo();
         //bigAmountTestComponent.getChartStr();
         //thsStockIndexComponent.blockMACDIndex();
-        macdCalComponent.quoteToKbar();
+        //macdCalComponent.quoteToKbar();
         //macdCalComponent.calMacd();
-        //macdCalComponent.macdExcel();
+        macdCalComponent.macdExcel();
     }
 
 

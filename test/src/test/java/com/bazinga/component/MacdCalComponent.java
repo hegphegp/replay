@@ -3,6 +3,7 @@ package com.bazinga.component;
 
 import com.bazinga.base.Sort;
 import com.bazinga.dto.MacdBuyDTO;
+import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.ThsDataComponent;
 import com.bazinga.replay.dto.MacdIndexDTO;
 import com.bazinga.replay.model.*;
@@ -11,6 +12,7 @@ import com.bazinga.replay.service.*;
 import com.bazinga.replay.util.PoiExcelUtil;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
+import com.bazinga.util.PriceUtil;
 import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +48,7 @@ public class MacdCalComponent {
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
     public void macdExcel(){
-        List<MacdBuyDTO> buys = calMacd();
+        List<MacdBuyDTO> buys = calMacdBuyThree();
         List<Object[]> datas = Lists.newArrayList();
 
         for (MacdBuyDTO dto:buys) {
@@ -55,26 +57,39 @@ public class MacdCalComponent {
             list.add(dto.getStockCode());
             list.add(dto.getStockName());
             list.add(dto.getRedirect());
-            list.add(dto.getBuyTime());
+            Date date = DateUtil.parseDate(dto.getBuyTime(), DateUtil.yyyyMMddHHmmss);
+            list.add(DateUtil.format(date,DateUtil.yyyyMMdd));
+            list.add(DateUtil.format(date,DateUtil.HHmmss_DEFALT));
             list.add(dto.getBuyPrice());
             list.add(dto.getSellTime());
             list.add(dto.getSellPrice());
             list.add(dto.getPreClosePrice());
             list.add(dto.getBuyKbarAmount());
             list.add(dto.getPreKbarAmount());
+            list.add(dto.getRaiseRateDay5());
             list.add(dto.getBar());
             list.add(dto.getPreBar());
-            if(dto.getRedirect()==1) {
-                list.add(dto.getSellPrice().subtract(dto.getBuyPrice()));
-            }else {
-                list.add(dto.getBuyPrice().subtract(dto.getSellPrice()));
+            list.add(dto.getSellBar());
+            list.add(dto.getHighBar());
+            list.add(dto.getDropPercent());
+            list.add(dto.getSellIntelTime());
+            list.add(dto.getSellDropBuy());
+            if(dto.getSellPrice()!=null) {
+                if (dto.getRedirect() == 1) {
+                    list.add(dto.getSellPrice().subtract(dto.getBuyPrice()));
+                } else {
+                    list.add(dto.getBuyPrice().subtract(dto.getSellPrice()));
+                }
+            }else{
+                list.add(null);
             }
 
             Object[] objects = list.toArray();
             datas.add(objects);
         }
 
-        String[] rowNames = {"index","股票代码","股票名称","交易方向（0 空 1多）","交易时间","买入价格","卖出时间","卖出价格","前一条k线收盘价","前一条k线成交额","当前k线成交额","bar值","前一条bar值","盈利"};
+        String[] rowNames = {"index","股票代码","股票名称","交易方向（0 空 1多）","交易日期","交易时间","买入价格","卖出时间","卖出价格","前一条k线收盘价","前一条k线成交额","当前k线成交额","5条k线涨幅","bar值","前一条bar值",
+                "卖出bar","高点bar","下跌比例","卖出间隔买入天数","卖出类型（0下跌卖出，1跌破买入卖出，2收盘平仓）","盈利"};
         PoiExcelUtil poiExcelUtil = new PoiExcelUtil("macd买入",rowNames,datas);
         try {
             poiExcelUtil.exportExcelUseExcelTitle("macd买入");
@@ -83,12 +98,270 @@ public class MacdCalComponent {
         }
     }
 
-
-    public List<MacdBuyDTO> calMacd(){
+    public List<MacdBuyDTO> calMacdBuyThree(){
         List<MacdBuyDTO> buys = Lists.newArrayList();
         List<MacdIndexDTO> list = Lists.newArrayList();
         StockKbarQuery stockKbarQuery = new StockKbarQuery();
         stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.ASC);
+        stockKbarQuery.setLimit(100000);
+        List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
+        StockKbar preStockKbar = null;
+        LimitQueue<StockKbar> limitQueue = new LimitQueue<>(6);
+        LimitQueue<MacdIndexDTO> sellLimitQueue = new LimitQueue<>(1000);
+        int i = 0;
+        for (StockKbar stockKbar:stockKbars){
+            i++;
+            limitQueue.offer(stockKbar);
+            if(i==1){
+                MacdIndexDTO macdIndexDTO = macdIndex(null, stockKbar, preStockKbar, 1);
+                list.add(macdIndexDTO);
+            }else{
+                MacdIndexDTO macdIndexDTO = macdIndex(list.get(list.size() - 1), stockKbar, preStockKbar, i);
+                list.add(macdIndexDTO);
+            }
+            if(i>=100){
+                MacdIndexDTO preMacdIndexDTO = list.get(list.size() - 2);
+                MacdIndexDTO macdIndexDTO = list.get(list.size() - 1);
+                boolean haveBuy = true;
+                if(buys.size()==0||buys.get(buys.size()-1).getSellPrice()!=null){
+                    haveBuy = false;
+                }
+                if(haveBuy){
+                    sellLimitQueue.offer(macdIndexDTO);
+                    calSellInfo(sellLimitQueue,buys.get(buys.size()-1),stockKbar);
+                }
+                Integer redirect = null;
+                if(macdIndexDTO.getBar().compareTo(BigDecimal.ZERO)==1&&preMacdIndexDTO.getBar().compareTo(BigDecimal.ZERO)==-1){
+                    redirect = 1;
+                }
+                if(macdIndexDTO.getBar().compareTo(BigDecimal.ZERO)==-1&&preMacdIndexDTO.getBar().compareTo(BigDecimal.ZERO)==1){
+                    redirect = 0;
+                }
+                if(redirect!=null){
+                    if(!stockKbar.getKbarDate().endsWith("150000")) {
+                        MacdBuyDTO macdBuyDTO = new MacdBuyDTO();
+                        macdBuyDTO.setStockCode("ICZL");
+                        macdBuyDTO.setStockCode("中证主连");
+                        macdBuyDTO.setPreBar(preMacdIndexDTO.getBar());
+                        macdBuyDTO.setBar(macdIndexDTO.getBar());
+                        macdBuyDTO.setBuyPrice(stockKbar.getClosePrice());
+                        macdBuyDTO.setBuyTime(stockKbar.getKbarDate());
+                        macdBuyDTO.setPreClosePrice(preStockKbar.getClosePrice());
+                        macdBuyDTO.setBuyKbarAmount(stockKbar.getTradeAmount());
+                        macdBuyDTO.setPreKbarAmount(preStockKbar.getTradeAmount());
+                        macdBuyDTO.setRedirect(redirect);
+                        BigDecimal raiseRate = getRaiseRate(limitQueue);
+                        macdBuyDTO.setRaiseRateDay5(raiseRate);
+                        buys.add(macdBuyDTO);
+                        sellLimitQueue.clear();
+                        sellLimitQueue.add(macdIndexDTO);
+                    }
+                }
+            }
+            preStockKbar = stockKbar;
+        }
+        return buys;
+    }
+
+    public boolean calSellInfo(LimitQueue<MacdIndexDTO> limitQueue,MacdBuyDTO buyDTO,StockKbar stockKbar){
+        Iterator<MacdIndexDTO> iterator = limitQueue.iterator();
+        int i = 0;
+        MacdIndexDTO buyMacd = null;
+        MacdIndexDTO highMacd = null;
+        MacdIndexDTO lowMacd = null;
+        while (iterator.hasNext()){
+            i++;
+            MacdIndexDTO indexDTO = iterator.next();
+            if(i==1){
+                buyMacd = indexDTO;
+            }
+            if(buyDTO.getRedirect()==1) {
+                if(highMacd==null||indexDTO.getBar().compareTo(highMacd.getBar())==1){
+                    highMacd = indexDTO;
+                }
+                if (i == limitQueue.size()) {
+                    BigDecimal absValue = highMacd.getBar().subtract(indexDTO.getBar());
+                    BigDecimal percent = absValue.divide(highMacd.getBar(),3,BigDecimal.ROUND_HALF_UP);
+                    boolean sellFlag = false;
+                    if(absValue.compareTo(new BigDecimal("0.15"))==1&&percent.compareTo(new BigDecimal("0.15"))==1){
+                        sellFlag = true;
+                    }
+                    if(sellFlag){
+                        buyDTO.setSellTime(stockKbar.getKbarDate());
+                        buyDTO.setSellBar(indexDTO.getBar());
+                        buyDTO.setSellPrice(stockKbar.getClosePrice());
+                        buyDTO.setHighBar(highMacd.getBar());
+                        buyDTO.setDropPercent(percent);
+                        buyDTO.setSellDropBuy(0);
+                        buyDTO.setSellIntelTime(i-1);
+                        return true;
+                    }
+                    if (indexDTO.getBar().compareTo(buyMacd.getBar())==-1){
+                        buyDTO.setSellTime(stockKbar.getKbarDate());
+                        buyDTO.setSellBar(indexDTO.getBar());
+                        buyDTO.setSellPrice(stockKbar.getClosePrice());
+                        buyDTO.setSellDropBuy(1);
+                        buyDTO.setSellIntelTime(i-1);
+                        return true;
+                    }
+                    if(stockKbar.getKbarDate().endsWith("150000")){
+                        buyDTO.setSellTime(stockKbar.getKbarDate());
+                        buyDTO.setSellBar(indexDTO.getBar());
+                        buyDTO.setSellPrice(stockKbar.getClosePrice());
+                        buyDTO.setSellDropBuy(2);
+                        buyDTO.setSellIntelTime(i-1);
+                        return true;
+                    }
+                }
+            }
+            if(buyDTO.getRedirect()==0) {
+                if(lowMacd==null||indexDTO.getBar().compareTo(lowMacd.getBar())==-1){
+                    lowMacd = indexDTO;
+                }
+                if (i == limitQueue.size()) {
+                    BigDecimal absValue = lowMacd.getBar().subtract(indexDTO.getBar());
+                    BigDecimal percent = absValue.divide(lowMacd.getBar(),3,BigDecimal.ROUND_HALF_UP);
+                    boolean sellFlag = false;
+                    if(absValue.compareTo(new BigDecimal("-0.15"))==-1&&percent.compareTo(new BigDecimal("0.15"))==1){
+                        sellFlag = true;
+                    }
+                    if(sellFlag){
+                        buyDTO.setSellTime(stockKbar.getKbarDate());
+                        buyDTO.setSellBar(indexDTO.getBar());
+                        buyDTO.setSellPrice(stockKbar.getClosePrice());
+                        buyDTO.setHighBar(lowMacd.getBar());
+                        buyDTO.setDropPercent(percent);
+                        buyDTO.setSellDropBuy(0);
+                        buyDTO.setSellIntelTime(i-1);
+                        return true;
+                    }
+                    if (indexDTO.getBar().compareTo(buyMacd.getBar())==1){
+                        buyDTO.setSellTime(stockKbar.getKbarDate());
+                        buyDTO.setSellBar(indexDTO.getBar());
+                        buyDTO.setSellPrice(stockKbar.getClosePrice());
+                        buyDTO.setSellDropBuy(1);
+                        buyDTO.setSellIntelTime(i-1);
+                        return true;
+                    }
+                    if(stockKbar.getKbarDate().endsWith("150000")){
+                        buyDTO.setSellTime(stockKbar.getKbarDate());
+                        buyDTO.setSellBar(indexDTO.getBar());
+                        buyDTO.setSellPrice(stockKbar.getClosePrice());
+                        buyDTO.setSellDropBuy(2);
+                        buyDTO.setSellIntelTime(i-1);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public List<MacdBuyDTO> calMacdBuyTwo(){
+        List<MacdBuyDTO> buys = Lists.newArrayList();
+        List<MacdIndexDTO> list = Lists.newArrayList();
+        StockKbarQuery stockKbarQuery = new StockKbarQuery();
+        stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.ASC);
+        stockKbarQuery.setLimit(100000);
+        List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
+        StockKbar preStockKbar = null;
+        LimitQueue<StockKbar> limitQueue = new LimitQueue<>(6);
+        int i = 0;
+        for (StockKbar stockKbar:stockKbars){
+            limitQueue.offer(stockKbar);
+            if(stockKbar.getKbarDate().startsWith("20220425")){
+                System.out.println(1);
+            }
+            i++;
+            if(i==1){
+                MacdIndexDTO macdIndexDTO = macdIndex(null, stockKbar, preStockKbar, 1);
+                list.add(macdIndexDTO);
+            }else{
+                MacdIndexDTO macdIndexDTO = macdIndex(list.get(list.size() - 1), stockKbar, preStockKbar, i);
+                list.add(macdIndexDTO);
+            }
+            if(i>=100){
+                MacdIndexDTO preMacdIndexDTO = list.get(list.size() - 2);
+                MacdIndexDTO macdIndexDTO = list.get(list.size() - 1);
+                boolean haveBuy = true;
+                if(buys.size()==0||buys.get(buys.size()-1).getSellPrice()!=null){
+                    haveBuy = false;
+                }
+
+                if(haveBuy){
+                    MacdBuyDTO macdBuyDTO = buys.get(buys.size() - 1);
+                    if(stockKbar.getKbarDate().endsWith("150000")){
+                        macdBuyDTO.setSellPrice(stockKbar.getClosePrice());
+                        macdBuyDTO.setSellTime(stockKbar.getKbarDate());
+                        haveBuy = false;
+                    }else {
+                        if (macdIndexDTO.getBar().compareTo(preMacdIndexDTO.getBar()) == 1) {
+                            if (macdBuyDTO.getRedirect() == 0) {
+                                macdBuyDTO.setSellPrice(stockKbar.getClosePrice());
+                                macdBuyDTO.setSellTime(stockKbar.getKbarDate());
+                                haveBuy = false;
+                            }
+                        }
+                        if (macdIndexDTO.getBar().compareTo(preMacdIndexDTO.getBar()) == -1) {
+                            if (macdBuyDTO.getRedirect() == 1) {
+                                macdBuyDTO.setSellPrice(stockKbar.getClosePrice());
+                                macdBuyDTO.setSellTime(stockKbar.getKbarDate());
+                                haveBuy = false;
+                            }
+                        }
+                    }
+                }
+
+                if(!haveBuy&&!(stockKbar.getKbarDate().endsWith("150000"))&&!(stockKbar.getKbarDate().endsWith("093000"))) {
+                    MacdBuyDTO macdBuyDTO = new MacdBuyDTO();
+                    macdBuyDTO.setStockCode("ICZL");
+                    macdBuyDTO.setStockCode("中证主连");
+                    macdBuyDTO.setPreBar(preMacdIndexDTO.getBar());
+                    macdBuyDTO.setBar(macdIndexDTO.getBar());
+                    macdBuyDTO.setBuyPrice(stockKbar.getClosePrice());
+                    macdBuyDTO.setBuyTime(stockKbar.getKbarDate());
+                    macdBuyDTO.setPreClosePrice(preStockKbar.getClosePrice());
+                    macdBuyDTO.setBuyKbarAmount(stockKbar.getTradeAmount());
+                    macdBuyDTO.setPreKbarAmount(preStockKbar.getTradeAmount());
+                    if (macdIndexDTO.getBar().compareTo(preMacdIndexDTO.getBar()) == 1) {
+                        macdBuyDTO.setRedirect(1);
+                    }
+                    if (macdIndexDTO.getBar().compareTo(preMacdIndexDTO.getBar()) == -1) {
+                        macdBuyDTO.setRedirect(0);
+                    }
+                    BigDecimal raiseRate = getRaiseRate(limitQueue);
+                    macdBuyDTO.setRaiseRateDay5(raiseRate);
+                    buys.add(macdBuyDTO);
+                }
+
+            }
+            preStockKbar = stockKbar;
+        }
+        return buys;
+    }
+
+    public BigDecimal getRaiseRate(LimitQueue<StockKbar> limitQueue){
+        Iterator<StockKbar> iterator = limitQueue.iterator();
+        StockKbar first = null;
+        StockKbar last = null;
+        while(iterator.hasNext()){
+            StockKbar next = iterator.next();
+            if(first==null){
+                first = next;
+            }
+            last = next;
+        }
+        BigDecimal pricePercentRate = PriceUtil.getPricePercentRate(last.getClosePrice().subtract(first.getClosePrice()), first.getClosePrice());
+        return pricePercentRate;
+    }
+
+
+    public List<MacdBuyDTO> calMacdBuy(){
+        List<MacdBuyDTO> buys = Lists.newArrayList();
+        List<MacdIndexDTO> list = Lists.newArrayList();
+        StockKbarQuery stockKbarQuery = new StockKbarQuery();
+        stockKbarQuery.addOrderBy("kbar_date", Sort.SortType.ASC);
+        stockKbarQuery.setLimit(30000);
         List<StockKbar> stockKbars = stockKbarService.listByCondition(stockKbarQuery);
         StockKbar preStockKbar = null;
         int i = 0;
@@ -111,28 +384,29 @@ public class MacdCalComponent {
 
                 if(haveBuy){
                     MacdBuyDTO macdBuyDTO = buys.get(buys.size() - 1);
-                    if(i==stockKbars.size()){
+                    if(stockKbar.getKbarDate().endsWith("150000")){
                         macdBuyDTO.setSellPrice(stockKbar.getClosePrice());
                         macdBuyDTO.setSellTime(stockKbar.getKbarDate());
-                        haveBuy = true;
-                    }
-                    if(macdIndexDTO.getBar().compareTo(preMacdIndexDTO.getBar())==1){
-                        if(macdBuyDTO.getRedirect()==0){
-                            macdBuyDTO.setSellPrice(stockKbar.getClosePrice());
-                            macdBuyDTO.setSellTime(stockKbar.getKbarDate());
-                            haveBuy = false;
+                        haveBuy = false;
+                    }else {
+                        if (macdIndexDTO.getBar().compareTo(preMacdIndexDTO.getBar()) == 1) {
+                            if (macdBuyDTO.getRedirect() == 0) {
+                                macdBuyDTO.setSellPrice(stockKbar.getClosePrice());
+                                macdBuyDTO.setSellTime(stockKbar.getKbarDate());
+                                haveBuy = false;
+                            }
                         }
-                    }
-                    if(macdIndexDTO.getBar().compareTo(preMacdIndexDTO.getBar())==-1){
-                        if(macdBuyDTO.getRedirect()==1){
-                            macdBuyDTO.setSellPrice(stockKbar.getClosePrice());
-                            macdBuyDTO.setSellTime(stockKbar.getKbarDate());
-                            haveBuy = false;
+                        if (macdIndexDTO.getBar().compareTo(preMacdIndexDTO.getBar()) == -1) {
+                            if (macdBuyDTO.getRedirect() == 1) {
+                                macdBuyDTO.setSellPrice(stockKbar.getClosePrice());
+                                macdBuyDTO.setSellTime(stockKbar.getKbarDate());
+                                haveBuy = false;
+                            }
                         }
                     }
                 }
 
-                if(!haveBuy) {
+                if(!haveBuy&&!(stockKbar.getKbarDate().endsWith("150000"))&&!(stockKbar.getKbarDate().endsWith("093020"))) {
                     MacdBuyDTO macdBuyDTO = new MacdBuyDTO();
                     macdBuyDTO.setStockCode("ICZL");
                     macdBuyDTO.setStockCode("中证主连");
@@ -207,7 +481,7 @@ public class MacdCalComponent {
      */
     public void quoteToKbar(){
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20220101",DateUtil.yyyyMMdd));
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20210101",DateUtil.yyyyMMdd));
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
         boolean flag = false;
         for (TradeDatePool tradeDatePool:tradeDatePools){
@@ -215,7 +489,7 @@ public class MacdCalComponent {
             /*if(!yyyyMMdd.equals("20220526")){
                 continue;
             }*/
-            if(yyyyMMdd.equals("20220401")){
+            if(yyyyMMdd.equals("20210813")){
                 flag = true;
             }
             if(flag) {
@@ -285,7 +559,7 @@ public class MacdCalComponent {
                         if(quoteInfo.getAmt().compareTo(BigDecimal.ZERO)==-1){
                             amount = amount.subtract(quoteInfo.getAmt());
                         }else {
-                            amount = amount.subtract(quoteInfo.getAmt());
+                            amount = amount.add(quoteInfo.getAmt());
                         }
                     }
                     kbarQuotes.add(quoteInfo);
