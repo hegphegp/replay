@@ -3,6 +3,7 @@ package com.bazinga.replay.component;
 
 
 import com.bazinga.base.Sort;
+import com.bazinga.replay.model.StockKbar;
 import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.TradeDatePoolService;
@@ -67,6 +68,36 @@ public class CommonComponent {
         query.setLimit(1);
         List<TradeDatePool> dates = tradeDatePoolService.listByCondition(query);
         return dates.get(0).getTradeDate();
+    }
+
+
+    //包括新股最后一个一字板
+    public List<StockKbar> deleteNewStockTimes(List<StockKbar> list, int size){
+        List<StockKbar> datas = Lists.newArrayList();
+        if(CollectionUtils.isEmpty(list)){
+            return datas;
+        }
+        StockKbar first = null;
+        if(list.size()<size){
+            BigDecimal preEndPrice = null;
+            int i = 0;
+            for (StockKbar dto:list){
+                if(preEndPrice!=null&&i==0){
+                    if(!(dto.getHighPrice().equals(dto.getLowPrice()))){
+                        i++;
+                        datas.add(first);
+                    }
+                }
+                if(i!=0){
+                    datas.add(dto);
+                }
+                preEndPrice = dto.getClosePrice();
+                first = dto;
+            }
+        }else{
+            return list;
+        }
+        return datas;
     }
 
 }

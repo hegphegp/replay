@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
 import com.bazinga.replay.dto.BlockStockDTO;
 import com.bazinga.replay.model.HistoryBlockStocks;
+import com.bazinga.replay.model.StockIndex;
 import com.bazinga.replay.model.ThsQuoteInfo;
 import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.TradeDatePoolQuery;
@@ -165,12 +166,29 @@ public class ThsDataComponent {
     }
 
 
-    public List<HistoryBlockStocks> initBlockKbars(String blockCode,String blockName){
+    public List<StockIndex>  initStockIndex(String thscode,String stockName,List<String> tradeDates){
+        List<StockIndex> stockIndexList = Lists.newArrayList();
         int ret = thsLogin();
-        List<BlockStockDTO> blockStockDTOS = getBlockKbars(blockCode,blockName);
+        for (String tradeDate:tradeDates) {
+            System.out.println(tradeDate);
+            BigDecimal diff = getMacdIndex(thscode, tradeDate, 100);
+            BigDecimal dea = getMacdIndex(thscode, tradeDate, 101);
+            BigDecimal macd = getMacdIndex(thscode, tradeDate, 102);
+            String dateyyyyMMdd = DateUtil.format(DateUtil.parseDate(tradeDate, DateUtil.yyyy_MM_dd), DateUtil.yyyyMMdd);
+            String stockCode = MarketUtil.thsToGeneralStock(thscode);
+            StockIndex stockIndex = new StockIndex();
+            stockIndex.setStockCode(stockCode);
+            stockIndex.setStockName(stockName);
+            stockIndex.setKbarDate(dateyyyyMMdd);
+            stockIndex.setDea(dea);
+            stockIndex.setDiff(diff);
+            stockIndex.setMacd(macd);
+            stockIndex.setUniqueKey(stockCode+"_"+dateyyyyMMdd);
+            stockIndex.setCreateTime(new Date());
+            stockIndexList.add(stockIndex);
+        }
         thsLoginOut();
-        List<HistoryBlockStocks> historys = converToHistoryBlockStocks(blockCode, blockName, blockStockDTOS);
-        return historys;
+        return stockIndexList;
 
     }
 
@@ -199,24 +217,35 @@ public class ThsDataComponent {
         return list;
     }
 
-    public List<BlockStockDTO> getDEA(String blockCode,String blockName){
-        ArrayList<BlockStockDTO> list = Lists.newArrayList();
-        String quote_str = JDIBridge.THS_BasicData("000001.SH","ths_macd_index","2022-05-23,26,12,9,100,100");
+    /**
+     * DEA 101 DIFF 100  MACD 102
+     * @param blockCode
+     * @param tradeDate
+     * @param index
+     * @return
+     */
+    public BigDecimal getMacdIndex(String blockCode,String tradeDate,int index){
+        String quote_str = JDIBridge.THS_BasicData(blockCode,"ths_macd_index",tradeDate+",26,12,9,"+index+",100");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);
             JSONArray tables = jsonObject.getJSONArray("tables");
             if(tables==null||tables.size()==0){
-                return list;
+                return null;
             }
             JSONObject tableJson = tables.getJSONObject(0);
             JSONObject tableInfo = tableJson.getJSONObject("table");
-            JSONArray dateJson = tableInfo.getJSONArray("date");
-            if(dateJson==null||dateJson.size()==0){
-                return list;
+            if(tableInfo==null){
+                return null;
             }
-            List<BigDecimal> highs = tableInfo.getJSONArray("high").toJavaList(BigDecimal.class);
+            List<BigDecimal> macdValues = tableInfo.getJSONArray("ths_macd_index").toJavaList(BigDecimal.class);
+            if(CollectionUtils.isEmpty(macdValues)){
+                return null;
+            }
+            BigDecimal macdValue = macdValues.get(0).setScale(2,BigDecimal.ROUND_HALF_UP);
+            return macdValue;
+
         }
-        return list;
+        return null;
     }
 
     public int thsLogin(){

@@ -232,16 +232,18 @@ public class SynInfoComponent {
                 if (!CollectionUtils.isEmpty(circulateInfos)) {
                     circulateInfo = circulateInfos.get(0);
                 }
-                if (circulateInfo==null) {
-                    circulateInfo = convert2Mode(item);
-                    circulateInfoService.save(circulateInfo);
-                } else {
-                    circulateInfo.setStockCode(item.getStock());
-                    circulateInfo.setCirculate(item.getTotalQuantity().longValue());
-                    circulateInfo.setCirculateZ(item.getCirculateZ().longValue());
-                    circulateInfo.setStockName(item.getStockName());
-                    circulateInfo.setStockType(CommonUtil.getStockType(item.getCirculateZ().longValue()));
-                    circulateInfoService.updateById(circulateInfo);
+                if((!item.getStock().equals("601099"))&&(!item.getStock().equals("600777"))) {
+                    if (circulateInfo == null) {
+                        circulateInfo = convert2Mode(item);
+                        circulateInfoService.save(circulateInfo);
+                    } else {
+                        circulateInfo.setStockCode(item.getStock());
+                        circulateInfo.setCirculate(item.getTotalQuantity().longValue());
+                        circulateInfo.setCirculateZ(item.getCirculateZ().longValue());
+                        circulateInfo.setStockName(item.getStockName());
+                        circulateInfo.setStockType(CommonUtil.getStockType(item.getCirculateZ().longValue()));
+                        circulateInfoService.updateById(circulateInfo);
+                    }
                 }
             });
             log.info("更新流通 z 信息完毕 size = {}", dataList.size());
