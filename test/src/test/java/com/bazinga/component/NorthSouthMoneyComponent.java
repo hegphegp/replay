@@ -85,7 +85,7 @@ public class NorthSouthMoneyComponent {
                         amount0940 = amount0940.add(sbar0940.getTradeAmount());
                     }
                     OtherIndexInfo otherIndexInfo = new OtherIndexInfo();
-                    otherIndexInfo.setIndexCode("1888888");
+                    otherIndexInfo.setIndexCode("188888");
                     otherIndexInfo.setIndexName(stockName);
                     otherIndexInfo.setTradeDate(yyyyMMdd);
                     otherIndexInfo.setTimeStamp(stamp);

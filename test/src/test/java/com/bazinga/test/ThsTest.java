@@ -69,8 +69,8 @@ public class ThsTest {
         //macdCalComponent.macdExcel();
         /*indexDValueComponent.calIndexDValue();*/
        // indexDValueComponent.dvalueExcel();
-        northSouthMoneyComponent.northMoney("","北向资金");
-        //northSouthMoneyComponent.indexPercent("999999","上证指数成交额比例");
+        //northSouthMoneyComponent.northMoney("","北向资金");
+        northSouthMoneyComponent.indexPercent("999999","上证指数成交额比例");
         /*List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("999999", "20220602");
         System.out.println(data);*/
     }

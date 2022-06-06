@@ -3,6 +3,7 @@ package com.bazinga.component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
+import com.bazinga.dto.BlocKFollowBuyDTO;
 import com.bazinga.dto.MarketMoneyDTO;
 import com.bazinga.dto.PlankTimePairDTO;
 import com.bazinga.queue.LimitQueue;
@@ -19,6 +20,7 @@ import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.sun.deploy.net.proxy.WFirefoxProxyConfig;
 import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -167,16 +169,24 @@ public class BlockFollowComponent {
         return historyBlockInfos;
     }
 
-    public void blockBuys(List<HistoryBlockInfo> blockInfos,List<PlankTimePairDTO> pairs,String tradeDate){
+    public void blockBuys(List<HistoryBlockInfo> blockInfos,List<PlankTimePairDTO> pairs,Map<String, CirculateInfo> circulateInfoMap,String tradeDate){
+        Date preTradeDate = commonComponent.preTradeDate(DateUtil.parseDate(tradeDate, DateUtil.yyyyMMdd));
+        Date nextTradeDate = commonComponent.afterTradeDate(DateUtil.parseDate(tradeDate, DateUtil.yyyyMMdd));
         List<StockKbar> stockKbars = getStockKbarsByKBarDate(tradeDate);
-        List<StockKbar> nextStockKbars = getStockKbarsByKBarDate(tradeDate);
+        List<StockKbar> nextStockKbars = getStockKbarsByKBarDate(DateUtil.format(nextTradeDate,DateUtil.yyyyMMdd));
+        List<StockKbar> preStockKbars = getStockKbarsByKBarDate(DateUtil.format(preTradeDate,DateUtil.yyyyMMdd));
+
         Map<String, StockKbar> stockMap = new HashMap<>();
         Map<String, StockKbar> nestStockMap = new HashMap<>();
+        Map<String, StockKbar> preStockMap = new HashMap<>();
         for (StockKbar stockKbar:stockKbars){
             stockMap.put(stockKbar.getStockCode(),stockKbar);
         }
         for (StockKbar stockKbar:nextStockKbars){
             nestStockMap.put(stockKbar.getStockCode(),stockKbar);
+        }
+        for (StockKbar stockKbar:preStockKbars){
+            preStockMap.put(stockKbar.getStockCode(),stockKbar);
         }
         for (HistoryBlockInfo blockInfo:blockInfos){
             List<PlankTimePairDTO> blockPairs = Lists.newArrayList();
@@ -192,10 +202,17 @@ public class BlockFollowComponent {
             if(blockPairs.size()<3){
                 continue;
             }
+            Map<String, List<MarketMoneyDTO>> threeBuyLevelStocks = getThreeBuyLevelStocks(stocks, circulateInfoMap, stockMap);
             List<PlankTimePairDTO> plankTens = judgePlanks100000(blockPairs);
             if(plankTens.size()<3){
                 continue;
             }
+            BlocKFollowBuyDTO blocKFollowBuyDTO = new BlocKFollowBuyDTO();
+            BigDecimal firstProfit = getBuysProfit(threeBuyLevelStocks.get("first"), "100000", stockMap, nestStockMap, preStockMap);
+            BigDecimal twoProfit = getBuysProfit(threeBuyLevelStocks.get("two"), "100000", stockMap, nestStockMap, preStockMap);
+            BigDecimal threeProfit = getBuysProfit(threeBuyLevelStocks.get("three"), "100000", stockMap, nestStockMap, preStockMap);
+
+
 
 
         }
@@ -227,29 +244,128 @@ public class BlockFollowComponent {
                 list.add(marketMoneyDTO);
             }
         }
-        if(CollectionUtils.isEmpty(list)||list.size()<3){
+        if(CollectionUtils.isEmpty(list)||list.size()<=3){
             return map;
         }
         List<MarketMoneyDTO> marketMoneyDTOS = MarketMoneyDTO.marketLevelSort(list);
-
-        if(marketMoneyDTOS.size()>60){
-            List<MarketMoneyDTO> marketMoneyDTOS1 = marketMoneyDTOS.subList(0, 20);
-            List<MarketMoneyDTO> marketMoneyDTOS3 = marketMoneyDTOS.subList(marketMoneyDTOS.size()-20,marketMoneyDTOS.size());
-        }
+        Map<String, List<Integer>> levelIndex = getLevelIndex(marketMoneyDTOS.size());
+        List<Integer> firsts = levelIndex.get("first");
+        List<Integer> twos = levelIndex.get("two");
+        List<Integer> threes = levelIndex.get("three");
+        List<MarketMoneyDTO> firstStocks = marketMoneyDTOS.subList(0, firsts.get(1));
+        List<MarketMoneyDTO> twoStocks = marketMoneyDTOS.subList(twos.get(0)-1, twos.get(1));
+        List<MarketMoneyDTO> threeStocks = marketMoneyDTOS.subList(threes.get(0)-1, firsts.get(1));
+        map.put("first",firstStocks);
+        map.put("two",twoStocks);
+        map.put("three",threeStocks);
         return map;
     }
+    public BigDecimal getBuysProfit(List<MarketMoneyDTO> marketDtos,String tradeTime,Map<String, StockKbar> stockKbarMap,Map<String, StockKbar> nextStockKbarMap,Map<String, StockKbar> preStockKbarMap){
+        BigDecimal totalProfit = BigDecimal.ZERO;
+        int count = 0;
+        for (MarketMoneyDTO dto:marketDtos){
+            StockKbar stockKbar = stockKbarMap.get(dto.getStockCode());
+            StockKbar nextStockKbar = nextStockKbarMap.get(dto.getStockCode());
+            StockKbar preStockKbar = preStockKbarMap.get(dto.getStockCode());
+            if(stockKbar==null||preStockKbar==null||nextStockKbar==null){
+                continue;
+            }
+            BigDecimal stockBuyPrice = getStockBuyPrice(dto.getStockCode(), stockKbar.getKbarDate(), tradeTime, preStockKbar);
+            BigDecimal sellPrice = nextStockKbar.getTradeAmount().divide(new BigDecimal(nextStockKbar.getTradeQuantity() * 100));
+            BigDecimal chuQuanBuyPrice = chuQuanAvgPrice(stockBuyPrice, stockKbar);
+            BigDecimal chuQuanSellPrice = chuQuanAvgPrice(sellPrice, stockKbar);
+            BigDecimal profit = PriceUtil.getPricePercentRate(chuQuanSellPrice.subtract(chuQuanBuyPrice), chuQuanBuyPrice);
+            count++;
+            totalProfit = totalProfit.add(profit);
+        }
+        if(count>0){
+            return null;
+        }
+        return null;
+    }
 
-    public Map<String,List<Integer>> getLevelIndex(int size){
+    public BigDecimal getStockBuyPrice(String stockCode,String tradeDate,String buyTime,StockKbar preStockKbar){
+        long buyTimeInt = timeToLong(buyTime);
+        List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockCode, tradeDate);
+        String preMin = "09:25";
+        Integer index = -1;
+        for (ThirdSecondTransactionDataDTO data:datas){
+            BigDecimal tradePrice = data.getTradePrice();
+            Integer tradeType = data.getTradeType();
+            String tradeTime = data.getTradeTime();
+            boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockCode, tradePrice, preStockKbar.getClosePrice(), tradeDate);
+            if(tradeTime.equals(preMin)){
+                index++;
+            }else{
+                preMin = tradeTime;
+                index = 0;
+            }
+            long timeLong = timeToLong(tradeTime, index);
+            if(timeLong>=buyTimeInt){
+                if(historyUpperPrice&&tradeType==1){
+                    return null;
+                }
+                return tradePrice;
+            }
+        }
+        return null;
+    }
+
+
+    public static Map<String,List<Integer>> getLevelIndex(int size){
         Map<String, List<Integer>> map = new HashMap<>();
-        if(size<=3){
-            map.put("frist",Lists.newArrayList(0,0));
-            map.put("frist",Lists.newArrayList(1,1));
-            map.put("frist",Lists.newArrayList(2,2));
+        if(size<=4){
+            map.put("first",Lists.newArrayList(1,1));
+            map.put("two",Lists.newArrayList(2,2));
+            map.put("three",Lists.newArrayList(size,size));
+            return map;
         }
-        Integer levelSize = Integer.valueOf(new BigDecimal(size).multiply(new BigDecimal("0.3")).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
-        map.put("frist",Lists.newArrayList(0,(levelSize-1)));
+        Integer levelSize = Integer.valueOf(new BigDecimal(size).multiply(new BigDecimal("0.3")).setScale(0, BigDecimal.ROUND_DOWN).toString());
+        Integer halfSize = Integer.valueOf(new BigDecimal(size).multiply(new BigDecimal("0.5")).setScale(0, BigDecimal.ROUND_DOWN).toString());
+        if(size%2==1) {
+            halfSize = Integer.valueOf(new BigDecimal(size).multiply(new BigDecimal("0.5")).setScale(0, BigDecimal.ROUND_UP).toString());
+        }
+        Integer handleSize = Integer.valueOf(new BigDecimal(levelSize).multiply(new BigDecimal("0.5")).setScale(0, BigDecimal.ROUND_DOWN).toString());
+        if(size>=60){
+            levelSize = 20;
+            handleSize = 10;
+        }
+        map.put("first",Lists.newArrayList(1,levelSize));
+        if(handleSize>0) {
+            if(levelSize%2==0) {
+                map.put("two", Lists.newArrayList(halfSize - handleSize + 1, halfSize + handleSize));
+            }else{
+                map.put("two", Lists.newArrayList(halfSize - handleSize, halfSize + handleSize));
+            }
+        }else{
+            map.put("two", Lists.newArrayList(halfSize, halfSize));
+        }
+        map.put("three",Lists.newArrayList(size-levelSize+1,size));
         return map;
     }
+
+    public static void main(String[] args) {
+        List<Integer> list = Lists.newArrayList();
+        for (int i=0 ; i<=99 ;i++) {
+            list.add(i);
+        }
+        for (int i=3 ; i<=100 ;i++) {
+            Map<String, List<Integer>> levelIndex = getLevelIndex(i);
+            System.out.println(levelIndex);
+            List<Integer> firsts = list.subList(0, levelIndex.get("first").get(1));
+            List<Integer> twos = list.subList(levelIndex.get("two").get(0)-1, levelIndex.get("two").get(1));
+            List<Integer> threes = list.subList(levelIndex.get("three").get(0)-1, levelIndex.get("three").get(1));
+            System.out.println(firsts);
+            System.out.println(twos);
+            System.out.println(threes);
+            System.out.println(i+"======================");
+
+        }
+
+        List<Integer> subs = list.subList(2, 3);
+        System.out.println(subs);
+    }
+
 
 
     public Map<String,CirculateInfo> getCirculateInfoMap(List<CirculateInfo> circulateInfos){
@@ -394,11 +510,13 @@ public class BlockFollowComponent {
         return timeLong;
     }
 
-    public static void main(String[] args) {
-        ArrayList<Integer> integers = Lists.newArrayList(0, 1, 2, 3, 4, 5, 6, 7, 8);
-        List<Integer> integers1 = integers.subList(0, 1);
-        List<Integer> integers2 = integers.subList(6, integers.size());
-        System.out.println(111111);
+    public static long timeToLong(String time){
+        String timeStr = time.replace(":", "");
+        if(timeStr.startsWith("09")){
+            timeStr = timeStr.substring(1);
+        }
+        Long timeLong = Long.valueOf(timeStr);
+        return timeLong;
     }
 
 
