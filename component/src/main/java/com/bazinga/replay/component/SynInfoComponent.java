@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.bazinga.constant.SymbolConstants;
 import com.bazinga.exception.BusinessException;
 import com.bazinga.replay.dto.CirculateInfoExcelDTO;
+import com.bazinga.replay.dto.HSTechExcelDTO;
 import com.bazinga.replay.dto.TransferableBondInfoExcelDTO;
 import com.bazinga.replay.dto.ZiDingYiBlockInfoExcelDTO;
 import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.*;
 import com.bazinga.replay.service.*;
 import com.bazinga.util.CommonUtil;
+import com.bazinga.util.DateUtil;
 import com.bazinga.util.Excel2JavaPojoUtil;
 import com.bazinga.util.MarketUtil;
 import com.google.common.collect.Lists;
@@ -26,10 +28,8 @@ import org.springframework.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @author yunshan
@@ -60,6 +60,8 @@ public class SynInfoComponent {
     private TransferableBondInfoService transferableBondInfoService;
     @Autowired
     private MarketInfoService marketInfoService;
+    @Autowired
+    private StockKbarService stockKbarService;
 
     public static List<String> BLOCK_NAME_FILTER_LIST = Lists.newArrayList("沪股通","深股通","标普道琼斯","新股","次新"
             ,"创业板重组松绑","高送转","填权","共同富裕示范区","融资融券","MSCI","ST");
@@ -286,6 +288,38 @@ public class SynInfoComponent {
             throw new BusinessException("文件解析及同步异常", e);
         }
     }
+
+    public void synHSTECH() {
+        File file = new File("D:/circulate/HK8007002.xlsx");
+        if (!file.exists()) {
+            throw new BusinessException("文件:" + "D:/circulate/hotCirculate.csv" + "不存在");
+        }
+        try {
+            List<HSTechExcelDTO> dataList = new Excel2JavaPojoUtil(file).excel2JavaPojo(HSTechExcelDTO.class);
+            dataList.forEach(item -> {
+                String time = item.getTime();
+                Date date = DateUtil.cstToDate(time);
+                StockKbar stockKbar = new StockKbar();
+                stockKbar.setStockCode("HSTECH");
+                stockKbar.setStockName("恒生科技指数");
+                stockKbar.setKbarDate(DateUtil.format(date,DateUtil.yyyyMMddHHmmss));
+                stockKbar.setUniqueKey(stockKbar.getStockCode()+"_"+stockKbar.getKbarDate());
+                stockKbar.setTradeQuantity(0l);
+                stockKbar.setTradeAmount(new BigDecimal(0));
+                stockKbar.setHighPrice(item.getHigh());
+                stockKbar.setLowPrice(item.getLow());
+                stockKbar.setOpenPrice(item.getOpen());
+                stockKbar.setClosePrice(item.getClose());
+                stockKbarService.save(stockKbar);
+            });
+            log.info("更新流通 z 信息完毕 size = {}", dataList.size());
+        } catch (Exception e) {
+            log.error("更新流通 z 信息异常", e);
+            throw new BusinessException("文件解析及同步异常", e);
+        }
+    }
+
+
 
     public void synMarketInfoZz500() {
         File file = new File("D:/circulate/zz500.xlsx");

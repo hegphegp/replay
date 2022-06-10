@@ -11,6 +11,9 @@
         <result column="macd" jdbcType="DECIMAL" property="macd"/>
         <result column="diff" jdbcType="DECIMAL" property="diff"/>
         <result column="dea" jdbcType="DECIMAL" property="dea"/>
+        <result column="bias6" jdbcType="DECIMAL" property="bias6"/>
+        <result column="bias12" jdbcType="DECIMAL" property="bias12"/>
+        <result column="bias24" jdbcType="DECIMAL" property="bias24"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
@@ -25,6 +28,9 @@
             macd,
             diff,
             dea,
+            bias6,
+            bias12,
+            bias24,
             create_time,
             update_time
         </sql>
@@ -66,6 +72,15 @@
         <if test="dea != null">
             dea = #{dea, jdbcType=DECIMAL},
         </if>
+        <if test="bias6 != null">
+            bias6 = #{bias6, jdbcType=DECIMAL},
+        </if>
+        <if test="bias12 != null">
+            bias12 = #{bias12, jdbcType=DECIMAL},
+        </if>
+        <if test="bias24 != null">
+            bias24 = #{bias24, jdbcType=DECIMAL},
+        </if>
         <if test="createTime != null">
             create_time = #{createTime, jdbcType=TIMESTAMP},
         </if>
@@ -86,6 +101,9 @@
             #{macd, jdbcType=DECIMAL},
             #{diff, jdbcType=DECIMAL},
             #{dea, jdbcType=DECIMAL},
+            #{bias6, jdbcType=DECIMAL},
+            #{bias12, jdbcType=DECIMAL},
+            #{bias24, jdbcType=DECIMAL},
             #{createTime, jdbcType=TIMESTAMP},
             #{updateTime, jdbcType=TIMESTAMP}
             )
@@ -114,6 +132,15 @@
             </if>
             <if test="dea != null">
                 dea = #{dea, jdbcType=DECIMAL},
+            </if>
+            <if test="bias6 != null">
+                bias6 = #{bias6, jdbcType=DECIMAL},
+            </if>
+            <if test="bias12 != null">
+                bias12 = #{bias12, jdbcType=DECIMAL},
+            </if>
+            <if test="bias24 != null">
+                bias24 = #{bias24, jdbcType=DECIMAL},
             </if>
             <if test="createTime != null">
                 create_time = #{createTime, jdbcType=TIMESTAMP},
@@ -146,6 +173,15 @@
         </if>
         <if test="dea != null">
             and dea = #{dea, jdbcType=DECIMAL}
+        </if>
+        <if test="bias6 != null">
+            and bias6 = #{bias6, jdbcType=DECIMAL}
+        </if>
+        <if test="bias12 != null">
+            and bias12 = #{bias12, jdbcType=DECIMAL}
+        </if>
+        <if test="bias24 != null">
+            and bias24 = #{bias24, jdbcType=DECIMAL}
         </if>
     </sql>
 

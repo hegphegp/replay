@@ -167,7 +167,8 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
+        synInfoComponent.synHSTECH();
+        //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
         /*historyBlockInfoComponent.initHistoryBlockInfo();
         stockKbarComponent.batchKbarDataInit();
         stockListComponent.getCirculateInfo(new Date());*/

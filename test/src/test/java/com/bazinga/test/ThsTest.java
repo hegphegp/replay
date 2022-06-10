@@ -1,6 +1,7 @@
 package com.bazinga.test;
 
 import com.bazinga.base.Sort;
+import com.bazinga.component.BlockFollowComponent;
 import com.bazinga.component.IndexDValueComponent;
 import com.bazinga.component.MacdCalComponent;
 import com.bazinga.component.NorthSouthMoneyComponent;
@@ -53,10 +54,14 @@ public class ThsTest {
     private NorthSouthMoneyComponent northSouthMoneyComponent;
     @Autowired
     private HistoryTransactionDataComponent historyTransactionDataComponent;
+    @Autowired
+    private BlockFollowComponent blockFollowComponent;
 
 
     @Test
     public void test1() {
+        blockFollowComponent.relativeWithSZInfo();
+        //blockFollowComponent.getHistoryBlockInfoTest();
         /*BigExchangeTestBuyDTO buyDTO = new BigExchangeTestBuyDTO();
         buyDTO.setTradeDate("20220425");
         bigAmountTestComponent.getStockOrder("601975","20220425",buyDTO);*/
@@ -68,9 +73,11 @@ public class ThsTest {
         //macdCalComponent.calMacd();
         //macdCalComponent.macdExcel();
         /*indexDValueComponent.calIndexDValue();*/
-       // indexDValueComponent.dvalueExcel();
+        indexDValueComponent.dvalueExcel();
         //northSouthMoneyComponent.northMoney("","北向资金");
-        northSouthMoneyComponent.indexPercent("999999","上证指数成交额比例");
+        //northSouthMoneyComponent.indexPercent("999999","上证指数成交额比例");
+        //northSouthMoneyComponent.calHenShenIndex();
+        //northSouthMoneyComponent.calHenShenStockKbar10();
         /*List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("999999", "20220602");
         System.out.println(data);*/
     }

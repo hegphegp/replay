@@ -186,4 +186,95 @@ public class NorthSouthMoneyComponent {
         }
 
     }
+
+    public void calHenShenIndex(){
+        Map<String, List<StockKbar>> henShenMap = getDateKbarMap("HSTE");
+        Map<String, List<StockKbar>> szMap = getDateKbarMap("999999");
+        for (String tradeDate:szMap.keySet()){
+            List<StockKbar> szList = szMap.get(tradeDate);
+            List<StockKbar> henShenList = henShenMap.get(tradeDate);
+            if(CollectionUtils.isEmpty(henShenList)){
+                continue;
+            }
+            int i=0;
+            BigDecimal openIndex = null;
+            for (StockKbar stockKbar:szList){
+                StockKbar henShenKbar = henShenList.get(i);
+                if(stockKbar.getKbarDate().endsWith("094000")){
+                    openIndex = stockKbar.getOpenPrice().subtract(henShenKbar.getOpenPrice());
+                }
+                BigDecimal indexIntel = stockKbar.getClosePrice().subtract(henShenKbar.getClosePrice());
+                BigDecimal subtract = indexIntel.subtract(openIndex);
+                OtherIndexInfo otherIndexInfo = new OtherIndexInfo();
+                otherIndexInfo.setIndexCode("HSTE");
+                otherIndexInfo.setTradeDate(tradeDate);
+                otherIndexInfo.setTimeStamp(stockKbar.getKbarDate().substring(8));
+                otherIndexInfo.setIndexName("恒生科技差值");
+                otherIndexInfo.setIndexValue(subtract);
+                otherIndexInfo.setCreateTime(new Date());
+                otherIndexInfoService.save(otherIndexInfo);
+                i++;
+            }
+        }
+    }
+
+    public void calHenShenStockKbar10(){
+        List<String> timeStamps = Lists.newArrayList("094000", "095000", "100000", "101000", "102000", "103000");
+        StockKbarQuery query = new StockKbarQuery();
+        //query.setKbarDateFrom("20220608000000");
+        query.addOrderBy("kbar_date", Sort.SortType.ASC);
+        query.setLimit(200000);
+        List<StockKbar> stockKbars = stockKbarService.listByCondition(query);
+        BigDecimal start = null;
+        for (StockKbar stockKbar:stockKbars){
+            String tradeDate = stockKbar.getKbarDate().substring(0, 8);
+            String tradeTime = stockKbar.getKbarDate().substring(8);
+            if(stockKbar.getKbarDate().endsWith("093000")||stockKbar.getKbarDate().endsWith("094100")||
+                    stockKbar.getKbarDate().endsWith("095100")||stockKbar.getKbarDate().endsWith("100100")||
+                    stockKbar.getKbarDate().endsWith("101100")||stockKbar.getKbarDate().endsWith("102100")){
+                start = stockKbar.getOpenPrice();
+            }
+            if(timeStamps.contains(tradeTime)){
+                StockKbar kbarMin10 = new StockKbar();
+                kbarMin10.setStockCode("HSTE");
+                kbarMin10.setStockName("恒生科技10mink");
+                kbarMin10.setKbarDate(stockKbar.getKbarDate());
+                kbarMin10.setUniqueKey(kbarMin10.getStockCode()+"_"+stockKbar.getKbarDate());
+                kbarMin10.setOpenPrice(start);
+                kbarMin10.setClosePrice(stockKbar.getClosePrice());
+                kbarMin10.setHighPrice(BigDecimal.ZERO);
+                kbarMin10.setLowPrice(BigDecimal.ZERO);
+                kbarMin10.setTradeAmount(BigDecimal.ZERO);
+                kbarMin10.setTradeQuantity(0l);
+                stockKbarService.save(kbarMin10);
+            }
+        }
+        //System.out.println(stockKbars);
+    }
+
+
+    public Map<String,List<StockKbar>> getDateKbarMap(String stockCode){
+        Map<String, List<StockKbar>> map = new HashMap<>();
+        StockKbarQuery query = new StockKbarQuery();
+        query.setStockCode(stockCode);
+        query.addOrderBy("kbar_date", Sort.SortType.ASC);
+        query.setLimit(100000);
+        List<StockKbar> stockKbars = stockKbarService.listByCondition(query);
+        String tradeDate = null;
+        for (StockKbar stockKbar:stockKbars){
+            if(tradeDate==null||!stockKbar.getKbarDate().startsWith(tradeDate)){
+                tradeDate = stockKbar.getKbarDate().substring(0,8);
+            }
+            if(stockKbar.getKbarDate().endsWith("094000")||stockKbar.getKbarDate().endsWith("095000")||stockKbar.getKbarDate().endsWith("101000")||
+                    stockKbar.getKbarDate().endsWith("100000")||stockKbar.getKbarDate().endsWith("102000")||stockKbar.getKbarDate().endsWith("103000")) {
+                List<StockKbar> kbars = map.get(tradeDate);
+                if (kbars == null) {
+                    kbars = Lists.newArrayList();
+                    map.put(tradeDate, kbars);
+                }
+                kbars.add(stockKbar);
+            }
+        }
+        return map;
+    }
 }
