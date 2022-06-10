@@ -4,8 +4,16 @@ package com.bazinga.replay.component;
 import Ths.JDIBridge;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.bazinga.base.Sort;
 import com.bazinga.replay.dto.BlockStockDTO;
+import com.bazinga.replay.model.HistoryBlockInfo;
 import com.bazinga.replay.model.HistoryBlockStocks;
+import com.bazinga.replay.model.StockIndex;
+import com.bazinga.replay.model.StockKbar;
+import com.bazinga.replay.query.HistoryBlockInfoQuery;
+import com.bazinga.replay.query.StockKbarQuery;
+import com.bazinga.replay.service.HistoryBlockInfoService;
+import com.bazinga.replay.service.StockKbarService;
 import com.bazinga.replay.service.ThsQuoteInfoService;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateTimeUtils;
@@ -19,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 
@@ -33,6 +42,10 @@ public class ThsBlockKbarComponent {
     private ThsQuoteInfoService thsQuoteInfoService;
     @Autowired
     private TradeDatePoolService tradeDatePoolService;
+    @Autowired
+    private HistoryBlockInfoService historyBlockInfoService;
+    @Autowired
+    private StockKbarService stockKbarService;
 
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
@@ -158,11 +171,112 @@ public class ThsBlockKbarComponent {
         return list;
     }
 
+    public void initHistoryBlockKbars(){
+        int ret = thsLogin();
+        HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
+        query.setBlockType(1);
+        List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
+        for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
+            getBlockKbar(historyBlockInfo.getBlockCode(),historyBlockInfo.getBlockName());
+        }
+        thsLoginOut();
+    }
+
+    public void getBlockKbar(String blockCode,String blockName){
+        System.out.println(blockCode);
+        String quote_str = JDIBridge.THS_HistoryQuotes(blockCode+".TI","open,high,low,close","","2017-06-01","2022-06-09");
+        if(!StringUtils.isEmpty(quote_str)){
+            JSONObject jsonObject = JSONObject.parseObject(quote_str);
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONArray timeArray = tableJson.getJSONArray("time");
+            if(timeArray==null||timeArray.size()==0){
+                return;
+            }
+            List<String> times = timeArray.toJavaList(String.class);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            List<BigDecimal> opens = tableInfo.getJSONArray("open").toJavaList(BigDecimal.class);
+            List<BigDecimal> highs = tableInfo.getJSONArray("high").toJavaList(BigDecimal.class);
+            List<BigDecimal> lows = tableInfo.getJSONArray("low").toJavaList(BigDecimal.class);
+            List<BigDecimal> closes = tableInfo.getJSONArray("close").toJavaList(BigDecimal.class);
+            int i = 0;
+            for (String time:times){
+                Date timeDate = DateUtil.parseDate(time, DateUtil.yyyy_MM_dd);
+                StockKbar stockKbar = new StockKbar();
+                stockKbar.setStockCode(blockCode);
+                stockKbar.setStockName(blockName);
+                stockKbar.setKbarDate(DateUtil.format(timeDate, DateUtil.yyyyMMdd));
+                stockKbar.setUniqueKey(stockKbar.getStockCode() + "_" + stockKbar.getKbarDate());
+                stockKbar.setOpenPrice(opens.get(i));
+                stockKbar.setClosePrice(closes.get(i));
+                stockKbar.setHighPrice(highs.get(i));
+                stockKbar.setLowPrice(lows.get(i));
+                stockKbar.setTradeAmount(BigDecimal.ZERO);
+                stockKbar.setTradeQuantity(0l);
+                stockKbarService.save(stockKbar);
+                i++;
+            }
+        }
+
+    }
+    public void initHistoryBlockIndex(){
+        int ret = thsLogin();
+        HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
+        query.setBlockType(1);
+        List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
+        for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
+            if(!historyBlockInfo.getBlockCode().equals("885806")){
+                continue;
+            }
+            StockKbarQuery kbarQuery = new StockKbarQuery();
+            kbarQuery.setStockCode(historyBlockInfo.getBlockCode());
+            kbarQuery.addOrderBy("kbar_date", Sort.SortType.ASC);
+            List<StockKbar> stockKbars = stockKbarService.listByCondition(kbarQuery);
+            if(stockKbars==null||stockKbars.size()<=0){
+                continue;
+            }
+            for (StockKbar stockKbar:stockKbars){
+                Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
+                String dateStr = DateUtil.format(date, DateUtil.yyyy_MM_dd);
+                StockIndex stockIndex = new StockIndex();
+                stockIndex.setStockCode(historyBlockInfo.getBlockCode());
+                stockIndex.setStockName(historyBlockInfo.getBlockName());
+                stockIndex.setKbarDate(stockKbar.getKbarDate());
+                stockIndex.setUniqueKey(stockIndex.getStockCode()+"_"+stockIndex.getKbarDate());
+                getStockIndex(historyBlockInfo.getBlockCode(),historyBlockInfo.getBlockName(),dateStr,stockIndex);
+            }
+        }
+        thsLoginOut();
+    }
+
+    public void getStockIndex(String blockCode,String blockName,String tradeDate,StockIndex stockIndex){
+        System.out.println(blockCode);
+        String quote_str = JDIBridge.THS_BasicData(blockCode+".TI", "ths_bias_index;ths_macd_index", tradeDate+",6,100;"+tradeDate+",26,12,9,102,100");
+        if(!StringUtils.isEmpty(quote_str)){
+            JSONObject jsonObject = JSONObject.parseObject(quote_str);
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            List<BigDecimal> biass = tableInfo.getJSONArray("ths_bias_index").toJavaList(BigDecimal.class);
+            List<BigDecimal> macds = tableInfo.getJSONArray("ths_macd_index").toJavaList(BigDecimal.class);
+            BigDecimal bias = biass.get(0);
+            BigDecimal macd = macds.get(0);
+
+        }
+
+    }
+
 
     public int thsLogin(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("ylz203", "182883");
+            int ret = JDIBridge.THS_iFinDLogin("ylz198", "307435");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);
@@ -173,7 +287,7 @@ public class ThsBlockKbarComponent {
     public int thsLoginOut(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("ylz200", "620865");
+            int ret = JDIBridge.THS_iFinDLogin("ylz198", "307435");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);
