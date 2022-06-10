@@ -70,6 +70,12 @@ public class HistoryBlockInfoComponent {
         saveHistoryBlockInfo(blocks);
         for (HistoryBlockInfo historyBlockInfo:blocks){
             System.out.println(historyBlockInfo.getBlockCode());
+            HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
+            query.setBlockCode(historyBlockInfo.getBlockCode());
+            List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
+            if(!CollectionUtils.isEmpty(historyBlockInfos)){
+                continue;
+            }
             List<HistoryBlockStocks> historyBlockStocks = thsDataComponent.initHistoryBlockStocks(historyBlockInfo.getBlockCode(), historyBlockInfo.getBlockName());
             saveBlockStocks(historyBlockStocks);
         }

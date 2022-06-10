@@ -56,12 +56,16 @@ public class ThsTest {
     private HistoryTransactionDataComponent historyTransactionDataComponent;
     @Autowired
     private BlockFollowComponent blockFollowComponent;
+    @Autowired
+    private ThsBlockKbarComponent thsBlockKbarComponent;
 
 
     @Test
     public void test1() {
         blockFollowComponent.relativeWithSZInfo();
         //blockFollowComponent.getHistoryBlockInfoTest();
+        //thsBlockKbarComponent.initHistoryBlockKbars();
+        thsBlockKbarComponent.initHistoryBlockIndex();
         /*BigExchangeTestBuyDTO buyDTO = new BigExchangeTestBuyDTO();
         buyDTO.setTradeDate("20220425");
         bigAmountTestComponent.getStockOrder("601975","20220425",buyDTO);*/
@@ -74,6 +78,8 @@ public class ThsTest {
         //macdCalComponent.macdExcel();
         /*indexDValueComponent.calIndexDValue();*/
         indexDValueComponent.dvalueExcel();
+        //northSouthMoneyComponent.northMoney("","北向资金");
+       // indexDValueComponent.dvalueExcel();
         //northSouthMoneyComponent.northMoney("","北向资金");
         //northSouthMoneyComponent.indexPercent("999999","上证指数成交额比例");
         //northSouthMoneyComponent.calHenShenIndex();
