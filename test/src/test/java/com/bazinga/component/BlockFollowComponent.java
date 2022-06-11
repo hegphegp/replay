@@ -67,7 +67,7 @@ public class BlockFollowComponent {
     @Autowired
     private StockIndexService stockIndexService;
 
-    public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
+    public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(4, 32, 512, "QuoteThreadPool");
     public void relativeWithSZInfo(){
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
         Map<String, CirculateInfo> circulateInfoMap = getCirculateInfoMap(circulateInfos);
@@ -89,7 +89,7 @@ public class BlockFollowComponent {
 
         }
         try {
-            Thread.sleep(10000000l);
+            Thread.sleep(10000000000l);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -239,6 +239,12 @@ public class BlockFollowComponent {
             preStockMap.put(stockKbar.getStockCode(),stockKbar);
         }
         for (HistoryBlockInfo blockInfo:blockInfos){
+            String rediesKey = blockInfo.getBlockCode() + "_" + tradeDate + "_" + "bkgs";
+            RedisMonior redisMinor = redisMoniorService.getByRedisKey(rediesKey);
+            if(redisMinor!=null){
+                System.out.println(rediesKey);
+                continue;
+            }
             List<PlankTimePairDTO> blockPairs = Lists.newArrayList();
             List<String> stocks = getBlockStocks(blockInfo.getBlockCode(), tradeDate);
             if(CollectionUtils.isEmpty(stocks)){
@@ -355,11 +361,13 @@ public class BlockFollowComponent {
                         blocKFollowBuyDTO.setMacd(stockIndex.getMacd());
                     }
                     buys.add(blocKFollowBuyDTO);
+
                     RedisMonior redisMonior = new RedisMonior();
                     redisMonior.setRedisKey(blocKFollowBuyDTO.getBlockCode()+"_"+blocKFollowBuyDTO.getTradeDate()+"_"+"bkgs");
                     redisMonior.setRedisValue(JSONObject.toJSONString(blocKFollowBuyDTO));
                     redisMonior.setCreateTime(new Date());
                     redisMoniorService.save(redisMonior);
+                    System.out.println(blocKFollowBuyDTO.getBlockCode()+"_"+blocKFollowBuyDTO.getTradeDate()+"_"+"bkgs"+"========没有跑到");
                 }
             }
 
