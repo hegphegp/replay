@@ -20,6 +20,7 @@ import com.bazinga.replay.util.PoiExcelUtil;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
+import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sun.deploy.net.proxy.WFirefoxProxyConfig;
@@ -34,6 +35,7 @@ import org.springframework.util.CollectionUtils;
 import javax.sql.rowset.FilteredRowSet;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 
@@ -64,8 +66,9 @@ public class BlockFollowComponent {
     private HistoryBlockStocksService historyBlockStocksService;
     @Autowired
     private StockIndexService stockIndexService;
+
+    public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
     public void relativeWithSZInfo(){
-        List<TradeDatePool> tradeDates = getTradeDates();
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
         Map<String, CirculateInfo> circulateInfoMap = getCirculateInfoMap(circulateInfos);
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
@@ -76,14 +79,21 @@ public class BlockFollowComponent {
         for (String tradeDate:pairsMap.keySet()) {
             index++;
             System.out.println(index+"===="+count);
-            List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
-            List<BlocKFollowBuyDTO> dtos = blockBuys(blockInfos, plankTimePairDTOS, circulateInfoMap, tradeDate);
+            THREAD_POOL_QUOTE.execute(() ->{
+                List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
+                List<BlocKFollowBuyDTO> dtos = blockBuys(blockInfos, plankTimePairDTOS, circulateInfoMap, tradeDate);
+                if(!CollectionUtils.isEmpty(dtos)) {
+                    buys.addAll(dtos);
+                }
+            });
 
-            if(!CollectionUtils.isEmpty(dtos)) {
-                buys.addAll(dtos);
-            }
         }
-        List<Object[]> datas = Lists.newArrayList();
+        try {
+            Thread.sleep(10000000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        /*List<Object[]> datas = Lists.newArrayList();
         for (BlocKFollowBuyDTO dto:buys) {
             List<Object> list = new ArrayList<>();
             list.add(dto.getTradeDate());
@@ -138,7 +148,7 @@ public class BlockFollowComponent {
             poiExcelUtil.exportExcelUseExcelTitle("板块跟随买入");
         }catch (Exception e){
             log.info(e.getMessage());
-        }
+        }*/
     }
 
 
@@ -164,10 +174,10 @@ public class BlockFollowComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220201", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 List<String> olds = Lists.newArrayList();
@@ -348,6 +358,7 @@ public class BlockFollowComponent {
                     RedisMonior redisMonior = new RedisMonior();
                     redisMonior.setRedisKey(blocKFollowBuyDTO.getBlockCode()+"_"+blocKFollowBuyDTO.getTradeDate()+"_"+"bkgs");
                     redisMonior.setRedisValue(JSONObject.toJSONString(blocKFollowBuyDTO));
+                    redisMonior.setCreateTime(new Date());
                     redisMoniorService.save(redisMonior);
                 }
             }
