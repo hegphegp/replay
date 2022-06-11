@@ -174,10 +174,10 @@ public class BlockFollowComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220201", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 List<String> olds = Lists.newArrayList();
@@ -428,7 +428,7 @@ public class BlockFollowComponent {
             if(pair.getPlanks()!=1){
                 continue;
             }
-            int i = 1;
+            int i = 0;
             for (PlankTimePairDTO dto:pairsCopy) {
                 if((!dto.getStockCode().equals(pair.getStockCode()))&&dto.getPlanks()==1) {
                     if (dto.getStart() <= pair.getStart() && (dto.getEnd() == null || dto.getEnd() > pair.getStart())) {
