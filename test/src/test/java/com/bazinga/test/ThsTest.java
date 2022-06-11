@@ -62,7 +62,7 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        blockFollowComponent.relativeWithSZInfo();
+        //blockFollowComponent.relativeWithSZInfo();
         //blockFollowComponent.getHistoryBlockInfoTest();
         //thsBlockKbarComponent.initHistoryBlockKbars();
         thsBlockKbarComponent.initHistoryBlockIndex();
@@ -77,7 +77,7 @@ public class ThsTest {
         //macdCalComponent.calMacd();
         //macdCalComponent.macdExcel();
         /*indexDValueComponent.calIndexDValue();*/
-        indexDValueComponent.dvalueExcel();
+        //indexDValueComponent.dvalueExcel();
         //northSouthMoneyComponent.northMoney("","北向资金");
        // indexDValueComponent.dvalueExcel();
         //northSouthMoneyComponent.northMoney("","北向资金");

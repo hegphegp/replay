@@ -12,10 +12,7 @@ import com.bazinga.replay.model.StockIndex;
 import com.bazinga.replay.model.StockKbar;
 import com.bazinga.replay.query.HistoryBlockInfoQuery;
 import com.bazinga.replay.query.StockKbarQuery;
-import com.bazinga.replay.service.HistoryBlockInfoService;
-import com.bazinga.replay.service.StockKbarService;
-import com.bazinga.replay.service.ThsQuoteInfoService;
-import com.bazinga.replay.service.TradeDatePoolService;
+import com.bazinga.replay.service.*;
 import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
@@ -26,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import sun.misc.Cache;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -46,6 +44,8 @@ public class ThsBlockKbarComponent {
     private HistoryBlockInfoService historyBlockInfoService;
     @Autowired
     private StockKbarService stockKbarService;
+    @Autowired
+    private StockIndexService stockIndexService;
 
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
@@ -222,38 +222,56 @@ public class ThsBlockKbarComponent {
         }
 
     }
-    public void initHistoryBlockIndex(){
+    public void initHistoryBlockIndex() {
         int ret = thsLogin();
         HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
         query.setBlockType(1);
         List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
         for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
-            if(!historyBlockInfo.getBlockCode().equals("885806")){
+           /* if(!historyBlockInfo.getBlockCode().equals("885806")){
                 continue;
-            }
-            StockKbarQuery kbarQuery = new StockKbarQuery();
-            kbarQuery.setStockCode(historyBlockInfo.getBlockCode());
-            kbarQuery.addOrderBy("kbar_date", Sort.SortType.ASC);
-            List<StockKbar> stockKbars = stockKbarService.listByCondition(kbarQuery);
-            if(stockKbars==null||stockKbars.size()<=0){
-                continue;
-            }
-            for (StockKbar stockKbar:stockKbars){
-                Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                String dateStr = DateUtil.format(date, DateUtil.yyyy_MM_dd);
-                StockIndex stockIndex = new StockIndex();
-                stockIndex.setStockCode(historyBlockInfo.getBlockCode());
-                stockIndex.setStockName(historyBlockInfo.getBlockName());
-                stockIndex.setKbarDate(stockKbar.getKbarDate());
-                stockIndex.setUniqueKey(stockIndex.getStockCode()+"_"+stockIndex.getKbarDate());
-                getStockIndex(historyBlockInfo.getBlockCode(),historyBlockInfo.getBlockName(),dateStr,stockIndex);
-            }
+            }*/
+            /*THREAD_POOL_QUOTE.execute(() ->{*/
+                StockKbarQuery kbarQuery = new StockKbarQuery();
+                kbarQuery.setStockCode(historyBlockInfo.getBlockCode());
+                kbarQuery.addOrderBy("kbar_date", Sort.SortType.ASC);
+                List<StockKbar> stockKbars = stockKbarService.listByCondition(kbarQuery);
+                if(!CollectionUtils.isEmpty(stockKbars)) {
+                    for (StockKbar stockKbar : stockKbars) {
+                        Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
+                        if (date.before(DateUtil.parseDate("20171210", DateUtil.yyyyMMdd))) {
+                            continue;
+                        }
+                        StockIndex byUniqueKey = stockIndexService.getByUniqueKey(stockKbar.getUniqueKey());
+                        if (byUniqueKey != null) {
+                            continue;
+                        }
+                        try {
+                            String dateStr = DateUtil.format(date, DateUtil.yyyy_MM_dd);
+                            StockIndex stockIndex = new StockIndex();
+                            stockIndex.setStockCode(historyBlockInfo.getBlockCode());
+                            stockIndex.setStockName(historyBlockInfo.getBlockName());
+                            stockIndex.setKbarDate(stockKbar.getKbarDate());
+                            stockIndex.setUniqueKey(stockIndex.getStockCode() + "_" + stockIndex.getKbarDate());
+                            getStockIndex(historyBlockInfo.getBlockCode(), historyBlockInfo.getBlockName(), dateStr, stockIndex);
+                            stockIndexService.save(stockIndex);
+                        } catch (Exception e) {
+                            log.info(e.getMessage(), e);
+                        }
+                    }
+                }
+           /* });*/
         }
+       /* try {
+            Thread.sleep(100000000);
+        }catch (Exception e){
+
+        }*/
         thsLoginOut();
     }
 
     public void getStockIndex(String blockCode,String blockName,String tradeDate,StockIndex stockIndex){
-        System.out.println(blockCode);
+        System.out.println(blockCode+"==="+tradeDate);
         String quote_str = JDIBridge.THS_BasicData(blockCode+".TI", "ths_bias_index;ths_macd_index", tradeDate+",6,100;"+tradeDate+",26,12,9,102,100");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);
@@ -267,7 +285,35 @@ public class ThsBlockKbarComponent {
             List<BigDecimal> macds = tableInfo.getJSONArray("ths_macd_index").toJavaList(BigDecimal.class);
             BigDecimal bias = biass.get(0);
             BigDecimal macd = macds.get(0);
+            stockIndex.setBias6(bias);
+            stockIndex.setMacd(macd);
+        }
+        String quote_str1 = JDIBridge.THS_BasicData(blockCode+".TI", "ths_bias_index", tradeDate+",12,100");
+        if(!StringUtils.isEmpty(quote_str1)){
+            JSONObject jsonObject = JSONObject.parseObject(quote_str1);
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            List<BigDecimal> biass = tableInfo.getJSONArray("ths_bias_index").toJavaList(BigDecimal.class);
+            BigDecimal bias = biass.get(0);
+            stockIndex.setBias12(bias);
+        }
 
+        String quote_str2 = JDIBridge.THS_BasicData(blockCode+".TI", "ths_bias_index", tradeDate+",24,100");
+        if(!StringUtils.isEmpty(quote_str2)){
+            JSONObject jsonObject = JSONObject.parseObject(quote_str2);
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            List<BigDecimal> biass = tableInfo.getJSONArray("ths_bias_index").toJavaList(BigDecimal.class);
+            BigDecimal bias = biass.get(0);
+            stockIndex.setBias24(bias);
         }
 
     }
