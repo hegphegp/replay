@@ -8,5 +8,5 @@ import java.math.BigDecimal;
 @Data
 public class BlockBuyProfitDTO {
     private BigDecimal avgProfit;
-    private int count;
+    private int count=0;
 }

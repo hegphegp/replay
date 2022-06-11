@@ -65,7 +65,7 @@ public class ThsTest {
         //blockFollowComponent.relativeWithSZInfo();
         //blockFollowComponent.getHistoryBlockInfoTest();
         //thsBlockKbarComponent.initHistoryBlockKbars();
-        thsBlockKbarComponent.initHistoryBlockIndex();
+        //thsBlockKbarComponent.initHistoryBlockIndex();
         /*BigExchangeTestBuyDTO buyDTO = new BigExchangeTestBuyDTO();
         buyDTO.setTradeDate("20220425");
         bigAmountTestComponent.getStockOrder("601975","20220425",buyDTO);*/
