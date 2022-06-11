@@ -71,7 +71,11 @@ public class BlockFollowComponent {
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
         Map<String, List<PlankTimePairDTO>> pairsMap = getPlankTimePairs(circulateInfos);
         List<BlocKFollowBuyDTO> buys = Lists.newArrayList();
+        int count = pairsMap.size();
+        int index = 0;
         for (String tradeDate:pairsMap.keySet()) {
+            index++;
+            System.out.println(index+"===="+count);
             List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
             List<BlocKFollowBuyDTO> dtos = blockBuys(blockInfos, plankTimePairDTOS, circulateInfoMap, tradeDate);
             if(!CollectionUtils.isEmpty(dtos)) {
@@ -128,9 +132,9 @@ public class BlockFollowComponent {
                 "10点前买入小","10点前买入小count","10点前买入中","10点前买入中count","10点前买入大","10点前买入大count",
                 "3块板买入时间","3块板买入小","3块板买入小count","3块板买入中","3块板买入中count","3块板买入大","3块板买入大count",
                 "3块首板买入时间","3块首板买入小","3块首板买入小count","3块首板买入中","3块首板买入中count","3块首板买入大","3块首板买入大count"};
-        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("背离买入",rowNames,datas);
+        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("板块跟随买入",rowNames,datas);
         try {
-            poiExcelUtil.exportExcelUseExcelTitle("背离买入");
+            poiExcelUtil.exportExcelUseExcelTitle("板块跟随买入");
         }catch (Exception e){
             log.info(e.getMessage());
         }
@@ -159,10 +163,10 @@ public class BlockFollowComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220501", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220510", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 List<String> olds = Lists.newArrayList();

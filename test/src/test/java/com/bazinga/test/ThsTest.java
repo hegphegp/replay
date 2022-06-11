@@ -62,7 +62,7 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        //blockFollowComponent.relativeWithSZInfo();
+        blockFollowComponent.relativeWithSZInfo();
         //blockFollowComponent.getHistoryBlockInfoTest();
         //thsBlockKbarComponent.initHistoryBlockKbars();
         //thsBlockKbarComponent.initHistoryBlockIndex();
