@@ -72,9 +72,9 @@ public class BlockFollowComponent {
         Map<String, List<PlankTimePairDTO>> pairsMap = getPlankTimePairs(circulateInfos);
         List<BlocKFollowBuyDTO> buys = Lists.newArrayList();
         for (String tradeDate:pairsMap.keySet()) {
-            if(!tradeDate.equals("20220509")){
+            /*if(!tradeDate.equals("20220509")){
                 continue;
-            }
+            }*/
             List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
             List<BlocKFollowBuyDTO> dtos = blockBuys(blockInfos, plankTimePairDTOS, circulateInfoMap, tradeDate);
             if(!CollectionUtils.isEmpty(dtos)) {
@@ -227,9 +227,9 @@ public class BlockFollowComponent {
             preStockMap.put(stockKbar.getStockCode(),stockKbar);
         }
         for (HistoryBlockInfo blockInfo:blockInfos){
-            if(!blockInfo.getBlockCode().equals("885514")){
+            /*if(!blockInfo.getBlockCode().equals("885514")){
                 continue;
-            }
+            }*/
             List<PlankTimePairDTO> blockPairs = Lists.newArrayList();
             List<String> stocks = getBlockStocks(blockInfo.getBlockCode(), tradeDate);
             if(CollectionUtils.isEmpty(stocks)){
