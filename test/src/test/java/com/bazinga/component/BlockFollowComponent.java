@@ -62,6 +62,8 @@ public class BlockFollowComponent {
     private HistoryBlockInfoService historyBlockInfoService;
     @Autowired
     private HistoryBlockStocksService historyBlockStocksService;
+    @Autowired
+    private StockIndexService stockIndexService;
     public void relativeWithSZInfo(){
         List<TradeDatePool> tradeDates = getTradeDates();
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
@@ -244,54 +246,101 @@ public class BlockFollowComponent {
             List<PlankTimePairDTO> firstPlankTens = judgeFirstPlanks100000(blockPairs);
             blocKFollowBuyDTO.setBefore10Planks(plankTens.size());
             blocKFollowBuyDTO.setBefore10OnePlanks(firstPlankTens.size());
-            if(plankTens.size()>=3) {
-                List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, 100000l);
-                blocKFollowBuyDTO.setBeautifulPlanks10(beautifulPlanks.size());
-                BlockBuyProfitDTO firstProfit = getBuysProfit(threeBuyLevelStocks.get("first"), "100000", stockMap, nestStockMap, preStockMap);
-                BlockBuyProfitDTO twoProfit = getBuysProfit(threeBuyLevelStocks.get("two"), "100000", stockMap, nestStockMap, preStockMap);
-                BlockBuyProfitDTO threeProfit = getBuysProfit(threeBuyLevelStocks.get("three"), "100000", stockMap, nestStockMap, preStockMap);
-                blocKFollowBuyDTO.setProfit10First(firstProfit.getAvgProfit());
-                blocKFollowBuyDTO.setCount10First(firstProfit.getCount());
-                blocKFollowBuyDTO.setProfit10Two(twoProfit.getAvgProfit());
-                blocKFollowBuyDTO.setCount10Two(twoProfit.getCount());
-                blocKFollowBuyDTO.setProfit10Three(threeProfit.getAvgProfit());
-                blocKFollowBuyDTO.setCount10Three(threeProfit.getCount());
-            }
-
             Long threePlankTime = judgeThreePlanks(blockPairs);
-            if(threePlankTime!=null){
-                List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, threePlankTime);
-                blocKFollowBuyDTO.setBeautifulPlanks3(beautifulPlanks.size());
-                blocKFollowBuyDTO.setTimeStamp3(threePlankTime);
-                BlockBuyProfitDTO profit1 = getBuysProfit(threeBuyLevelStocks.get("first"), threePlankTime.toString(), stockMap, nestStockMap, preStockMap);
-                BlockBuyProfitDTO profit2 = getBuysProfit(threeBuyLevelStocks.get("two"), threePlankTime.toString(), stockMap, nestStockMap, preStockMap);
-                BlockBuyProfitDTO profit3 = getBuysProfit(threeBuyLevelStocks.get("three"), threePlankTime.toString(), stockMap, nestStockMap, preStockMap);
-
-                blocKFollowBuyDTO.setProfit3PlankFirst(profit1.getAvgProfit());
-                blocKFollowBuyDTO.setCount3PlankFirst(profit1.getCount());
-                blocKFollowBuyDTO.setProfit3PlankTwo(profit2.getAvgProfit());
-                blocKFollowBuyDTO.setCount3PlankTwo(profit2.getCount());
-                blocKFollowBuyDTO.setProfit3PlankThree(profit3.getAvgProfit());
-                blocKFollowBuyDTO.setCount3PlankThree(profit3.getCount());
-            }
             Long threeFirstPlankTime = judgeThreeFirstPlanks(blockPairs);
-            if(threeFirstPlankTime!=null){
-                List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, threeFirstPlankTime);
-                blocKFollowBuyDTO.setBeautifulPlanks3First(beautifulPlanks.size());
-                blocKFollowBuyDTO.setTimeStamp3First(threeFirstPlankTime);
-                BlockBuyProfitDTO profit1 = getBuysProfit(threeBuyLevelStocks.get("first"), threeFirstPlankTime.toString(), stockMap, nestStockMap, preStockMap);
-                BlockBuyProfitDTO profit2 = getBuysProfit(threeBuyLevelStocks.get("two"), threeFirstPlankTime.toString(), stockMap, nestStockMap, preStockMap);
-                BlockBuyProfitDTO profit3 = getBuysProfit(threeBuyLevelStocks.get("three"), threeFirstPlankTime.toString(), stockMap, nestStockMap, preStockMap);
-
-                blocKFollowBuyDTO.setProfit3FirstPlankFirst(profit1.getAvgProfit());
-                blocKFollowBuyDTO.setCount3FirstPlankFirst(profit1.getCount());
-                blocKFollowBuyDTO.setProfit3FirstPlankTwo(profit2.getAvgProfit());
-                blocKFollowBuyDTO.setCount3FirstPlankTwo(profit2.getCount());
-                blocKFollowBuyDTO.setProfit3FirstPlankThree(profit3.getAvgProfit());
-                blocKFollowBuyDTO.setCount3FirstPlankThree(profit3.getCount());
+            List<String> buyTimes = Lists.newArrayList();
+            if(plankTens.size()>=3){
+                buyTimes.add("100000");
             }
-            if(plankTens.size()>=3||threePlankTime!=null||threeFirstPlankTime!=null){
-                buys.add(blocKFollowBuyDTO);
+            if(threePlankTime!=null){
+                String times = threePlankTime.toString();
+                if(!buyTimes.contains(times)) {
+                    buyTimes.add(times);
+                }
+            }
+            if(threeFirstPlankTime!=null){
+                String times = threeFirstPlankTime.toString();
+                if(!buyTimes.contains(times)) {
+                    buyTimes.add(times);
+                }
+            }
+            if(buyTimes.size()>0) {
+                Map<String, BlockBuyProfitDTO> firstProfitMap = getBuysProfit(threeBuyLevelStocks.get("first"), buyTimes, stockMap, nestStockMap, preStockMap);
+                Map<String, BlockBuyProfitDTO> twoProfitMap = getBuysProfit(threeBuyLevelStocks.get("two"), buyTimes, stockMap, nestStockMap, preStockMap);
+                Map<String, BlockBuyProfitDTO> threeProfitMap = getBuysProfit(threeBuyLevelStocks.get("three"), buyTimes, stockMap, nestStockMap, preStockMap);
+                if (plankTens.size() >= 3) {
+                    List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, 100000l);
+                    blocKFollowBuyDTO.setBeautifulPlanks10(beautifulPlanks.size());
+                    BlockBuyProfitDTO firstProfit = firstProfitMap.get("100000");
+                    BlockBuyProfitDTO twoProfit = twoProfitMap.get("100000");;
+                    BlockBuyProfitDTO threeProfit = threeProfitMap.get("100000");
+                    if(firstProfit!=null) {
+                        blocKFollowBuyDTO.setProfit10First(firstProfit.getAvgProfit());
+                        blocKFollowBuyDTO.setCount10First(firstProfit.getCount());
+                    }
+                    if(twoProfit!=null) {
+                        blocKFollowBuyDTO.setProfit10Two(twoProfit.getAvgProfit());
+                        blocKFollowBuyDTO.setCount10Two(twoProfit.getCount());
+                    }
+                    if(threeProfit!=null) {
+                        blocKFollowBuyDTO.setProfit10Three(threeProfit.getAvgProfit());
+                        blocKFollowBuyDTO.setCount10Three(threeProfit.getCount());
+                    }
+                }
+
+                if (threePlankTime != null) {
+                    List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, threePlankTime);
+                    blocKFollowBuyDTO.setBeautifulPlanks3(beautifulPlanks.size());
+                    blocKFollowBuyDTO.setTimeStamp3(threePlankTime);
+                    BlockBuyProfitDTO profit1 = firstProfitMap.get(threePlankTime.toString());
+                    BlockBuyProfitDTO profit2 = twoProfitMap.get(threePlankTime.toString());;
+                    BlockBuyProfitDTO profit3 = threeProfitMap.get(threePlankTime.toString());
+
+                    if(profit1!=null) {
+                        blocKFollowBuyDTO.setProfit3PlankFirst(profit1.getAvgProfit());
+                        blocKFollowBuyDTO.setCount3PlankFirst(profit1.getCount());
+                    }
+                    if(profit2!=null) {
+                        blocKFollowBuyDTO.setProfit3PlankTwo(profit2.getAvgProfit());
+                        blocKFollowBuyDTO.setCount3PlankTwo(profit2.getCount());
+                    }
+                    if(profit3!=null) {
+                        blocKFollowBuyDTO.setProfit3PlankThree(profit3.getAvgProfit());
+                        blocKFollowBuyDTO.setCount3PlankThree(profit3.getCount());
+                    }
+                }
+
+                if (threeFirstPlankTime != null) {
+                    List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, threeFirstPlankTime);
+                    blocKFollowBuyDTO.setBeautifulPlanks3First(beautifulPlanks.size());
+                    blocKFollowBuyDTO.setTimeStamp3First(threeFirstPlankTime);
+                    BlockBuyProfitDTO profit1 = firstProfitMap.get(threeFirstPlankTime.toString());
+                    BlockBuyProfitDTO profit2 = twoProfitMap.get(threeFirstPlankTime.toString());;
+                    BlockBuyProfitDTO profit3 = threeProfitMap.get(threeFirstPlankTime.toString());
+
+                    if(profit1!=null) {
+                        blocKFollowBuyDTO.setProfit3FirstPlankFirst(profit1.getAvgProfit());
+                        blocKFollowBuyDTO.setCount3FirstPlankFirst(profit1.getCount());
+                    }
+                    if(profit2!=null) {
+                        blocKFollowBuyDTO.setProfit3FirstPlankTwo(profit2.getAvgProfit());
+                        blocKFollowBuyDTO.setCount3FirstPlankTwo(profit2.getCount());
+                    }
+                    if(profit3!=null) {
+                        blocKFollowBuyDTO.setProfit3FirstPlankThree(profit3.getAvgProfit());
+                        blocKFollowBuyDTO.setCount3FirstPlankThree(profit3.getCount());
+                    }
+                }
+                if (plankTens.size() >= 3 || threePlankTime != null || threeFirstPlankTime != null) {
+                    StockIndex stockIndex = stockIndexService.getByUniqueKey(blocKFollowBuyDTO.getBlockCode() + "_" + blocKFollowBuyDTO.getTradeDate());
+                    if (stockIndex != null) {
+                        blocKFollowBuyDTO.setBiasDay6(stockIndex.getBias6());
+                        blocKFollowBuyDTO.setBiasDay12(stockIndex.getBias12());
+                        blocKFollowBuyDTO.setBiasDay24(stockIndex.getBias24());
+                        blocKFollowBuyDTO.setMacd(stockIndex.getMacd());
+                    }
+                    buys.add(blocKFollowBuyDTO);
+                }
             }
 
         }
@@ -406,10 +455,9 @@ public class BlockFollowComponent {
         map.put("three",threeStocks);
         return map;
     }
-    public BlockBuyProfitDTO getBuysProfit(List<MarketMoneyDTO> marketDtos,String tradeTime,Map<String, StockKbar> stockKbarMap,Map<String, StockKbar> nextStockKbarMap,Map<String, StockKbar> preStockKbarMap){
-        BlockBuyProfitDTO profitDTO = new BlockBuyProfitDTO();
-        BigDecimal totalProfit = BigDecimal.ZERO;
-        int count = 0;
+    public Map<String,BlockBuyProfitDTO> getBuysProfit(List<MarketMoneyDTO> marketDtos,List<String> tradeTimes,Map<String, StockKbar> stockKbarMap,Map<String, StockKbar> nextStockKbarMap,Map<String, StockKbar> preStockKbarMap){
+        Map<String, BlockBuyProfitDTO> map = new HashMap<>();
+        Map<String, BlockBuyProfitDTO> totalMap = new HashMap<>();
         for (MarketMoneyDTO dto:marketDtos){
             StockKbar stockKbar = stockKbarMap.get(dto.getStockCode());
             StockKbar nextStockKbar = nextStockKbarMap.get(dto.getStockCode());
@@ -417,49 +465,73 @@ public class BlockFollowComponent {
             if(stockKbar==null||preStockKbar==null||nextStockKbar==null){
                 continue;
             }
-            BigDecimal stockBuyPrice = getStockBuyPrice(dto.getStockCode(), stockKbar.getKbarDate(), tradeTime, preStockKbar);
-            BigDecimal sellPrice = nextStockKbar.getTradeAmount().divide(new BigDecimal(nextStockKbar.getTradeQuantity() * 100),2,BigDecimal.ROUND_HALF_UP);
-            if(stockBuyPrice!=null&&sellPrice!=null) {
-                BigDecimal chuQuanBuyPrice = chuQuanAvgPrice(stockBuyPrice, stockKbar);
-                BigDecimal chuQuanSellPrice = chuQuanAvgPrice(sellPrice, stockKbar);
-                BigDecimal profit = PriceUtil.getPricePercentRate(chuQuanSellPrice.subtract(chuQuanBuyPrice), chuQuanBuyPrice);
-                count++;
-                totalProfit = totalProfit.add(profit);
+            Map<String, BigDecimal> buyPriceMap = getStockBuyPrice(dto.getStockCode(), stockKbar.getKbarDate(), tradeTimes, preStockKbar);
+            BigDecimal sellPrice = null;
+            if(nextStockKbar.getTradeQuantity()!=null&&nextStockKbar.getTradeQuantity()!=0){
+                sellPrice = nextStockKbar.getTradeAmount().divide(new BigDecimal(nextStockKbar.getTradeQuantity() * 100),2,BigDecimal.ROUND_HALF_UP);
+            }
+            for (String buyTime:tradeTimes) {
+                BigDecimal stockBuyPrice = buyPriceMap.get(buyTime);
+                if (stockBuyPrice != null && sellPrice != null) {
+                    BigDecimal chuQuanBuyPrice = chuQuanAvgPrice(stockBuyPrice, stockKbar);
+                    BigDecimal chuQuanSellPrice = chuQuanAvgPrice(sellPrice, stockKbar);
+                    BigDecimal profit = PriceUtil.getPricePercentRate(chuQuanSellPrice.subtract(chuQuanBuyPrice), chuQuanBuyPrice);
+                    BlockBuyProfitDTO totalProfitDTO = totalMap.get(buyTime);
+                    if(totalProfitDTO==null){
+                        totalProfitDTO = new BlockBuyProfitDTO();
+                        totalMap.put(buyTime,totalProfitDTO);
+                    }
+                    if(totalProfitDTO.getAvgProfit()==null) {
+                        totalProfitDTO.setAvgProfit(profit);
+                    }else{
+                        totalProfitDTO.setAvgProfit(totalProfitDTO.getAvgProfit().add(profit));
+                    }
+                    totalProfitDTO.setCount(totalProfitDTO.getCount()+1);
+                }
             }
         }
-        if(count>0){
-            BigDecimal avgProfit = totalProfit.divide(new BigDecimal(count), 2, BigDecimal.ROUND_HALF_UP);
-            profitDTO.setAvgProfit(avgProfit);
-            profitDTO.setCount(count);
+        for (String buyTime:totalMap.keySet()){
+            BlockBuyProfitDTO blockBuyProfitDTO = totalMap.get(buyTime);
+            if(blockBuyProfitDTO!=null&&blockBuyProfitDTO.getCount()>0){
+                BigDecimal avgProfit = blockBuyProfitDTO.getAvgProfit().divide(new BigDecimal(blockBuyProfitDTO.getCount()), 2, BigDecimal.ROUND_HALF_UP);
+                BlockBuyProfitDTO buyDto = new BlockBuyProfitDTO();
+                buyDto.setAvgProfit(avgProfit);
+                buyDto.setCount(blockBuyProfitDTO.getCount());
+                map.put(buyTime,buyDto);
+            }
         }
-        return profitDTO;
+        return map;
     }
 
-    public BigDecimal getStockBuyPrice(String stockCode,String tradeDate,String buyTime,StockKbar preStockKbar){
-        long buyTimeInt = timeToLong(buyTime);
+    public Map<String,BigDecimal> getStockBuyPrice(String stockCode,String tradeDate,List<String> buyTimes,StockKbar preStockKbar){
+        Map<String, BigDecimal> map = new HashMap<>();
         List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockCode, tradeDate);
-        String preMin = "09:25";
-        Integer index = -1;
-        for (ThirdSecondTransactionDataDTO data:datas){
-            BigDecimal tradePrice = data.getTradePrice();
-            Integer tradeType = data.getTradeType();
-            String tradeTime = data.getTradeTime();
-            boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockCode, tradePrice, preStockKbar.getClosePrice(), tradeDate);
-            if(tradeTime.equals(preMin)){
-                index++;
-            }else{
-                preMin = tradeTime;
-                index = 0;
-            }
-            long timeLong = timeToLong(tradeTime, index);
-            if(timeLong>=buyTimeInt){
-                if(historyUpperPrice&&tradeType==1){
-                    return null;
+        for(String buyTime:buyTimes) {
+            long buyTimeInt = timeToLong(buyTime);
+            String preMin = "09:25";
+            Integer index = -1;
+            for (ThirdSecondTransactionDataDTO data : datas) {
+                BigDecimal tradePrice = data.getTradePrice();
+                Integer tradeType = data.getTradeType();
+                String tradeTime = data.getTradeTime();
+                boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockCode, tradePrice, preStockKbar.getClosePrice(), tradeDate);
+                if (tradeTime.equals(preMin)) {
+                    index++;
+                } else {
+                    preMin = tradeTime;
+                    index = 0;
                 }
-                return tradePrice;
+                long timeLong = timeToLong(tradeTime, index);
+                if (timeLong >= buyTimeInt) {
+                    if (historyUpperPrice && tradeType == 1) {
+                        break;
+                    }
+                    map.put(buyTime,tradePrice);
+                    break;
+                }
             }
         }
-        return null;
+        return map;
     }
 
 
