@@ -78,6 +78,7 @@ public class BlockFollowComponent {
             System.out.println(index+"===="+count);
             List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
             List<BlocKFollowBuyDTO> dtos = blockBuys(blockInfos, plankTimePairDTOS, circulateInfoMap, tradeDate);
+
             if(!CollectionUtils.isEmpty(dtos)) {
                 buys.addAll(dtos);
             }
@@ -344,6 +345,10 @@ public class BlockFollowComponent {
                         blocKFollowBuyDTO.setMacd(stockIndex.getMacd());
                     }
                     buys.add(blocKFollowBuyDTO);
+                    RedisMonior redisMonior = new RedisMonior();
+                    redisMonior.setRedisKey(blocKFollowBuyDTO.getBlockCode()+"_"+blocKFollowBuyDTO.getTradeDate()+"_"+"bkgs");
+                    redisMonior.setRedisValue(JSONObject.toJSONString(blocKFollowBuyDTO));
+                    redisMoniorService.save(redisMonior);
                 }
             }
 
