@@ -67,7 +67,12 @@ public class BlockFollowComponent {
     @Autowired
     private StockIndexService stockIndexService;
 
+    public static Map<String,Map<String,BigDecimal>> buyPriceCacheMap = new HashMap<>();
+
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(4, 32, 512, "QuoteThreadPool");
+
+
+
     public void relativeWithSZInfo(){
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
         Map<String, CirculateInfo> circulateInfoMap = getCirculateInfoMap(circulateInfos);
@@ -85,6 +90,7 @@ public class BlockFollowComponent {
                 if(!CollectionUtils.isEmpty(dtos)) {
                     buys.addAll(dtos);
                 }
+                //buyPriceCacheMap.remove(tradeDate);
             });
 
         }
@@ -93,7 +99,26 @@ public class BlockFollowComponent {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        /*List<Object[]> datas = Lists.newArrayList();
+
+
+
+        /*List<BlocKFollowBuyDTO> buys = Lists.newArrayList();
+        List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
+        for (HistoryBlockInfo blockInfo:blockInfos){
+            List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
+            for (TradeDatePool tradeDatePool:tradeDatePools){
+                String format = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+                String key = blockInfo.getBlockCode() + "_" + format + "_" + "bkgs";
+                RedisMonior redisMonior = redisMoniorService.getByRedisKey(key);
+                if(redisMonior!=null) {
+                    String redisValue = redisMonior.getRedisValue();
+                    BlocKFollowBuyDTO follow = JSONObject.parseObject(redisValue, BlocKFollowBuyDTO.class);
+                    buys.add(follow);
+                }
+            }
+        }
+
+        List<Object[]> datas = Lists.newArrayList();
         for (BlocKFollowBuyDTO dto:buys) {
             List<Object> list = new ArrayList<>();
             list.add(dto.getTradeDate());
@@ -174,10 +199,10 @@ public class BlockFollowComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220302", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220401", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 List<String> olds = Lists.newArrayList();
@@ -533,6 +558,19 @@ public class BlockFollowComponent {
 
     public Map<String,BigDecimal> getStockBuyPrice(String stockCode,String tradeDate,List<String> buyTimes,StockKbar preStockKbar){
         Map<String, BigDecimal> map = new HashMap<>();
+        /*boolean flag = true;
+        for(String buyTime:buyTimes) {
+            Map<String, BigDecimal> tradeDateBuyPriceMap = buyPriceCacheMap.get(tradeDate);
+            if(tradeDateBuyPriceMap==null||tradeDateBuyPriceMap.get(stockCode + "_" + tradeDate + "_" + buyTime)==null){
+                flag = false;
+                break;
+            }
+            BigDecimal buyPrice = tradeDateBuyPriceMap.get(stockCode + "_" + tradeDate + "_" + buyTime);
+            map.put(buyTime,buyPrice);
+        }
+        if(flag){
+            return map;
+        }*/
         List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockCode, tradeDate);
         for(String buyTime:buyTimes) {
             long buyTimeInt = timeToLong(buyTime);
@@ -555,6 +593,12 @@ public class BlockFollowComponent {
                         break;
                     }
                     map.put(buyTime,tradePrice);
+                    /*Map<String, BigDecimal> tradeDateBuyPriceMap = buyPriceCacheMap.get(tradeDate);
+                    if(tradeDateBuyPriceMap==null){
+                        tradeDateBuyPriceMap = new HashMap<>();
+                        buyPriceCacheMap.put(tradeDate,tradeDateBuyPriceMap);
+                    }
+                    tradeDateBuyPriceMap.put((stockCode + "_" + tradeDate + "_" + buyTime),tradePrice);*/
                     break;
                 }
             }
