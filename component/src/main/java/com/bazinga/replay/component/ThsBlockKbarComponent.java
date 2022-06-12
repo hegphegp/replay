@@ -6,12 +6,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
 import com.bazinga.replay.dto.BlockStockDTO;
-import com.bazinga.replay.model.HistoryBlockInfo;
-import com.bazinga.replay.model.HistoryBlockStocks;
-import com.bazinga.replay.model.StockIndex;
-import com.bazinga.replay.model.StockKbar;
+import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.HistoryBlockInfoQuery;
 import com.bazinga.replay.query.StockKbarQuery;
+import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.*;
 import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
@@ -224,54 +222,53 @@ public class ThsBlockKbarComponent {
     }
     public void initHistoryBlockIndex() {
         int ret = thsLogin();
+        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
+        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
         HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
         query.setBlockType(1);
         List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
         for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
-           /* if(!historyBlockInfo.getBlockCode().equals("885806")){
-                continue;
-            }*/
-            /*THREAD_POOL_QUOTE.execute(() ->{*/
-                StockKbarQuery kbarQuery = new StockKbarQuery();
-                kbarQuery.setStockCode(historyBlockInfo.getBlockCode());
-                kbarQuery.addOrderBy("kbar_date", Sort.SortType.ASC);
-                List<StockKbar> stockKbars = stockKbarService.listByCondition(kbarQuery);
-                if(!CollectionUtils.isEmpty(stockKbars)) {
-                    for (StockKbar stockKbar : stockKbars) {
-                        Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                        if (date.before(DateUtil.parseDate("20171210", DateUtil.yyyyMMdd))) {
-                            continue;
-                        }
-                        StockIndex byUniqueKey = stockIndexService.getByUniqueKey(stockKbar.getUniqueKey());
-                        if (byUniqueKey != null) {
-                            continue;
-                        }
-                        try {
-                            String dateStr = DateUtil.format(date, DateUtil.yyyy_MM_dd);
-                            StockIndex stockIndex = new StockIndex();
-                            stockIndex.setStockCode(historyBlockInfo.getBlockCode());
-                            stockIndex.setStockName(historyBlockInfo.getBlockName());
-                            stockIndex.setKbarDate(stockKbar.getKbarDate());
-                            stockIndex.setUniqueKey(stockIndex.getStockCode() + "_" + stockIndex.getKbarDate());
-                            getStockIndex(historyBlockInfo.getBlockCode(), historyBlockInfo.getBlockName(), dateStr, stockIndex);
-                            stockIndexService.save(stockIndex);
-                        } catch (Exception e) {
-                            log.info(e.getMessage(), e);
-                        }
+            THREAD_POOL_QUOTE.execute(() ->{
+                String marketDateStr = historyBlockInfo.getMarketDate();
+                Date marketDate = DateUtil.parseDate(marketDateStr, DateUtil.yyyyMMdd);
+                for (TradeDatePool tradeDatePool:tradeDatePools){
+                    Date tradeDate = DateTimeUtils.getDate000000(tradeDatePool.getTradeDate());
+                    if (tradeDate.before(marketDate)) {
+                        continue;
+                    }
+                    String tradeDateyyyyMMdd = DateUtil.format(tradeDate, DateUtil.yyyyMMdd);
+                    String tradeDateyyyy_MM_dd = DateUtil.format(tradeDate, DateUtil.yyyy_MM_dd);
+                    String uk = historyBlockInfo.getBlockCode()+"_"+tradeDateyyyyMMdd;
+                    StockIndex byUniqueKey = stockIndexService.getByUniqueKey(uk);
+                    if (byUniqueKey != null) {
+                        continue;
+                    }
+                    try {
+                        StockIndex stockIndex = new StockIndex();
+                        stockIndex.setStockCode(historyBlockInfo.getBlockCode());
+                        stockIndex.setStockName(historyBlockInfo.getBlockName());
+                        stockIndex.setKbarDate(tradeDateyyyyMMdd);
+                        stockIndex.setUniqueKey(stockIndex.getStockCode() + "_" + stockIndex.getKbarDate());
+                        getStockIndex(historyBlockInfo.getBlockCode(), historyBlockInfo.getBlockName(), tradeDateyyyy_MM_dd, stockIndex);
+                        stockIndexService.save(stockIndex);
+                    } catch (Exception e) {
+                        log.info(e.getMessage(), e);
                     }
                 }
-           /* });*/
+            });
         }
-       /* try {
-            Thread.sleep(100000000);
-        }catch (Exception e){
 
-        }*/
+        try {
+            Thread.sleep(10000000000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         thsLoginOut();
     }
 
     public void getStockIndex(String blockCode,String blockName,String tradeDate,StockIndex stockIndex){
-        System.out.println(blockCode+"==="+tradeDate);
+        System.out.println(blockCode+"_"+blockName+"_"+tradeDate);
         String quote_str = JDIBridge.THS_BasicData(blockCode+".TI", "ths_bias_index;ths_macd_index", tradeDate+",6,100;"+tradeDate+",26,12,9,102,100");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);

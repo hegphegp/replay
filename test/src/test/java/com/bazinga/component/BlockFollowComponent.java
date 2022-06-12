@@ -74,7 +74,7 @@ public class BlockFollowComponent {
 
 
     public void relativeWithSZInfo(){
-        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
+        /*List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
         Map<String, CirculateInfo> circulateInfoMap = getCirculateInfoMap(circulateInfos);
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
         Map<String, List<PlankTimePairDTO>> pairsMap = getPlankTimePairs(circulateInfos);
@@ -98,11 +98,11 @@ public class BlockFollowComponent {
             Thread.sleep(10000000000l);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
 
 
 
-        /*List<BlocKFollowBuyDTO> buys = Lists.newArrayList();
+        List<BlocKFollowBuyDTO> buys = Lists.newArrayList();
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
         for (HistoryBlockInfo blockInfo:blockInfos){
             List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
@@ -173,7 +173,7 @@ public class BlockFollowComponent {
             poiExcelUtil.exportExcelUseExcelTitle("板块跟随买入");
         }catch (Exception e){
             log.info(e.getMessage());
-        }*/
+        }
     }
 
 

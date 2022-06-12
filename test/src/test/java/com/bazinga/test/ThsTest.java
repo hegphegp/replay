@@ -66,7 +66,7 @@ public class ThsTest {
         //blockFollowComponent.searchTest();
         //blockFollowComponent.getHistoryBlockInfoTest();
         //thsBlockKbarComponent.initHistoryBlockKbars();
-        //thsBlockKbarComponent.initHistoryBlockIndex();
+        thsBlockKbarComponent.initHistoryBlockIndex();
         /*BigExchangeTestBuyDTO buyDTO = new BigExchangeTestBuyDTO();
         buyDTO.setTradeDate("20220425");
         bigAmountTestComponent.getStockOrder("601975","20220425",buyDTO);*/
@@ -87,6 +87,7 @@ public class ThsTest {
         //northSouthMoneyComponent.calHenShenStockKbar10();
         /*List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("999999", "20220602");
         System.out.println(data);*/
+
     }
 
 
