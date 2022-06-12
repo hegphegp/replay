@@ -113,6 +113,13 @@ public class BlockFollowComponent {
                 if(redisMonior!=null) {
                     String redisValue = redisMonior.getRedisValue();
                     BlocKFollowBuyDTO follow = JSONObject.parseObject(redisValue, BlocKFollowBuyDTO.class);
+                    StockIndex stockIndex = stockIndexService.getByUniqueKey(follow.getBlockCode() + "_" + follow.getTradeDate());
+                    if (stockIndex != null) {
+                        follow.setBiasDay6(stockIndex.getBias6());
+                        follow.setBiasDay12(stockIndex.getBias12());
+                        follow.setBiasDay24(stockIndex.getBias24());
+                        follow.setMacd(stockIndex.getMacd());
+                    }
                     buys.add(follow);
                 }
             }
