@@ -1,17 +1,12 @@
 package com.bazinga.component;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
-import com.bazinga.dto.BlocKFollowBuyDTO;
-import com.bazinga.dto.BlockBuyProfitDTO;
-import com.bazinga.dto.MarketMoneyDTO;
-import com.bazinga.dto.PlankTimePairDTO;
+import com.bazinga.dto.*;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.CommonComponent;
 import com.bazinga.replay.component.HistoryTransactionDataComponent;
 import com.bazinga.replay.component.StockKbarComponent;
-import com.bazinga.replay.dto.AdjFactorDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.*;
@@ -22,21 +17,15 @@ import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
 import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.sun.deploy.net.proxy.WFirefoxProxyConfig;
-import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import javax.sql.rowset.FilteredRowSet;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -45,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-public class BlockFollowComponent {
+public class BlockBackRowComponent {
     @Autowired
     private CirculateInfoService circulateInfoService;
     @Autowired
@@ -73,8 +62,8 @@ public class BlockFollowComponent {
 
 
 
-    public void relativeWithSZInfo(){
-        /*List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
+    public void backRowBuyExcel(){
+        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
         Map<String, CirculateInfo> circulateInfoMap = getCirculateInfoMap(circulateInfos);
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
         Map<String, List<PlankTimePairDTO>> pairsMap = getPlankTimePairs(circulateInfos);
@@ -98,11 +87,11 @@ public class BlockFollowComponent {
             Thread.sleep(10000000000l);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }*/
+        }
 
 
 
-        List<BlocKFollowBuyDTO> buys = Lists.newArrayList();
+        /*List<BlocKFollowBuyDTO> buys = Lists.newArrayList();
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
         for (HistoryBlockInfo blockInfo:blockInfos){
             TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
@@ -189,7 +178,7 @@ public class BlockFollowComponent {
             poiExcelUtil.exportExcelUseExcelTitle("板块跟随买入");
         }catch (Exception e){
             log.info(e.getMessage());
-        }
+        }*/
     }
 
 
@@ -215,33 +204,19 @@ public class BlockFollowComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20200101", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220401", DateUtil.yyyyMMdd))){
                     continue;
-                }
-                List<String> olds = Lists.newArrayList();
-                RedisMonior redisMonior = redisMoniorService.getByRedisKey(circulateInfo.getStockCode());
-                if(redisMonior!=null&&!redisMonior.getRedisValue().equals("test")){
-                    String[] split = redisMonior.getRedisValue().split(",");
-                    List<String> strings = Arrays.asList(split);
-                    olds.addAll(strings);
                 }
 
                 if(preKbar!=null) {
                     boolean highUpper = PriceUtil.isHistoryUpperPrice(circulateInfo.getStockCode(), stockKbar.getHighPrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
                     if(highUpper){
                         int planks = calPlanks(limitQueue);
-                        List<PlankTimePairDTO> plankPairs = getPlankPairs(stockKbar, preKbar.getClosePrice(),planks);
-                        if(!CollectionUtils.isEmpty(plankPairs)){
-                            List<PlankTimePairDTO> pairs = map.get(stockKbar.getKbarDate());
-                            if(pairs==null){
-                                pairs = Lists.newArrayList();
-                                map.put(stockKbar.getKbarDate(),pairs);
-                            }
-                            pairs.addAll(plankPairs);
-                        }
+                        PlankBuyTimeDTO plankBuy = getPlankPairs(stockKbar, preKbar.getClosePrice(),planks);
+
                     }
                 }
                 preKbar = stockKbar;
@@ -742,12 +717,14 @@ public class BlockFollowComponent {
     }
 
 
-    public List<PlankTimePairDTO> getPlankPairs(StockKbar stockKbar,BigDecimal preEndPrice,int planks){
-        List<PlankTimePairDTO> pairs = Lists.newArrayList();
+    public PlankBuyTimeDTO getPlankPairs(StockKbar stockKbar,BigDecimal preEndPrice,int planks){
         List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockKbar.getStockCode(), DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd));
         if(CollectionUtils.isEmpty(datas)){
-            return pairs;
+            return null;
         }
+        PlankBuyTimeDTO pairDTO = new PlankBuyTimeDTO();
+        pairDTO.setPlanks(planks);
+        pairDTO.setStockCode(stockKbar.getStockCode());
         int i = 0;
         int index = 0;
         String preMin = "09:25";
@@ -765,48 +742,24 @@ public class BlockFollowComponent {
                 gatherUpper = true;
             }
             Integer tradeType = data.getTradeType();
+            if(tradeType!=0&&tradeType!=1||data.getTradeTime().equals("09:25")){
+                continue;
+            }
             i++;
-            if(i==2&&gatherUpper&&upperPrice&&tradeType==1){
-                PlankTimePairDTO pairDTO = new PlankTimePairDTO();
-                pairDTO.setStockCode(stockKbar.getStockCode());
-                pairDTO.setPlanks(planks);
+            if(i==1&&gatherUpper&&upperPrice&&tradeType==1){
                 pairDTO.setStart(92500l);
-                pairs.add(pairDTO);
                 continue;
             }
-            if(data.getTradeTime().equals("15:00")){
-                if(upperPrice&&pairs.size()>0&&pairs.get(pairs.size()-1).getEnd()==null){
-                    pairs.get(pairs.size()-1).setEnd(150000l);
-                }
-                continue;
-            }
-            if(tradeType!=0&&tradeType!=1){
-                continue;
-            }
-            PlankTimePairDTO pair = null;
-            if(pairs.size()>0){
-                pair = pairs.get(pairs.size()-1);
-            }
-            if(i>=1){
-                if(pair==null||pair.getEnd()!=null){
-                    if(upperPrice&&tradeType==1) {
-                        PlankTimePairDTO pairDTO = new PlankTimePairDTO();
-                        pairDTO.setPlanks(planks);
-                        pairDTO.setStockCode(stockKbar.getStockCode());
-                        long start = timeToLong(data.getTradeTime(), index);
-                        pairDTO.setStart(start);
-                        pairs.add(pairDTO);
-                    }
-                }
-                if (pair!=null&&pair.getEnd()==null){
-                    if(!upperPrice||tradeType!=1){
-                        long end = timeToLong(data.getTradeTime(), index);
-                        pair.setEnd(end);
-                    }
+            if(upperPrice&&tradeType==1) {
+                if(pairDTO.getStart()==null) {
+                    long start = timeToLong(data.getTradeTime(), index);
+                    pairDTO.setStart(start);
                 }
             }
+
+
         }
-        return pairs;
+        return pairDTO;
     }
 
     public static long timeToLong(String time,int index){

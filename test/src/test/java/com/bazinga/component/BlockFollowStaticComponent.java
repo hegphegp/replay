@@ -1,6 +1,5 @@
 package com.bazinga.component;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
 import com.bazinga.dto.BlocKFollowBuyDTO;
@@ -11,7 +10,6 @@ import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.CommonComponent;
 import com.bazinga.replay.component.HistoryTransactionDataComponent;
 import com.bazinga.replay.component.StockKbarComponent;
-import com.bazinga.replay.dto.AdjFactorDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.*;
@@ -22,21 +20,15 @@ import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
 import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.sun.deploy.net.proxy.WFirefoxProxyConfig;
-import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import javax.sql.rowset.FilteredRowSet;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -45,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-public class BlockFollowComponent {
+public class BlockFollowStaticComponent {
     @Autowired
     private CirculateInfoService circulateInfoService;
     @Autowired
@@ -74,7 +66,7 @@ public class BlockFollowComponent {
 
 
     public void relativeWithSZInfo(){
-        /*List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
+        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
         Map<String, CirculateInfo> circulateInfoMap = getCirculateInfoMap(circulateInfos);
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
         Map<String, List<PlankTimePairDTO>> pairsMap = getPlankTimePairs(circulateInfos);
@@ -98,11 +90,11 @@ public class BlockFollowComponent {
             Thread.sleep(10000000000l);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }*/
+        }
 
 
 
-        List<BlocKFollowBuyDTO> buys = Lists.newArrayList();
+        /*List<BlocKFollowBuyDTO> buys = Lists.newArrayList();
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
         for (HistoryBlockInfo blockInfo:blockInfos){
             TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
@@ -189,7 +181,7 @@ public class BlockFollowComponent {
             poiExcelUtil.exportExcelUseExcelTitle("板块跟随买入");
         }catch (Exception e){
             log.info(e.getMessage());
-        }
+        }*/
     }
 
 
