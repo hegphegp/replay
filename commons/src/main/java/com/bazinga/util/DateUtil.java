@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 /**
  * @author huliang
@@ -779,6 +780,26 @@ public class DateUtil {
         System.out.println(getDayLastMill(new Date()));
         System.out.println(getDayBegin(new Date()));
     }
+
+	/**
+	 * Wed May 04 09:30:00 CST 2022
+	 * @param dateStr
+	 * @return
+	 */
+	public static Date cstToDate(String dateStr) {
+		if(StringUtils.isBlank(dateStr)){
+			return null;
+		}
+		SimpleDateFormat sim1 = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+		// 时间格式1：
+		try {
+			Date parse = sim1.parse(dateStr);
+			return parse;
+		}catch (Exception e){
+
+		}
+		return null;
+	}
 
 	/**
 	 * 判断时间是否重合

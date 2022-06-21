@@ -59,6 +59,12 @@ public class StockIndexQuery extends PagingQuery implements Serializable {
      */
     private BigDecimal dea;
 
+
+    private BigDecimal bias6;
+    private BigDecimal bias12;
+    private BigDecimal bias24;
+
+
     /**
      * 创建时间 开始
      */

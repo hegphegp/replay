@@ -89,6 +89,9 @@ public class StockIndex implements Serializable {
      * @是否索引   NO
      */
     private BigDecimal dea;
+    private BigDecimal bias6;
+    private BigDecimal bias12;
+    private BigDecimal bias24;
 
     /**
      * 创建时间

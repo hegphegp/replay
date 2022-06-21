@@ -96,6 +96,8 @@ public class BaseTestCase {
     private StockKbarService stockKbarService;
     @Autowired
     private HistoryBlockInfoComponent historyBlockInfoComponent;
+    @Autowired
+    private CurrentDayTransactionDataComponent currentDayTransactionDataComponent;
 
 
     @Test
@@ -167,9 +169,17 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        historyBlockInfoComponent.initHistoryBlockInfo();
+        List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("002121", "20220610");
+        List<ThirdSecondTransactionDataDTO> data1 = currentDayTransactionDataComponent.getData("002121");
+        System.out.println(111);
+        //synInfoComponent.synHSTECH();
+        //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
+        /*historyBlockInfoComponent.initHistoryBlockInfo();
         stockKbarComponent.batchKbarDataInit();
-        stockListComponent.getCirculateInfo(new Date());
+       // stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
+        historyBlockInfoComponent.initHistoryBlockInfo();
+        /*stockKbarComponent.batchKbarDataInit();
+        stockListComponent.getCirculateInfo(new Date());*/
        /* StockKbarQuery kbarQuery = new StockKbarQuery();
         kbarQuery.setStockCode("000001");
         List<StockKbar> stockKbars = stockKbarService.listByCondition(kbarQuery);
