@@ -2,10 +2,7 @@ package com.bazinga.component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
-import com.bazinga.dto.BlocKFollowBuyDTO;
-import com.bazinga.dto.BlockBuyProfitDTO;
-import com.bazinga.dto.MarketMoneyDTO;
-import com.bazinga.dto.PlankTimePairDTO;
+import com.bazinga.dto.*;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.CommonComponent;
 import com.bazinga.replay.component.HistoryTransactionDataComponent;
@@ -271,13 +268,16 @@ public class BlockFollowStaticComponent {
         for (StockKbar stockKbar:preStockKbars){
             preStockMap.put(stockKbar.getStockCode(),stockKbar);
         }
+        Map<String, List<MarketMoneyDTO>> blockBuyStocksMap = new HashMap<>();
+        Map<String,MarketMoneyDTO> stockBuyMap = new HashMap<>();
+        List<MarketMoneyDTO> buyStocks = Lists.newArrayList();
         for (HistoryBlockInfo blockInfo:blockInfos){
-            String rediesKey = blockInfo.getBlockCode() + "_" + tradeDate + "_" + "bkgs";
+            /*String rediesKey = blockInfo.getBlockCode() + "_" + tradeDate + "_" + "bkgs";
             RedisMonior redisMinor = redisMoniorService.getByRedisKey(rediesKey);
             if(redisMinor!=null){
                 System.out.println(rediesKey);
                 continue;
-            }
+            }*/
             List<PlankTimePairDTO> blockPairs = Lists.newArrayList();
             List<String> stocks = getBlockStocks(blockInfo.getBlockCode(), tradeDate);
             if(CollectionUtils.isEmpty(stocks)){
@@ -292,6 +292,10 @@ public class BlockFollowStaticComponent {
                 continue;
             }
             Map<String, List<MarketMoneyDTO>> threeBuyLevelStocks = getThreeBuyLevelStocks(stocks, circulateInfoMap, stockMap);
+            List<MarketMoneyDTO> firsts = threeBuyLevelStocks.get("first");
+            if(firsts.size()<=0){
+                continue;
+            }
             BlocKFollowBuyDTO blocKFollowBuyDTO = new BlocKFollowBuyDTO();
             blocKFollowBuyDTO.setBlockCode(blockInfo.getBlockCode());
             blocKFollowBuyDTO.setBlockName(blockInfo.getBlockName());
@@ -300,111 +304,23 @@ public class BlockFollowStaticComponent {
             List<PlankTimePairDTO> firstPlankTens = judgeFirstPlanks100000(blockPairs);
             blocKFollowBuyDTO.setBefore10Planks(plankTens.size());
             blocKFollowBuyDTO.setBefore10OnePlanks(firstPlankTens.size());
-            Long threePlankTime = judgeThreePlanks(blockPairs);
-            Long threeFirstPlankTime = judgeThreeFirstPlanks(blockPairs);
-            List<String> buyTimes = Lists.newArrayList();
             if(plankTens.size()>=3){
-                buyTimes.add("100000");
-            }
-            if(threePlankTime!=null){
-                String times = threePlankTime.toString();
-                if(!buyTimes.contains(times)) {
-                    buyTimes.add(times);
-                }
-            }
-            if(threeFirstPlankTime!=null){
-                String times = threeFirstPlankTime.toString();
-                if(!buyTimes.contains(times)) {
-                    buyTimes.add(times);
-                }
-            }
-            if(buyTimes.size()>0) {
-                Map<String, BlockBuyProfitDTO> firstProfitMap = getBuysProfit(threeBuyLevelStocks.get("first"), buyTimes, stockMap, nestStockMap, preStockMap);
-                Map<String, BlockBuyProfitDTO> twoProfitMap = getBuysProfit(threeBuyLevelStocks.get("two"), buyTimes, stockMap, nestStockMap, preStockMap);
-                Map<String, BlockBuyProfitDTO> threeProfitMap = getBuysProfit(threeBuyLevelStocks.get("three"), buyTimes, stockMap, nestStockMap, preStockMap);
-                if (plankTens.size() >= 3) {
-                    List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, 100000l);
-                    blocKFollowBuyDTO.setBeautifulPlanks10(beautifulPlanks.size());
-                    BlockBuyProfitDTO firstProfit = firstProfitMap.get("100000");
-                    BlockBuyProfitDTO twoProfit = twoProfitMap.get("100000");;
-                    BlockBuyProfitDTO threeProfit = threeProfitMap.get("100000");
-                    if(firstProfit!=null) {
-                        blocKFollowBuyDTO.setProfit10First(firstProfit.getAvgProfit());
-                        blocKFollowBuyDTO.setCount10First(firstProfit.getCount());
+                blockBuyStocksMap.put(blockInfo.getBlockCode(), firsts);
+                for (MarketMoneyDTO buyDTO:firsts){
+                    boolean flag = true;
+                    for (MarketMoneyDTO marketMoneyDTO:buyStocks){
+                        if(!buyDTO.getStockCode().equals(marketMoneyDTO.getStockCode())){
+                            flag = false;
+                        }
                     }
-                    if(twoProfit!=null) {
-                        blocKFollowBuyDTO.setProfit10Two(twoProfit.getAvgProfit());
-                        blocKFollowBuyDTO.setCount10Two(twoProfit.getCount());
+                    if(flag){
+                        buyStocks.add(buyDTO);
                     }
-                    if(threeProfit!=null) {
-                        blocKFollowBuyDTO.setProfit10Three(threeProfit.getAvgProfit());
-                        blocKFollowBuyDTO.setCount10Three(threeProfit.getCount());
-                    }
-                }
-
-                if (threePlankTime != null) {
-                    List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, threePlankTime);
-                    blocKFollowBuyDTO.setBeautifulPlanks3(beautifulPlanks.size());
-                    blocKFollowBuyDTO.setTimeStamp3(threePlankTime);
-                    BlockBuyProfitDTO profit1 = firstProfitMap.get(threePlankTime.toString());
-                    BlockBuyProfitDTO profit2 = twoProfitMap.get(threePlankTime.toString());;
-                    BlockBuyProfitDTO profit3 = threeProfitMap.get(threePlankTime.toString());
-
-                    if(profit1!=null) {
-                        blocKFollowBuyDTO.setProfit3PlankFirst(profit1.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3PlankFirst(profit1.getCount());
-                    }
-                    if(profit2!=null) {
-                        blocKFollowBuyDTO.setProfit3PlankTwo(profit2.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3PlankTwo(profit2.getCount());
-                    }
-                    if(profit3!=null) {
-                        blocKFollowBuyDTO.setProfit3PlankThree(profit3.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3PlankThree(profit3.getCount());
-                    }
-                }
-
-                if (threeFirstPlankTime != null) {
-                    List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, threeFirstPlankTime);
-                    blocKFollowBuyDTO.setBeautifulPlanks3First(beautifulPlanks.size());
-                    blocKFollowBuyDTO.setTimeStamp3First(threeFirstPlankTime);
-                    BlockBuyProfitDTO profit1 = firstProfitMap.get(threeFirstPlankTime.toString());
-                    BlockBuyProfitDTO profit2 = twoProfitMap.get(threeFirstPlankTime.toString());;
-                    BlockBuyProfitDTO profit3 = threeProfitMap.get(threeFirstPlankTime.toString());
-
-                    if(profit1!=null) {
-                        blocKFollowBuyDTO.setProfit3FirstPlankFirst(profit1.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3FirstPlankFirst(profit1.getCount());
-                    }
-                    if(profit2!=null) {
-                        blocKFollowBuyDTO.setProfit3FirstPlankTwo(profit2.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3FirstPlankTwo(profit2.getCount());
-                    }
-                    if(profit3!=null) {
-                        blocKFollowBuyDTO.setProfit3FirstPlankThree(profit3.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3FirstPlankThree(profit3.getCount());
-                    }
-                }
-                if (plankTens.size() >= 3 || threePlankTime != null || threeFirstPlankTime != null) {
-                    StockIndex stockIndex = stockIndexService.getByUniqueKey(blocKFollowBuyDTO.getBlockCode() + "_" + blocKFollowBuyDTO.getTradeDate());
-                    if (stockIndex != null) {
-                        blocKFollowBuyDTO.setBiasDay6(stockIndex.getBias6());
-                        blocKFollowBuyDTO.setBiasDay12(stockIndex.getBias12());
-                        blocKFollowBuyDTO.setBiasDay24(stockIndex.getBias24());
-                        blocKFollowBuyDTO.setMacd(stockIndex.getMacd());
-                    }
-                    buys.add(blocKFollowBuyDTO);
-
-                    RedisMonior redisMonior = new RedisMonior();
-                    redisMonior.setRedisKey(blocKFollowBuyDTO.getBlockCode()+"_"+blocKFollowBuyDTO.getTradeDate()+"_"+"bkgs");
-                    redisMonior.setRedisValue(JSONObject.toJSONString(blocKFollowBuyDTO));
-                    redisMonior.setCreateTime(new Date());
-                    redisMoniorService.save(redisMonior);
-                    System.out.println(blocKFollowBuyDTO.getBlockCode()+"_"+blocKFollowBuyDTO.getTradeDate()+"_"+"bkgs"+"========没有跑到");
                 }
             }
-
         }
+        Map<String, StockBuyProfitDTO> firstProfitMap = getBuysProfit(buyStocks,"100000" , stockMap, nestStockMap, preStockMap);
+
         return buys;
     }
 
@@ -516,9 +432,8 @@ public class BlockFollowStaticComponent {
         map.put("three",threeStocks);
         return map;
     }
-    public Map<String,BlockBuyProfitDTO> getBuysProfit(List<MarketMoneyDTO> marketDtos,List<String> tradeTimes,Map<String, StockKbar> stockKbarMap,Map<String, StockKbar> nextStockKbarMap,Map<String, StockKbar> preStockKbarMap){
-        Map<String, BlockBuyProfitDTO> map = new HashMap<>();
-        Map<String, BlockBuyProfitDTO> totalMap = new HashMap<>();
+    public Map<String,StockBuyProfitDTO> getBuysProfit(List<MarketMoneyDTO> marketDtos,String tradeTime,Map<String, StockKbar> stockKbarMap,Map<String, StockKbar> nextStockKbarMap,Map<String, StockKbar> preStockKbarMap){
+        Map<String, StockBuyProfitDTO> map = new HashMap<>();
         for (MarketMoneyDTO dto:marketDtos){
             StockKbar stockKbar = stockKbarMap.get(dto.getStockCode());
             StockKbar nextStockKbar = nextStockKbarMap.get(dto.getStockCode());
@@ -526,92 +441,48 @@ public class BlockFollowStaticComponent {
             if(stockKbar==null||preStockKbar==null||nextStockKbar==null){
                 continue;
             }
-            Map<String, BigDecimal> buyPriceMap = getStockBuyPrice(dto.getStockCode(), stockKbar.getKbarDate(), tradeTimes, preStockKbar);
+            BigDecimal buyPrice = getStockBuyPrice(dto.getStockCode(), stockKbar.getKbarDate(), tradeTime, preStockKbar);
             BigDecimal sellPrice = null;
             if(nextStockKbar.getTradeQuantity()!=null&&nextStockKbar.getTradeQuantity()!=0){
                 sellPrice = nextStockKbar.getTradeAmount().divide(new BigDecimal(nextStockKbar.getTradeQuantity() * 100),2,BigDecimal.ROUND_HALF_UP);
             }
-            for (String buyTime:tradeTimes) {
-                BigDecimal stockBuyPrice = buyPriceMap.get(buyTime);
-                if (stockBuyPrice != null && sellPrice != null) {
-                    BigDecimal chuQuanBuyPrice = chuQuanAvgPrice(stockBuyPrice, stockKbar);
-                    BigDecimal chuQuanSellPrice = chuQuanAvgPrice(sellPrice, stockKbar);
-                    BigDecimal profit = PriceUtil.getPricePercentRate(chuQuanSellPrice.subtract(chuQuanBuyPrice), chuQuanBuyPrice);
-                    BlockBuyProfitDTO totalProfitDTO = totalMap.get(buyTime);
-                    if(totalProfitDTO==null){
-                        totalProfitDTO = new BlockBuyProfitDTO();
-                        totalMap.put(buyTime,totalProfitDTO);
-                    }
-                    if(totalProfitDTO.getAvgProfit()==null) {
-                        totalProfitDTO.setAvgProfit(profit);
-                    }else{
-                        totalProfitDTO.setAvgProfit(totalProfitDTO.getAvgProfit().add(profit));
-                    }
-                    totalProfitDTO.setCount(totalProfitDTO.getCount()+1);
-                }
-            }
-        }
-        for (String buyTime:totalMap.keySet()){
-            BlockBuyProfitDTO blockBuyProfitDTO = totalMap.get(buyTime);
-            if(blockBuyProfitDTO!=null&&blockBuyProfitDTO.getCount()>0){
-                BigDecimal avgProfit = blockBuyProfitDTO.getAvgProfit().divide(new BigDecimal(blockBuyProfitDTO.getCount()), 2, BigDecimal.ROUND_HALF_UP);
-                BlockBuyProfitDTO buyDto = new BlockBuyProfitDTO();
-                buyDto.setAvgProfit(avgProfit);
-                buyDto.setCount(blockBuyProfitDTO.getCount());
-                map.put(buyTime,buyDto);
+            if (buyPrice != null && sellPrice != null) {
+                BigDecimal chuQuanBuyPrice = chuQuanAvgPrice(buyPrice, stockKbar);
+                BigDecimal chuQuanSellPrice = chuQuanAvgPrice(sellPrice, stockKbar);
+                BigDecimal profit = PriceUtil.getPricePercentRate(chuQuanSellPrice.subtract(chuQuanBuyPrice), chuQuanBuyPrice);
+                StockBuyProfitDTO profitDTO = new StockBuyProfitDTO();
+                profitDTO.setProfit(profit);
+                map.put(dto.getStockCode(),profitDTO);
             }
         }
         return map;
     }
 
-    public Map<String,BigDecimal> getStockBuyPrice(String stockCode,String tradeDate,List<String> buyTimes,StockKbar preStockKbar){
-        Map<String, BigDecimal> map = new HashMap<>();
-        /*boolean flag = true;
-        for(String buyTime:buyTimes) {
-            Map<String, BigDecimal> tradeDateBuyPriceMap = buyPriceCacheMap.get(tradeDate);
-            if(tradeDateBuyPriceMap==null||tradeDateBuyPriceMap.get(stockCode + "_" + tradeDate + "_" + buyTime)==null){
-                flag = false;
-                break;
-            }
-            BigDecimal buyPrice = tradeDateBuyPriceMap.get(stockCode + "_" + tradeDate + "_" + buyTime);
-            map.put(buyTime,buyPrice);
-        }
-        if(flag){
-            return map;
-        }*/
+    public BigDecimal getStockBuyPrice(String stockCode,String tradeDate,String buyTime,StockKbar preStockKbar){
         List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockCode, tradeDate);
-        for(String buyTime:buyTimes) {
-            long buyTimeInt = timeToLong(buyTime);
-            String preMin = "09:25";
-            Integer index = -1;
-            for (ThirdSecondTransactionDataDTO data : datas) {
-                BigDecimal tradePrice = data.getTradePrice();
-                Integer tradeType = data.getTradeType();
-                String tradeTime = data.getTradeTime();
-                boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockCode, tradePrice, preStockKbar.getClosePrice(), tradeDate);
-                if (tradeTime.equals(preMin)) {
-                    index++;
-                } else {
-                    preMin = tradeTime;
-                    index = 0;
+        long buyTimeInt = timeToLong(buyTime);
+        String preMin = "09:25";
+        Integer index = -1;
+        for (ThirdSecondTransactionDataDTO data : datas) {
+            BigDecimal tradePrice = data.getTradePrice();
+            Integer tradeType = data.getTradeType();
+            String tradeTime = data.getTradeTime();
+            boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockCode, tradePrice, preStockKbar.getClosePrice(), tradeDate);
+            if (tradeTime.equals(preMin)) {
+                index++;
+            } else {
+                preMin = tradeTime;
+                index = 0;
+            }
+            long timeLong = timeToLong(tradeTime, index);
+            if (timeLong >= buyTimeInt) {
+                if (historyUpperPrice && tradeType == 1) {
+                    return null;
                 }
-                long timeLong = timeToLong(tradeTime, index);
-                if (timeLong >= buyTimeInt) {
-                    if (historyUpperPrice && tradeType == 1) {
-                        break;
-                    }
-                    map.put(buyTime,tradePrice);
-                    /*Map<String, BigDecimal> tradeDateBuyPriceMap = buyPriceCacheMap.get(tradeDate);
-                    if(tradeDateBuyPriceMap==null){
-                        tradeDateBuyPriceMap = new HashMap<>();
-                        buyPriceCacheMap.put(tradeDate,tradeDateBuyPriceMap);
-                    }
-                    tradeDateBuyPriceMap.put((stockCode + "_" + tradeDate + "_" + buyTime),tradePrice);*/
-                    break;
-                }
+                return tradePrice;
             }
         }
-        return map;
+        return null;
     }
 
 
@@ -958,4 +829,7 @@ public class BlockFollowStaticComponent {
 
         }
     }
+
+
+
 }

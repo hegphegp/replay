@@ -37,6 +37,7 @@ public class BusTest extends BaseTestCase {
 
     @Autowired
     private TradeDatePoolService tradeDatePoolService;
+    @Autowired
 
     @Test
     public void test(){

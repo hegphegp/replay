@@ -325,49 +325,6 @@ public class BlockBackRowComponent {
                     }
                 }
 
-                if (threePlankTime != null) {
-                    List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, threePlankTime);
-                    blocKFollowBuyDTO.setBeautifulPlanks3(beautifulPlanks.size());
-                    blocKFollowBuyDTO.setTimeStamp3(threePlankTime);
-                    BlockBuyProfitDTO profit1 = firstProfitMap.get(threePlankTime.toString());
-                    BlockBuyProfitDTO profit2 = twoProfitMap.get(threePlankTime.toString());;
-                    BlockBuyProfitDTO profit3 = threeProfitMap.get(threePlankTime.toString());
-
-                    if(profit1!=null) {
-                        blocKFollowBuyDTO.setProfit3PlankFirst(profit1.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3PlankFirst(profit1.getCount());
-                    }
-                    if(profit2!=null) {
-                        blocKFollowBuyDTO.setProfit3PlankTwo(profit2.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3PlankTwo(profit2.getCount());
-                    }
-                    if(profit3!=null) {
-                        blocKFollowBuyDTO.setProfit3PlankThree(profit3.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3PlankThree(profit3.getCount());
-                    }
-                }
-
-                if (threeFirstPlankTime != null) {
-                    List<PlankTimePairDTO> beautifulPlanks = judgeBeautifulPlanks(blockPairs, threeFirstPlankTime);
-                    blocKFollowBuyDTO.setBeautifulPlanks3First(beautifulPlanks.size());
-                    blocKFollowBuyDTO.setTimeStamp3First(threeFirstPlankTime);
-                    BlockBuyProfitDTO profit1 = firstProfitMap.get(threeFirstPlankTime.toString());
-                    BlockBuyProfitDTO profit2 = twoProfitMap.get(threeFirstPlankTime.toString());;
-                    BlockBuyProfitDTO profit3 = threeProfitMap.get(threeFirstPlankTime.toString());
-
-                    if(profit1!=null) {
-                        blocKFollowBuyDTO.setProfit3FirstPlankFirst(profit1.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3FirstPlankFirst(profit1.getCount());
-                    }
-                    if(profit2!=null) {
-                        blocKFollowBuyDTO.setProfit3FirstPlankTwo(profit2.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3FirstPlankTwo(profit2.getCount());
-                    }
-                    if(profit3!=null) {
-                        blocKFollowBuyDTO.setProfit3FirstPlankThree(profit3.getAvgProfit());
-                        blocKFollowBuyDTO.setCount3FirstPlankThree(profit3.getCount());
-                    }
-                }
                 if (plankTens.size() >= 3 || threePlankTime != null || threeFirstPlankTime != null) {
                     StockIndex stockIndex = stockIndexService.getByUniqueKey(blocKFollowBuyDTO.getBlockCode() + "_" + blocKFollowBuyDTO.getTradeDate());
                     if (stockIndex != null) {
