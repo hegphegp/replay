@@ -234,7 +234,7 @@ public class ThsBlockKbarComponent {
                 Date marketDate = DateUtil.parseDate(marketDateStr, DateUtil.yyyyMMdd);
                 for (TradeDatePool tradeDatePool:tradeDatePools){
                     Date tradeDate = DateTimeUtils.getDate000000(tradeDatePool.getTradeDate());
-                    if (tradeDate.before(marketDate)) {
+                    if (tradeDate.before(marketDate)||tradeDate.before(DateUtil.parseDate("20171201",DateUtil.yyyyMMdd))) {
                         continue;
                     }
                     String tradeDateyyyyMMdd = DateUtil.format(tradeDate, DateUtil.yyyyMMdd);

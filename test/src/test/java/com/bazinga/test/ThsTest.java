@@ -87,7 +87,6 @@ public class ThsTest {
         //northSouthMoneyComponent.calHenShenStockKbar10();
         /*List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("999999", "20220602");
         System.out.println(data);*/
-
     }
 
 
