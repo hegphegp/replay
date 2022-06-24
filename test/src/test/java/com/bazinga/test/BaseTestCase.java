@@ -169,6 +169,9 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
+        Date date = new Date();
+        long time = date.getTime();
+        System.out.println(time);
         List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("002121", "20220610");
         List<ThirdSecondTransactionDataDTO> data1 = currentDayTransactionDataComponent.getData("002121");
         System.out.println(111);
