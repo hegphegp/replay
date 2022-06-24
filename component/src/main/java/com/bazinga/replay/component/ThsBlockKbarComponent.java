@@ -221,6 +221,49 @@ public class ThsBlockKbarComponent {
 
     }
 
+    public void initHistoryBlockMinKbar() {
+        int ret = thsLogin();
+        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
+        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
+        HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
+        List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
+        for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
+            if(!historyBlockInfo.getBlockCode().startsWith("881")){
+                continue;
+            }
+            //THREAD_POOL_QUOTE.execute(() ->{
+                String marketDateStr = historyBlockInfo.getMarketDate();
+                Date marketDate = DateUtil.parseDate(marketDateStr, DateUtil.yyyyMMdd);
+                for (TradeDatePool tradeDatePool:tradeDatePools){
+                    Date tradeDate = DateTimeUtils.getDate000000(tradeDatePool.getTradeDate());
+                    if (tradeDate.before(marketDate)||tradeDate.before(DateUtil.parseDate("20210101",DateUtil.yyyyMMdd))) {
+                        continue;
+                    }
+                    String tradeDateyyyyMMdd = DateUtil.format(tradeDate, DateUtil.yyyyMMdd);
+                    String tradeDateyyyy_MM_dd = DateUtil.format(tradeDate, DateUtil.yyyy_MM_dd);
+                    String uk = historyBlockInfo.getBlockCode()+"_"+tradeDateyyyyMMdd;
+                    StockKbar stockKbar = stockKbarService.getByUniqueKey(uk);
+                    if (stockKbar != null) {
+                        continue;
+                    }
+                    try {
+                       getBlockMinKbar(historyBlockInfo.getBlockCode(),historyBlockInfo.getBlockName(),tradeDateyyyy_MM_dd);
+                    } catch (Exception e) {
+                        log.info(e.getMessage(), e);
+                    }
+                }
+            //});
+        }
+
+        try {
+            Thread.sleep(10000000000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        thsLoginOut();
+    }
+
 
     public void getBlockMinKbar(String blockCode,String blockName,String tradeDate){
         System.out.println(blockCode);
@@ -242,6 +285,8 @@ public class ThsBlockKbarComponent {
             List<BigDecimal> highs = tableInfo.getJSONArray("high").toJavaList(BigDecimal.class);
             List<BigDecimal> lows = tableInfo.getJSONArray("low").toJavaList(BigDecimal.class);
             List<BigDecimal> closes = tableInfo.getJSONArray("close").toJavaList(BigDecimal.class);
+            List<BigDecimal> amounts = tableInfo.getJSONArray("amount").toJavaList(BigDecimal.class);
+            List<Long> volumes = tableInfo.getJSONArray("volume").toJavaList(Long.class);
 
             int i = 0;
             for (String time:times){
@@ -255,8 +300,8 @@ public class ThsBlockKbarComponent {
                 stockKbar.setClosePrice(closes.get(i));
                 stockKbar.setHighPrice(highs.get(i));
                 stockKbar.setLowPrice(lows.get(i));
-                stockKbar.setTradeAmount(BigDecimal.ZERO);
-                stockKbar.setTradeQuantity(0l);
+                stockKbar.setTradeAmount(amounts.get(i));
+                stockKbar.setTradeQuantity(volumes.get(i));
                 stockKbarService.save(stockKbar);
                 i++;
             }
