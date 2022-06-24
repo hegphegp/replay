@@ -290,11 +290,11 @@ public class ThsBlockKbarComponent {
 
             int i = 0;
             for (String time:times){
-                Date timeDate = DateUtil.parseDate(time, DateUtil.yyyy_MM_dd);
+                Date timeDate = DateUtil.parseDate(time, DateUtil.noSecondFormat);
                 StockKbar stockKbar = new StockKbar();
                 stockKbar.setStockCode(blockCode);
                 stockKbar.setStockName(blockName);
-                stockKbar.setKbarDate(DateUtil.format(timeDate, DateUtil.yyyyMMdd));
+                stockKbar.setKbarDate(DateUtil.format(timeDate, DateUtil.yyyyMMddHHmmss));
                 stockKbar.setUniqueKey(stockKbar.getStockCode() + "_" + stockKbar.getKbarDate());
                 stockKbar.setOpenPrice(opens.get(i));
                 stockKbar.setClosePrice(closes.get(i));
