@@ -129,18 +129,20 @@ public class QuanShangHighComponent {
             }
             StockKbar preKbar = null;
             for (StockKbar stockKbar:stockKbars){
-                BigDecimal marketValue = new BigDecimal(circulateInfo.getCirculate()).multiply(stockKbar.getHighPrice());
-                BigDecimal highRate = PriceUtil.getPricePercentRate(stockKbar.getAdjHighPrice().subtract(preKbar.getAdjClosePrice()), preKbar.getAdjClosePrice());
-                if(preKbar!=null&&marketValue.compareTo(new BigDecimal(50000000000l))>=0) {
-                    if(highRate.compareTo(new BigDecimal(5))>=0){
-                        PlankTimePairDTO highPair = getHighPair(stockKbar, preKbar.getClosePrice());
-                        if(highPair!=null) {
-                            List<PlankTimePairDTO> pairs = map.get(stockKbar.getKbarDate());
-                            if (pairs == null) {
-                                pairs = Lists.newArrayList();
-                                map.put(stockKbar.getKbarDate(), pairs);
+                if(!DateUtil.parseDate(stockKbar.getKbarDate(),DateUtil.yyyyMMdd).before(DateUtil.parseDate("20210101",DateUtil.yyyyMMdd))){
+                    BigDecimal marketValue = new BigDecimal(circulateInfo.getCirculate()).multiply(stockKbar.getHighPrice());
+                    if(preKbar!=null&&marketValue.compareTo(new BigDecimal(100000000000l))>=0) {
+                        BigDecimal highRate = PriceUtil.getPricePercentRate(stockKbar.getAdjHighPrice().subtract(preKbar.getAdjClosePrice()), preKbar.getAdjClosePrice());
+                        if (highRate.compareTo(new BigDecimal(5)) >= 0) {
+                            PlankTimePairDTO highPair = getHighPair(stockKbar, preKbar.getClosePrice());
+                            if (highPair != null) {
+                                List<PlankTimePairDTO> pairs = map.get(stockKbar.getKbarDate());
+                                if (pairs == null) {
+                                    pairs = Lists.newArrayList();
+                                    map.put(stockKbar.getKbarDate(), pairs);
+                                }
+                                pairs.add(highPair);
                             }
-                            pairs.add(highPair);
                         }
                     }
                 }
