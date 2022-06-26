@@ -229,24 +229,24 @@ public class ThsBlockKbarComponent {
         HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
         List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
         for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
-            if(!historyBlockInfo.getBlockCode().startsWith("881")){
-                continue;
-            }
             //THREAD_POOL_QUOTE.execute(() ->{
+                if(!historyBlockInfo.getBlockCode().startsWith("881")){
+                    continue;
+                }
+                StockKbarQuery kbarQuery = new StockKbarQuery();
+                kbarQuery.setStockCode(historyBlockInfo.getBlockCode());
+                List<StockKbar> stockKbars = stockKbarService.listByCondition(kbarQuery);
+                if (!CollectionUtils.isEmpty(stockKbars)) {
+                    continue;
+                }
                 String marketDateStr = historyBlockInfo.getMarketDate();
                 Date marketDate = DateUtil.parseDate(marketDateStr, DateUtil.yyyyMMdd);
                 for (TradeDatePool tradeDatePool:tradeDatePools){
                     Date tradeDate = DateTimeUtils.getDate000000(tradeDatePool.getTradeDate());
-                    if (tradeDate.before(marketDate)||tradeDate.before(DateUtil.parseDate("20210101",DateUtil.yyyyMMdd))) {
+                    if (tradeDate.before(marketDate)||tradeDate.before(DateUtil.parseDate("20220101",DateUtil.yyyyMMdd))) {
                         continue;
                     }
-                    String tradeDateyyyyMMdd = DateUtil.format(tradeDate, DateUtil.yyyyMMdd);
                     String tradeDateyyyy_MM_dd = DateUtil.format(tradeDate, DateUtil.yyyy_MM_dd);
-                    String uk = historyBlockInfo.getBlockCode()+"_"+tradeDateyyyyMMdd;
-                    StockKbar stockKbar = stockKbarService.getByUniqueKey(uk);
-                    if (stockKbar != null) {
-                        continue;
-                    }
                     try {
                        getBlockMinKbar(historyBlockInfo.getBlockCode(),historyBlockInfo.getBlockName(),tradeDateyyyy_MM_dd);
                     } catch (Exception e) {
@@ -256,17 +256,17 @@ public class ThsBlockKbarComponent {
             //});
         }
 
-        try {
+        /*try {
             Thread.sleep(10000000000l);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
         thsLoginOut();
     }
 
 
     public void getBlockMinKbar(String blockCode,String blockName,String tradeDate){
-        System.out.println(blockCode);
+        System.out.println(blockCode+"===="+tradeDate);
         String quote_str = JDIBridge.THS_HighFrequenceSequence(blockCode+".TI","open;high;low;close;volume;amount","Fill:Original",tradeDate+" 09:15:00",tradeDate+" 15:00:00");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);
