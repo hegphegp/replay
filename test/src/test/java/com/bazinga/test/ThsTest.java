@@ -57,11 +57,14 @@ public class ThsTest {
     private ThsBlockKbarComponent thsBlockKbarComponent;
     @Autowired
     private QuanShangHighComponent quanShangHighComponent;
+    @Autowired
+    private HangYeLevelComponent hangYeLevelComponent;
 
 
     @Test
     public void test1() {
-        quanShangHighComponent.quanShangYiDong();
+        hangYeLevelComponent.calHangYeKbarToRedis();
+        //quanShangHighComponent.quanShangYiDong();
         //thsBlockKbarComponent.initHistoryBlockMinKbar();
         //blockFollowComponent.relativeWithSZInfo();
         //blockFollowComponent.searchTest();
