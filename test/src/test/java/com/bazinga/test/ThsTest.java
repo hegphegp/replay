@@ -1,10 +1,7 @@
 package com.bazinga.test;
 
 import com.bazinga.base.Sort;
-import com.bazinga.component.BlockFollowComponent;
-import com.bazinga.component.IndexDValueComponent;
-import com.bazinga.component.MacdCalComponent;
-import com.bazinga.component.NorthSouthMoneyComponent;
+import com.bazinga.component.*;
 import com.bazinga.replay.component.*;
 import com.bazinga.replay.dto.BigExchangeTestBuyDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
@@ -58,11 +55,17 @@ public class ThsTest {
     private BlockFollowComponent blockFollowComponent;
     @Autowired
     private ThsBlockKbarComponent thsBlockKbarComponent;
+    @Autowired
+    private QuanShangHighComponent quanShangHighComponent;
+    @Autowired
+    private HangYeLevelComponent hangYeLevelComponent;
 
 
     @Test
     public void test1() {
-        thsBlockKbarComponent.initHistoryBlockMinKbar();
+        hangYeLevelComponent.calHangYeKbarToRedis();
+        //quanShangHighComponent.quanShangYiDong();
+        //thsBlockKbarComponent.initHistoryBlockMinKbar();
         //blockFollowComponent.relativeWithSZInfo();
         //blockFollowComponent.searchTest();
         //blockFollowComponent.getHistoryBlockInfoTest();
