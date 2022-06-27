@@ -63,9 +63,10 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        hangYeLevelComponent.calHangYeKbarToRedis();
+        hangYeLevelComponent.hangyeAmount();
+        //hangYeLevelComponent.calHangYeKbarToRedis();
         //quanShangHighComponent.quanShangYiDong();
-        //thsBlockKbarComponent.initHistoryBlockMinKbar();
+       // thsBlockKbarComponent.initHistoryBlockMinKbar();
         //blockFollowComponent.relativeWithSZInfo();
         //blockFollowComponent.searchTest();
         //blockFollowComponent.getHistoryBlockInfoTest();

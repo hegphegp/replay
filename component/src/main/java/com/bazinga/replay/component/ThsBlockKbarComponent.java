@@ -229,16 +229,16 @@ public class ThsBlockKbarComponent {
         HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
         List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
         for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
+            if(!historyBlockInfo.getBlockCode().startsWith("881124")){
+                continue;
+            }
             //THREAD_POOL_QUOTE.execute(() ->{
-                if(!historyBlockInfo.getBlockCode().startsWith("881")){
-                    continue;
-                }
-                StockKbarQuery kbarQuery = new StockKbarQuery();
+                /*StockKbarQuery kbarQuery = new StockKbarQuery();
                 kbarQuery.setStockCode(historyBlockInfo.getBlockCode());
                 List<StockKbar> stockKbars = stockKbarService.listByCondition(kbarQuery);
                 if (!CollectionUtils.isEmpty(stockKbars)) {
                     continue;
-                }
+                }*/
                 String marketDateStr = historyBlockInfo.getMarketDate();
                 Date marketDate = DateUtil.parseDate(marketDateStr, DateUtil.yyyyMMdd);
                 for (TradeDatePool tradeDatePool:tradeDatePools){
@@ -247,10 +247,12 @@ public class ThsBlockKbarComponent {
                         continue;
                     }
                     String tradeDateyyyy_MM_dd = DateUtil.format(tradeDate, DateUtil.yyyy_MM_dd);
-                    try {
-                       getBlockMinKbar(historyBlockInfo.getBlockCode(),historyBlockInfo.getBlockName(),tradeDateyyyy_MM_dd);
-                    } catch (Exception e) {
-                        log.info(e.getMessage(), e);
+                    if(tradeDateyyyy_MM_dd.equals("2022-01-10")) {
+                        try {
+                            getBlockMinKbar(historyBlockInfo.getBlockCode(), historyBlockInfo.getBlockName(), tradeDateyyyy_MM_dd);
+                        } catch (Exception e) {
+                            log.info(e.getMessage(), e);
+                        }
                     }
                 }
             //});
@@ -302,7 +304,10 @@ public class ThsBlockKbarComponent {
                 stockKbar.setLowPrice(lows.get(i));
                 stockKbar.setTradeAmount(amounts.get(i));
                 stockKbar.setTradeQuantity(volumes.get(i));
-                stockKbarService.save(stockKbar);
+                StockKbar byUniqueKey = stockKbarService.getByUniqueKey(stockKbar.getUniqueKey());
+                if(byUniqueKey==null) {
+                    stockKbarService.save(stockKbar);
+                }
                 i++;
             }
         }

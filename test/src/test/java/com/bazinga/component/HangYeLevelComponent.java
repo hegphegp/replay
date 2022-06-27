@@ -72,6 +72,7 @@ public class HangYeLevelComponent {
             List<Object> list = new ArrayList<>();
             list.add(dto.getStockCode());
             list.add(dto.getStockCode());
+            list.add(dto.getStockName());
             list.add(dto.getTradeDate());
             list.add(dto.getStart());
             list.add(dto.getBlockCode());
@@ -113,6 +114,9 @@ public class HangYeLevelComponent {
             if(circulateInfo==null){
                 continue;
             }
+           /* if (!circulateInfo.getStockCode().equals("002703")){
+                continue;
+            }*/
             List<StockKbar> stockKbars = getStockKBarsDelete30Days(circulateInfo.getStockCode());
             if(CollectionUtils.isEmpty(stockKbars)){
                 continue;
@@ -144,6 +148,9 @@ public class HangYeLevelComponent {
                                 BigDecimal profit = calProfit(stockKbars, stockKbar);
                                 buyDTO.setProfit(profit);
                                 list.add(buyDTO);
+                               /* if(list.size()>=100){
+                                    return list;
+                                }*/
                             }
                         }
                     }
@@ -412,7 +419,7 @@ public class HangYeLevelComponent {
             if(i==1){
                 BigDecimal avgPrice = stockKbar.getTradeAmount().divide(new BigDecimal(stockKbar.getTradeQuantity() * 100),2,BigDecimal.ROUND_HALF_UP);
                 avgPrice = chuQuanAvgPrice(avgPrice, stockKbar);
-                BigDecimal profit = PriceUtil.getPricePercentRate(avgPrice.subtract(buyStockKbar.getAdjClosePrice()), buyStockKbar.getAdjClosePrice());
+                BigDecimal profit = PriceUtil.getPricePercentRate(avgPrice.subtract(buyStockKbar.getAdjHighPrice()), buyStockKbar.getAdjHighPrice());
                 return profit;
             }
             if(buyStockKbar.getKbarDate().equals(stockKbar.getKbarDate())){
