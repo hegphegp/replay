@@ -82,11 +82,11 @@ public class BlockFollowStaticComponent {
                 BlocKFollowStaticTotalDTO blocKFollowStaticTotalDTO = blockBuys(blockInfos, plankTimePairDTOS, circulateInfoMap, tradeDate);
                 if(blocKFollowStaticTotalDTO!=null) {
                     RedisMonior redisMonior = new RedisMonior();
-                    redisMonior.setRedisValue(blocKFollowStaticTotalDTO.getTradeDate()+"_total_static");
+                    redisMonior.setRedisKey(blocKFollowStaticTotalDTO.getTradeDate()+"_total_static");
                     redisMonior.setRedisValue(JSONObject.toJSONString(blocKFollowStaticTotalDTO));
                     redisMoniorService.save(redisMonior);
                 }
-            //});
+           // });
 
         }
         try {
@@ -165,9 +165,9 @@ public class BlockFollowStaticComponent {
            /* if(!circulateInfo.getStockCode().equals("001318")){
                 continue;
             }*/
-            if(m>=500){
+           /* if(m>=500){
                 return map;
-            }
+            }*/
             List<StockKbar> stockKbars = getStockKBarsDelete30Days(circulateInfo.getStockCode());
             if(CollectionUtils.isEmpty(stockKbars)){
                 continue;
@@ -180,7 +180,7 @@ public class BlockFollowStaticComponent {
                 if(date.before(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220110", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220401", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 List<String> olds = Lists.newArrayList();
@@ -284,6 +284,7 @@ public class BlockFollowStaticComponent {
             rateBuys = rateBuys.subList(0,150);
         }
         BlocKFollowStaticTotalDTO staticDTO = new BlocKFollowStaticTotalDTO();
+        staticDTO.setTradeDate(tradeDate);
         calTotalInfo(buys,staticDTO,1);
         calTotalInfo(amountRateBuys,staticDTO,2);
         calTotalInfo(rateBuys,staticDTO,3);
@@ -509,7 +510,7 @@ public class BlockFollowStaticComponent {
             Integer tradeType = data.getTradeType();
             String tradeTime = data.getTradeTime();
             BigDecimal amount = tradePrice.multiply(new BigDecimal(data.getTradeQuantity() * 100));
-            if(tradeAmount==null){
+            if(tradeAmount!=null){
                 tradeAmount = tradeAmount.add(amount);
             }
             boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockCode, tradePrice, preStockKbar.getClosePrice(), tradeDate);
@@ -524,10 +525,8 @@ public class BlockFollowStaticComponent {
                 if (historyUpperPrice && tradeType == 1) {
                     return null;
                 }
-                if(preStockKbar.getTradeAmount()!=null){
-                    BigDecimal amountRate = tradeAmount.divide(preStockKbar.getTradeAmount(), 4, BigDecimal.ROUND_HALF_UP);
-                    buyDTO.setAmountRate(amountRate);
-                }
+                BigDecimal amountRate = tradeAmount.divide(preStockKbar.getTradeAmount(), 8, BigDecimal.ROUND_HALF_UP);
+                buyDTO.setAmountRate(amountRate);
                 return tradePrice;
             }
         }

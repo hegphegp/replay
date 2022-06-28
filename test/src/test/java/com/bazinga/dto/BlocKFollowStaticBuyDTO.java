@@ -27,6 +27,9 @@ public class BlocKFollowStaticBuyDTO {
             BlocKFollowStaticBuyDTO p1 = (BlocKFollowStaticBuyDTO)object1;
             BlocKFollowStaticBuyDTO p2 = (BlocKFollowStaticBuyDTO)object2;
             if(p1.getAmountRate()==null){
+                if(p2.getAmountRate()==null){
+                    return 0;
+                }
                 return 1;
             }
             if(p2.getAmountRate()==null){
@@ -47,10 +50,13 @@ public class BlocKFollowStaticBuyDTO {
         public int compare(Object object1,Object object2){
             BlocKFollowStaticBuyDTO p1 = (BlocKFollowStaticBuyDTO)object1;
             BlocKFollowStaticBuyDTO p2 = (BlocKFollowStaticBuyDTO)object2;
-            if(p1.getAmountRate()==null){
+            if(p1.getRate()==null){
+                if(p2.getRate()==null){
+                    return 0;
+                }
                 return 1;
             }
-            if(p2.getAmountRate()==null){
+            if(p2.getRate()==null){
                 return -1;
             }
             int i = p2.getRate().compareTo(p1.getRate());
