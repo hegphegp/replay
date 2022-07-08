@@ -71,7 +71,7 @@ public class SynInfoComponent {
 
 
     public void synStockFactor(int factorIndex) throws IOException {
-        File file = new File("D:/circulate/thsindex"+ factorIndex +"_202201-202206.txt");
+        File file = new File("D:/circulate/history/thsindex"+ factorIndex +"_2017-2021.txt");
         List<String> list = FileUtils.readLines(file, "UTF-8");
 
 
@@ -80,6 +80,10 @@ public class SynInfoComponent {
             String line = list.get(i);
 
             String[] array = line.split("\\|");
+            if(array.length<4){
+                log.info("行数i{} factorIndex{}", i,factorIndex);
+                continue;
+            }
             String uniqueKey = array[0] + SymbolConstants.UNDERLINE + array[1];
             if(factorIndex==1){
                 String  kbarDate =  array[0];
@@ -92,10 +96,15 @@ public class SynInfoComponent {
                 stockFactorService.save(stockFactor);
             }else {
                 StockFactor stockFactor = stockFactorService.getByUniqueKey(uniqueKey);
-
+                boolean saveFlag = false;
                 if(stockFactor==null){
-                    log.info("未查询到需要更新数据stockCode kbarDate{}",array[1],array[0]);
-                    continue;
+                    stockFactor = new StockFactor();
+                    stockFactor.setKbarDate(array[0]);
+                    stockFactor.setStockCode(array[1]);
+                    stockFactor.setStockName(array[2]);
+                    stockFactor.setIndex1(new BigDecimal(array[3]));
+                    stockFactor.setUniqueKey(uniqueKey);
+                    saveFlag = true;
                 }
                 if(factorIndex==2){
                     stockFactor.setIndex2a(new BigDecimal(array[3]));
@@ -112,7 +121,11 @@ public class SynInfoComponent {
                 }else if(factorIndex==7){
                     stockFactor.setIndex7(new BigDecimal(array[3]));
                 }
-                stockFactorService.updateById(stockFactor);
+                if (saveFlag){
+                    stockFactorService.save(stockFactor);
+                }else {
+                    stockFactorService.updateById(stockFactor);
+                }
             }
         }
 

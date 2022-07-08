@@ -36,9 +36,11 @@ public class SynTest extends BaseTestCase {
     @Test
     public void testSynFactor(){
         try {
-            for (int i = 2; i < 8; i++) {
-                synInfoComponent.synStockFactor(1);
+            for (int i = 1; i < 8; i++) {
+                synInfoComponent.synStockFactor(i);
             }
+           // synInfoComponent.synStockFactor(5);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
