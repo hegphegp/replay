@@ -61,11 +61,16 @@ public class ThsTest {
     private HangYeLevelComponent hangYeLevelComponent;
     @Autowired
     private BlockFollowStaticComponent blockFollowStaticComponent;
+    @Autowired
+    private TianDiPlankComponent tianDiPlankComponent;
+    @Autowired
+    private StockKbarComponent stockKbarComponent;
 
 
     @Test
     public void test1() {
-        blockFollowStaticComponent.blockFollowStaticInfo();
+        tianDiPlankComponent.highLowPlank();
+        //blockFollowStaticComponent.blockFollowStaticInfo();
         //hangYeLevelComponent.calHangYeKbarToRedis();
         //hangYeLevelComponent.hangyeAmount();
         //hangYeLevelComponent.calHangYeKbarToRedis();
@@ -98,5 +103,9 @@ public class ThsTest {
         System.out.println(data);*/
     }
 
+    @Test
+    public void test2() {
+        stockKbarComponent.batchKbarDataInit();
+    }
 
 }

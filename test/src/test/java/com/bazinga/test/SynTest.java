@@ -32,4 +32,16 @@ public class SynTest extends BaseTestCase {
             log.error(e.getMessage(),e);
         }
     }
+
+    @Test
+    public void testSynFactor(){
+        try {
+            for (int i = 2; i < 8; i++) {
+                synInfoComponent.synStockFactor(1);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 }
