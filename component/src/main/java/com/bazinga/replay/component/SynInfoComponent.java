@@ -63,8 +63,60 @@ public class SynInfoComponent {
     @Autowired
     private StockKbarService stockKbarService;
 
+    @Autowired
+    private StockFactorService stockFactorService;
+
     public static List<String> BLOCK_NAME_FILTER_LIST = Lists.newArrayList("沪股通","深股通","标普道琼斯","新股","次新"
             ,"创业板重组松绑","高送转","填权","共同富裕示范区","融资融券","MSCI","ST");
+
+
+    public void synStockFactor(int factorIndex) throws IOException {
+        File file = new File("D:/circulate/thsindex"+ factorIndex +"_202201-202206.txt");
+        List<String> list = FileUtils.readLines(file, "UTF-8");
+
+
+
+        for (int i = 1; i <list.size(); i++) {
+            String line = list.get(i);
+
+            String[] array = line.split("\\|");
+            String uniqueKey = array[0] + SymbolConstants.UNDERLINE + array[1];
+            if(factorIndex==1){
+                String  kbarDate =  array[0];
+                StockFactor stockFactor = new StockFactor();
+                stockFactor.setKbarDate(kbarDate);
+                stockFactor.setStockCode(array[1]);
+                stockFactor.setStockName(array[2]);
+                stockFactor.setIndex1(new BigDecimal(array[3]));
+                stockFactor.setUniqueKey(uniqueKey);
+                stockFactorService.save(stockFactor);
+            }else {
+                StockFactor stockFactor = stockFactorService.getByUniqueKey(uniqueKey);
+
+                if(stockFactor==null){
+                    log.info("未查询到需要更新数据stockCode kbarDate{}",array[1],array[0]);
+                    continue;
+                }
+                if(factorIndex==2){
+                    stockFactor.setIndex2a(new BigDecimal(array[3]));
+                    stockFactor.setIndex2b(new BigDecimal(array[4]));
+                    stockFactor.setIndex2c(new BigDecimal(array[5]));
+                }else if(factorIndex==3){
+                    stockFactor.setIndex3(new BigDecimal(array[3]));
+                }else if(factorIndex==4){
+                    stockFactor.setIndex4(new BigDecimal(array[3]));
+                }else if(factorIndex==5){
+                    stockFactor.setIndex5(new BigDecimal(array[3]));
+                }else if(factorIndex==6){
+                    stockFactor.setIndex6(new BigDecimal(array[3]));
+                }else if(factorIndex==7){
+                    stockFactor.setIndex7(new BigDecimal(array[3]));
+                }
+                stockFactorService.updateById(stockFactor);
+            }
+        }
+
+    }
 
     public void synThsBlockInfo() throws IOException {
         File file = new File("D:/circulate/block_industry.ini");
