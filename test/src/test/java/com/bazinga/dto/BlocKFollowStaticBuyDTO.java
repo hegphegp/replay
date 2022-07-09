@@ -13,9 +13,13 @@ public class BlocKFollowStaticBuyDTO {
     private String stockCode;
     private String stockName;
     private String blockCode;
+    private BigDecimal buyPrice;
+    private BigDecimal chuQuanBuyPrice;
     private BigDecimal amountRate;
     private BigDecimal rate;
     private BigDecimal profit;
+    private BigDecimal profitTen;
+    private BigDecimal profitEnd;
 
     public static List<BlocKFollowStaticBuyDTO> amountRateSort(List<BlocKFollowStaticBuyDTO> list){
         Collections.sort(list,new AmountRateComparator());

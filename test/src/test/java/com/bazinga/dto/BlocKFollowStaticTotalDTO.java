@@ -8,6 +8,10 @@ import java.math.BigDecimal;
 @Data
 public class BlocKFollowStaticTotalDTO {
     private String tradeDate;
+    private Integer planksTenCount;
+    private Integer plankBlockCount;
+    private Integer allBuyCount;
+    private Integer oneBuyCount;
 
     private Integer buyBlocks;
     private Integer buys;
@@ -24,5 +28,8 @@ public class BlocKFollowStaticTotalDTO {
     private BigDecimal rateProfit;
     private Integer noSameRateBuys;
     private BigDecimal noSameRateProfit;
+
+    private BigDecimal noSameRateProfitEnd;
+    private BigDecimal noSameRateProfitTen;
 
 }

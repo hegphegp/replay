@@ -15,6 +15,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -176,6 +177,33 @@ public class HistoryTransactionDataComponent {
             return null;
         }
     }
+
+    public BigDecimal calTenAvgPrice(String stockCode, Date tradeDate) {
+        String tradeDateStr = DateUtil.format(tradeDate, DateUtil.yyyy_MM_dd);
+        try{
+            List<ThirdSecondTransactionDataDTO> datas = getData(stockCode, tradeDate);
+            if(CollectionUtils.isEmpty(datas)){
+                return null;
+            }
+            List<ThirdSecondTransactionDataDTO> lists = Lists.newArrayList();
+            for (ThirdSecondTransactionDataDTO data:datas){
+                if(data.getTradeTime().startsWith("09")){
+                    lists.add(data);
+                }
+            }
+            if(CollectionUtils.isEmpty(lists)){
+                return null;
+            }
+            BigDecimal avgPrice = new BigDecimal(calAveragePrice(lists)).setScale(2,BigDecimal.ROUND_HALF_UP);
+            return avgPrice;
+        } catch (Exception e) {
+            log.info("计算均价异常 stockCode:{} tradeDate:{}",stockCode,tradeDateStr);
+            return null;
+        }
+    }
+
+
+
 
     /**
      * 允许买入时间
