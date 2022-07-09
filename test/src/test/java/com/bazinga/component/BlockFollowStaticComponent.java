@@ -165,9 +165,9 @@ public class BlockFollowStaticComponent {
            /* if(!circulateInfo.getStockCode().equals("001318")){
                 continue;
             }*/
-            if(m>=500){
+            /*if(m>=1000){
                 return map;
-            }
+            }*/
             List<StockKbar> stockKbars = getStockKBarsDelete30Days(circulateInfo.getStockCode());
             if(CollectionUtils.isEmpty(stockKbars)){
                 continue;
@@ -177,10 +177,10 @@ public class BlockFollowStaticComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220301", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220110", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220310", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 List<String> olds = Lists.newArrayList();
