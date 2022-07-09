@@ -55,6 +55,18 @@ public class PriceUtil {
         }
     }
 
+    public static boolean isHistorySuddenPrice(String stockCode,BigDecimal currentPrice, BigDecimal yesterdayPrice,String tradeDateStr) {
+        Date date = DateUtil.parseDate(tradeDateStr, DateUtil.yyyyMMdd);
+        if(date.before(DateUtil.parseDate("20200824",DateUtil.yyyyMMdd))){
+            return currentPrice.compareTo(yesterdayPrice.multiply(CommonConstant.SUDDEN_RATE).setScale(2, BigDecimal.ROUND_HALF_UP)) == 0;
+        }else {
+            if (StringUtils.isNotBlank(stockCode) && (stockCode.startsWith("3") || stockCode.startsWith("688"))) {
+                return currentPrice.compareTo(yesterdayPrice.multiply(CommonConstant.SUDDEN_RATE300).setScale(2, BigDecimal.ROUND_HALF_UP)) == 0;
+            }
+            return currentPrice.compareTo(yesterdayPrice.multiply(CommonConstant.SUDDEN_RATE).setScale(2, BigDecimal.ROUND_HALF_UP)) == 0;
+        }
+    }
+
 
 
     public static boolean isStarUpperPrice(BigDecimal currentPrice, BigDecimal yesterdayPrice) {
