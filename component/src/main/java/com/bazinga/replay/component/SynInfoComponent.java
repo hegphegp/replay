@@ -71,7 +71,7 @@ public class SynInfoComponent {
 
 
     public void synStockFactor(int factorIndex) throws IOException {
-        File file = new File("D:/circulate/history/thsindex"+ factorIndex +"_2017-2021.txt");
+        File file = new File("D:/circulate/thsindex"+ factorIndex +"_202201-202206.txt");
         List<String> list = FileUtils.readLines(file, "UTF-8");
 
 
