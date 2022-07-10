@@ -117,9 +117,9 @@ public class TianDiPlankComponent {
                 if(date.before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220401", DateUtil.yyyyMMdd))){
+                /*if(date.after(DateUtil.parseDate("20220401", DateUtil.yyyyMMdd))){
                     continue;
-                }
+                }*/
                 if(preKbar!=null) {
                     boolean highUpper = PriceUtil.isHistoryUpperPrice(circulateInfo.getStockCode(), stockKbar.getHighPrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
                     boolean lowSudden = PriceUtil.isHistorySuddenPrice(circulateInfo.getStockCode(), stockKbar.getLowPrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
