@@ -169,8 +169,7 @@ public class BaseTestCase {
 
     @Test
     public void test9() {
-        //historyBlockInfoComponent.initHistoryBlockInfo();
-        historyBlockInfoComponent.initHistoryBlockInfoCurrent();
+        historyBlockInfoComponent.initHistoryBlockInfo();
     }
 
     @Test
