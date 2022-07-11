@@ -27,10 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -68,19 +65,9 @@ public class HistoryBlockInfoComponent {
     public void initHistoryBlockInfo(){
         List<HistoryBlockInfo> blocks = getBlocks();
         saveHistoryBlockInfo(blocks);
-        for (HistoryBlockInfo historyBlockInfo:blocks){
-            System.out.println(historyBlockInfo.getBlockCode());
-            /*HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
-            query.setBlockCode(historyBlockInfo.getBlockCode());
-            List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
-            if(!CollectionUtils.isEmpty(historyBlockInfos)){
-                continue;
-            }*/
-            List<HistoryBlockStocks> historyBlockStocks = thsDataComponent.initHistoryBlockStocks(historyBlockInfo.getBlockCode(), historyBlockInfo.getBlockName());
-            saveBlockStocks(historyBlockStocks);
-        }
-
-
+        HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
+        List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
+        thsDataComponent.initHistoryBlockStocks(historyBlockInfos);
     }
 
     public void saveBlockStocks(List<HistoryBlockStocks> historyBlockStocks) {
@@ -135,7 +122,17 @@ public class HistoryBlockInfoComponent {
         for (HistoryBlockInfo blockInfo:historyBlockInfos){
             historyBlockInfoService.deleteById(blockInfo.getId());
         }
+        List<String> list = Lists.newArrayList("同花顺漂亮100");
         for (HistoryBlockInfo block:blocks){
+            boolean flag = false;
+            for (String badBlockName:list){
+                if(block.getBlockName().contains(badBlockName)){
+                    flag = true;
+                }
+            }
+            if(flag){
+                continue;
+            }
             historyBlockInfoService.save(block);
         }
     }
