@@ -2,7 +2,10 @@ package com.bazinga.component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
-import com.bazinga.dto.*;
+import com.bazinga.dto.BlocKFollowStaticBuyDTO;
+import com.bazinga.dto.BlocKFollowStaticTotalDTO;
+import com.bazinga.dto.MarketMoneyDTO;
+import com.bazinga.dto.PlankTimePairDTO;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.CommonComponent;
 import com.bazinga.replay.component.HistoryTransactionDataComponent;
@@ -11,13 +14,11 @@ import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.*;
 import com.bazinga.replay.service.*;
-import com.bazinga.replay.util.PoiExcelUtil;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
 import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
-import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
-public class BlockFollowStaticComponent {
+public class BlockFollowStaticCurrentComponent {
     @Autowired
     private CirculateInfoService circulateInfoService;
     @Autowired
@@ -86,6 +87,7 @@ public class BlockFollowStaticComponent {
             System.out.println(index+"===="+count);
             //THREAD_POOL_QUOTE.execute(() ->{
                 List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
+                List<PlankTimePairDTO> plankTens = judgePlanks100000(plankTimePairDTOS);
                 BlocKFollowStaticTotalDTO blocKFollowStaticTotalDTO = blockBuys(blockInfos, plankTimePairDTOS, circulateInfoMap, tradeDate);
                 if(blocKFollowStaticTotalDTO!=null) {
                     RedisMonior redisMonior = new RedisMonior();
@@ -169,6 +171,16 @@ public class BlockFollowStaticComponent {
         Date nextTradeDate = commonComponent.afterTradeDate(DateUtil.parseDate(tradeDate, DateUtil.yyyyMMdd));
         List<StockKbar> stockKbars = getStockKbarsByKBarDate(tradeDate);
         List<StockKbar> nextStockKbars = getStockKbarsByKBarDate(DateUtil.format(nextTradeDate,DateUtil.yyyyMMdd));
+        //用于和实盘作对比
+        if(CollectionUtils.isEmpty(nextStockKbars)){
+            nextStockKbars = Lists.newArrayList();
+            for (StockKbar stockKbar:stockKbars){
+                StockKbar kbar = new StockKbar();
+                BeanUtils.copyProperties(stockKbar,kbar);
+                kbar.setKbarDate(DateUtil.format(nextTradeDate,DateUtil.yyyyMMdd));
+                nextStockKbars.add(kbar);
+            }
+        }
         List<StockKbar> preStockKbars = getStockKbarsByKBarDate(DateUtil.format(preTradeDate,DateUtil.yyyyMMdd));
         if(CollectionUtils.isEmpty(stockKbars)||CollectionUtils.isEmpty(preStockKbars)||CollectionUtils.isEmpty(nextStockKbars)){
             return null;
