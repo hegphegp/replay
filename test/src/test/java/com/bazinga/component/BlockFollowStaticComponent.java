@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -92,70 +93,6 @@ public class BlockFollowStaticComponent {
         }
 
 
-
-        /*List<BlocKFollowStaticTotalDTO> buys = Lists.newArrayList();
-        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
-        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
-        for (TradeDatePool tradeDatePool:tradeDatePools){
-            boolean before = tradeDatePool.getTradeDate().before(DateUtil.parseDate("20200101", DateUtil.yyyyMMdd));
-            boolean after = tradeDatePool.getTradeDate().after(DateUtil.parseDate("20230101", DateUtil.yyyyMMdd));
-            if((!before)&&(!after)) {
-                String format = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
-                String key = format + "_total_static";
-                RedisMonior redisMonior = redisMoniorService.getByRedisKey(key);
-                if (redisMonior != null) {
-                    String redisValue = redisMonior.getRedisValue();
-                    BlocKFollowStaticTotalDTO follow = JSONObject.parseObject(redisValue, BlocKFollowStaticTotalDTO.class);
-                    buys.add(follow);
-                }
-            }
-        }
-
-        List<Object[]> datas = Lists.newArrayList();
-        for (BlocKFollowStaticTotalDTO dto:buys) {
-            List<Object> list = new ArrayList<>();
-            list.add(dto.getTradeDate());
-            list.add(dto.getTradeDate());
-            list.add(dto.getPlanksTenCount());
-            list.add(dto.getPlankBlockCount());
-            list.add(dto.getAllBuyCount());
-            list.add(dto.getOneBuyCount());
-            list.add(dto.getBuyBlocks());
-
-            list.add(dto.getBuys());
-            list.add(dto.getProfit());
-            list.add(dto.getNoSameBuys());
-            list.add(dto.getNoSameProfit());
-
-            list.add(dto.getAmountBuys());
-            list.add(dto.getAmountProfit());
-            list.add(dto.getNoSameAmountBuys());
-            list.add(dto.getNoSameAmountProfit());
-
-            list.add(dto.getRateBuys());
-            list.add(dto.getRateProfit());
-            list.add(dto.getNoSameRateBuys());
-            list.add(dto.getNoSameRateProfit());
-            list.add(dto.getNoSameRateProfitEnd());
-            list.add(dto.getNoSameRateProfitTen());
-
-
-
-            Object[] objects = list.toArray();
-            datas.add(objects);
-        }
-
-
-        String[] rowNames = {"index","交易日期","10点前市场涨停数量","10点前有涨停股票板块数量","10点前满足3中买入方式板块数量","10点前满足任何一种买入方式数量","原始板块数量","原始买入数量","原始总利润","去重数量","去重总盈亏"
-                ,"成交额较前日排序买入数量","成交额较前日排序总利润","成交额较前日排序去重买入数量","成交额较前日排序去重总盈亏"
-                ,"买入时涨幅排序买入数量","买入时涨幅排序总利润","买入时涨幅排序去重买入数量","买入时涨幅排序去重总盈亏","买入时涨幅排序去重10点盈亏","买入时涨幅排序去重收盘盈亏"};
-        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("板块跟随统计买入",rowNames,datas);
-        try {
-            poiExcelUtil.exportExcelUseExcelTitle("板块跟随统计买入");
-        }catch (Exception e){
-            log.info(e.getMessage());
-        }*/
     }
 
 
@@ -180,19 +117,19 @@ public class BlockFollowStaticComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20200101", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220601", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
+                /*if(date.after(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
                     continue;
-                }
-                List<String> olds = Lists.newArrayList();
+                }*/
+                /*List<String> olds = Lists.newArrayList();
                 RedisMonior redisMonior = redisMoniorService.getByRedisKey(circulateInfo.getStockCode());
                 if(redisMonior!=null&&!redisMonior.getRedisValue().equals("test")){
                     String[] split = redisMonior.getRedisValue().split(",");
                     List<String> strings = Arrays.asList(split);
                     olds.addAll(strings);
-                }
+                }*/
 
                 if(preKbar!=null) {
                     boolean highUpper = PriceUtil.isHistoryUpperPrice(circulateInfo.getStockCode(), stockKbar.getHighPrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
@@ -227,6 +164,16 @@ public class BlockFollowStaticComponent {
         Date nextTradeDate = commonComponent.afterTradeDate(DateUtil.parseDate(tradeDate, DateUtil.yyyyMMdd));
         List<StockKbar> stockKbars = getStockKbarsByKBarDate(tradeDate);
         List<StockKbar> nextStockKbars = getStockKbarsByKBarDate(DateUtil.format(nextTradeDate,DateUtil.yyyyMMdd));
+        //用于和实盘作对比
+        if(CollectionUtils.isEmpty(nextStockKbars)){
+            nextStockKbars = Lists.newArrayList();
+            for (StockKbar stockKbar:stockKbars){
+                StockKbar kbar = new StockKbar();
+                BeanUtils.copyProperties(stockKbar,kbar);
+                kbar.setKbarDate(DateUtil.format(nextTradeDate,DateUtil.yyyyMMdd));
+                nextStockKbars.add(kbar);
+            }
+        }
         List<StockKbar> preStockKbars = getStockKbarsByKBarDate(DateUtil.format(preTradeDate,DateUtil.yyyyMMdd));
         if(CollectionUtils.isEmpty(stockKbars)||CollectionUtils.isEmpty(preStockKbars)||CollectionUtils.isEmpty(nextStockKbars)){
             return null;
