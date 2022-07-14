@@ -157,7 +157,7 @@ public class PlankAmountSuperTestComponent {
                         }else{
                             dto.setHighPlankCount(dto.getHighPlankCount()+1);
                             if(endUpper){
-                                dto.setHighEndPlankCount(dto.getHighPlankCount()+1);
+                                dto.setHighEndPlankCount(dto.getHighEndPlankCount()+1);
                             }
                         }
                     }
