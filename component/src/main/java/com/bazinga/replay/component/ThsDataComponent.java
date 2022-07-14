@@ -62,8 +62,13 @@ public class ThsDataComponent {
                 }
                 String blockCode = historyBlockInfo.getBlockCode();
                 String blockName = historyBlockInfo.getBlockName();
+                long time0 = new Date().getTime();
                 List<BlockStockDTO> blockStockDTOS = getBlockStocks(blockCode);
+                long time1 = new Date().getTime();
+                System.out.println(time1-time0);
                 List<HistoryBlockStocks> historys = converToHistoryBlockStocks(blockCode, blockName, blockStockDTOS);
+                long time2 = new Date().getTime();
+                System.out.println(time2-time1);
                 saveBlockStocks(blockCode,historys);
                 System.out.println(blockCode+"===========结束了"+i);
             //});
@@ -91,6 +96,7 @@ public class ThsDataComponent {
             if(list.contains(history.getTradeDate())){
                 continue;
             }
+            System.out.println(history.getBlockCode()+"======"+history.getTradeDate());
             historyBlockStocksService.save(history);
         }
     }
@@ -120,7 +126,7 @@ public class ThsDataComponent {
                 stocks.add(blockStockDTO.getStockCode());
             }
         }
-        Date fisrtDate = DateUtil.parseDate("20170101", DateUtil.yyyyMMdd);
+        Date fisrtDate = DateUtil.parseDate("20220701", DateUtil.yyyyMMdd);
         Date endDate = DateTimeUtils.getDate000000(new Date());
         Date date = DateUtil.parseDate("19910101", DateUtil.yyyyMMdd);
         List<String> reals = Lists.newArrayList();
