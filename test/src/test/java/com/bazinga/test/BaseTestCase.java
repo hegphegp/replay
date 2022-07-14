@@ -168,6 +168,11 @@ public class BaseTestCase {
     }
 
     @Test
+    public void test9() {
+        historyBlockInfoComponent.initHistoryBlockInfo();
+    }
+
+    @Test
     public void test7() {
         Date date = new Date();
         long time = date.getTime();

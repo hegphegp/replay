@@ -23,7 +23,7 @@ import com.bazinga.util.PriceUtil;
 import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sun.deploy.net.proxy.WFirefoxProxyConfig;
+
 import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

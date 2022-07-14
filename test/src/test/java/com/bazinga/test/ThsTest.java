@@ -61,13 +61,31 @@ public class ThsTest {
     private HangYeLevelComponent hangYeLevelComponent;
     @Autowired
     private BlockFollowStaticComponent blockFollowStaticComponent;
+    @Autowired
+    private TianDiPlankComponent tianDiPlankComponent;
+    @Autowired
+    private StockKbarComponent stockKbarComponent;
+    @Autowired
+    private BlockFollowTestComponent blockFollowTestComponent;
+    @Autowired
+    private StrongBlockExploreComponent strongBlockExploreComponent;
+    @Autowired
+    private BlockFollowStaticCurrentComponent blockFollowStaticCurrentComponent;
+    @Autowired
+    private PlankAmountSuperTestComponent plankAmountSuperTestComponent;
 
 
     @Test
     public void test1() {
-        blockFollowStaticComponent.blockFollowStaticInfo();
+        plankAmountSuperTestComponent.plankAmountInfo();
+        //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        //strongBlockExploreComponent.highLowPlank();
+        /*List<String> list = Lists.newArrayList("000950","002767","002718","600624","603669","001308","603595","002992","002813","002864","002888","002077","600336","603329","603327","000533","000545","002317","002337","002339","600259","600192","600152","000404","002225","600101","002272","000722","603122","000755","600056","000709","002514","603191","002526","603161","002589","600868","600833","603969","603963","000601","000600");
+        blockFollowTestComponent.blockFollowBuyStock(list);*/
+        //tianDiPlankComponent.highLowPlank();
+        //blockFollowStaticComponent.blockFollowStaticInfo();
         //hangYeLevelComponent.calHangYeKbarToRedis();
-        hangYeLevelComponent.hangyeAmount();
+        //hangYeLevelComponent.hangyeAmount();
         //hangYeLevelComponent.calHangYeKbarToRedis();
         //quanShangHighComponent.quanShangYiDong();
        // thsBlockKbarComponent.initHistoryBlockMinKbar();
@@ -96,7 +114,12 @@ public class ThsTest {
         //northSouthMoneyComponent.calHenShenStockKbar10();
         /*List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("999999", "20220602");
         System.out.println(data);*/
+        //thsBlockKbarComponent.initHistoryBlockKbars();
     }
 
+    @Test
+    public void test2() {
+        stockKbarComponent.batchKbarDataInit();
+    }
 
 }

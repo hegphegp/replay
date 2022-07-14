@@ -175,14 +175,17 @@ public class ThsBlockKbarComponent {
         query.setBlockType(1);
         List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
         for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
-            getBlockKbar(historyBlockInfo.getBlockCode(),historyBlockInfo.getBlockName());
+            StockKbar byUniqueKey = stockKbarService.getByUniqueKey(historyBlockInfo.getBlockCode()+"_"+"20220713");
+            if(byUniqueKey==null) {
+                getBlockKbar(historyBlockInfo.getBlockCode(), historyBlockInfo.getBlockName());
+            }
         }
         thsLoginOut();
     }
 
     public void getBlockKbar(String blockCode,String blockName){
         System.out.println(blockCode);
-        String quote_str = JDIBridge.THS_HistoryQuotes(blockCode+".TI","open,high,low,close","","2017-06-01","2022-06-09");
+        String quote_str = JDIBridge.THS_HistoryQuotes(blockCode+".TI","open,high,low,close,volume,amount","","2017-01-01","2022-07-13");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);
             JSONArray tables = jsonObject.getJSONArray("tables");
@@ -200,6 +203,8 @@ public class ThsBlockKbarComponent {
             List<BigDecimal> highs = tableInfo.getJSONArray("high").toJavaList(BigDecimal.class);
             List<BigDecimal> lows = tableInfo.getJSONArray("low").toJavaList(BigDecimal.class);
             List<BigDecimal> closes = tableInfo.getJSONArray("close").toJavaList(BigDecimal.class);
+            List<Long> volumes = tableInfo.getJSONArray("volume").toJavaList(Long.class);
+            List<BigDecimal> amounts = tableInfo.getJSONArray("amount").toJavaList(BigDecimal.class);
             int i = 0;
             for (String time:times){
                 Date timeDate = DateUtil.parseDate(time, DateUtil.yyyy_MM_dd);
@@ -212,9 +217,12 @@ public class ThsBlockKbarComponent {
                 stockKbar.setClosePrice(closes.get(i));
                 stockKbar.setHighPrice(highs.get(i));
                 stockKbar.setLowPrice(lows.get(i));
-                stockKbar.setTradeAmount(BigDecimal.ZERO);
-                stockKbar.setTradeQuantity(0l);
-                stockKbarService.save(stockKbar);
+                stockKbar.setTradeAmount(amounts.get(i));
+                stockKbar.setTradeQuantity(volumes.get(i));
+                StockKbar byUniqueKey = stockKbarService.getByUniqueKey(stockKbar.getUniqueKey());
+                if(byUniqueKey==null) {
+                    stockKbarService.save(stockKbar);
+                }
                 i++;
             }
         }

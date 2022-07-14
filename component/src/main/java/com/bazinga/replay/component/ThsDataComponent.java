@@ -6,11 +6,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
 import com.bazinga.replay.dto.BlockStockDTO;
-import com.bazinga.replay.model.HistoryBlockStocks;
-import com.bazinga.replay.model.StockIndex;
-import com.bazinga.replay.model.ThsQuoteInfo;
-import com.bazinga.replay.model.TradeDatePool;
+import com.bazinga.replay.model.*;
+import com.bazinga.replay.query.HistoryBlockStocksQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
+import com.bazinga.replay.service.HistoryBlockInfoService;
+import com.bazinga.replay.service.HistoryBlockStocksService;
 import com.bazinga.replay.service.ThsQuoteInfoService;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateTimeUtils;
@@ -40,17 +40,67 @@ public class ThsDataComponent {
     private ThsQuoteInfoService thsQuoteInfoService;
     @Autowired
     private TradeDatePoolService tradeDatePoolService;
+    @Autowired
+    private HistoryBlockStocksService historyBlockStocksService;
 
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
-    public List<HistoryBlockStocks> initHistoryBlockStocks(String blockCode,String blockName){
+    public void initHistoryBlockStocks(List<HistoryBlockInfo> historyBlockInfos){
         int ret = thsLogin();
-        List<BlockStockDTO> blockStockDTOS = getBlockStocks(blockCode);
-        thsLoginOut();
-        List<HistoryBlockStocks> historys = converToHistoryBlockStocks(blockCode, blockName, blockStockDTOS);
-        return historys;
+        int i = 0;
+        for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
+            i++;
+            //THREAD_POOL_QUOTE.execute(() ->{
+                HistoryBlockStocksQuery query = new HistoryBlockStocksQuery();
+                query.setBlockCode(historyBlockInfo.getBlockCode());
+                query.setTradeDate(DateUtil.format(new Date(),DateUtil.yyyyMMdd));
+                List<HistoryBlockStocks> blockStocks = historyBlockStocksService.listByCondition(query);
+                if(!CollectionUtils.isEmpty(blockStocks)){
+                    System.out.println(historyBlockInfo.getBlockCode()+"****已执行"+i);
+                    continue;
 
+                }
+                String blockCode = historyBlockInfo.getBlockCode();
+                String blockName = historyBlockInfo.getBlockName();
+                long time0 = new Date().getTime();
+                List<BlockStockDTO> blockStockDTOS = getBlockStocks(blockCode);
+                long time1 = new Date().getTime();
+                System.out.println(time1-time0);
+                List<HistoryBlockStocks> historys = converToHistoryBlockStocks(blockCode, blockName, blockStockDTOS);
+                long time2 = new Date().getTime();
+                System.out.println(time2-time1);
+                saveBlockStocks(blockCode,historys);
+                System.out.println(blockCode+"===========结束了"+i);
+            //});
+        }
+        try{
+            Thread.sleep(100000000l);
+        }catch (Exception e){
+
+        }
+
+        thsLoginOut();
     }
+    public void saveBlockStocks(String blockCode,List<HistoryBlockStocks> historyBlockStocks) {
+        if(historyBlockStocks==null){
+            return;
+        }
+        HistoryBlockStocksQuery query = new HistoryBlockStocksQuery();
+        query.setBlockCode(blockCode);
+        List<HistoryBlockStocks> blockStocks = historyBlockStocksService.listByCondition(query);
+        List<String> list = Lists.newArrayList();
+        for (HistoryBlockStocks blockStock:blockStocks){
+            list.add(blockStock.getTradeDate());
+        }
+        for (HistoryBlockStocks history:historyBlockStocks){
+            if(list.contains(history.getTradeDate())){
+                continue;
+            }
+            System.out.println(history.getBlockCode()+"======"+history.getTradeDate());
+            historyBlockStocksService.save(history);
+        }
+    }
+
     public List<HistoryBlockStocks> converToHistoryBlockStocks(String blockCode,String blockName,List<BlockStockDTO> list){
         List<HistoryBlockStocks> historys = Lists.newArrayList();
         if(CollectionUtils.isEmpty(list)){
@@ -76,7 +126,7 @@ public class ThsDataComponent {
                 stocks.add(blockStockDTO.getStockCode());
             }
         }
-        Date fisrtDate = DateUtil.parseDate("20170101", DateUtil.yyyyMMdd);
+        Date fisrtDate = DateUtil.parseDate("20220701", DateUtil.yyyyMMdd);
         Date endDate = DateTimeUtils.getDate000000(new Date());
         Date date = DateUtil.parseDate("19910101", DateUtil.yyyyMMdd);
         List<String> reals = Lists.newArrayList();
@@ -251,7 +301,7 @@ public class ThsDataComponent {
     public int thsLogin(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("ylz203", "182883");
+            int ret = JDIBridge.THS_iFinDLogin("ylz198", "307435");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);
@@ -262,7 +312,7 @@ public class ThsDataComponent {
     public int thsLoginOut(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("ylz200", "620865");
+            int ret = JDIBridge.THS_iFinDLogin("ylz198", "307435");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);
