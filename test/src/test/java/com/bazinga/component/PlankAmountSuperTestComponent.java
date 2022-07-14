@@ -119,7 +119,10 @@ public class PlankAmountSuperTestComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220501", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20210501", DateUtil.yyyyMMdd))){
+                    continue;
+                }
+                if(date.after(DateUtil.parseDate("20220714", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 if(preKbar!=null) {
