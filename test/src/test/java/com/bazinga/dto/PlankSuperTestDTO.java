@@ -22,5 +22,11 @@ public class PlankSuperTestDTO {
     private int highPlankCount;
     private int highEndPlankCount;
 
+    private String highStockCode;
+    private Integer plankTime;
+    private Integer planks;
+    private Integer endFlag;
+    private BigDecimal profit;
+
 
 }

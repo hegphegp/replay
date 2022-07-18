@@ -11,4 +11,5 @@ public class StrongPercentDTO {
     private Integer marketCount;
     private Integer blockCount;
     private BigDecimal rate;
+    private SBEHighTimeDTO buyDTO;
 }
