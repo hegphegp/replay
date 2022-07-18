@@ -24,4 +24,10 @@ public class StrongBlockBuyDTO {
     private Integer blockCount3;
     private BigDecimal rate3;
 
+    private String stockCode;
+    private String stockName;
+    private Integer planks;
+    private Long plankTime;
+    private BigDecimal profit;
+
 }

@@ -64,9 +64,11 @@ public class StrongBlockExploreComponent {
 
 
     public void highLowPlank(){
+        Map<String, String> nextTradeDateMap = getNextTradeDateMap();
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
-        Map<String, List<String>> map = getEndPlanks(circulateInfos);
-        List<StrongBlockBuyDTO> buys = blockPlankRate(map);
+        Map<String,List<SBEHighTimeDTO>> highMapInfo = new HashMap<>();
+        Map<String, List<String>> map = getEndPlanks(circulateInfos,highMapInfo,nextTradeDateMap);
+        List<StrongBlockBuyDTO> buys = blockPlankRate(map,highMapInfo);
         List<Object[]> datas = Lists.newArrayList();
         for (StrongBlockBuyDTO dto:buys) {
             List<Object> list = new ArrayList<>();
@@ -89,12 +91,18 @@ public class StrongBlockExploreComponent {
             list.add(dto.getMarketCount3());
             list.add(dto.getRate3());
 
+            list.add(dto.getStockCode());
+            list.add(dto.getStockName());
+            list.add(dto.getPlankTime());
+            list.add(dto.getPlanks());
+            list.add(dto.getProfit());
+
             Object[] objects = list.toArray();
             datas.add(objects);
         }
 
 
-        String[] rowNames = {"index","日期","板块代码","板块名称","股票数","板块封住1","市场封住1","比例1","板块封住2","市场封住2","比例2","板块封住3","市场封住3","比例3"};
+        String[] rowNames = {"index","日期","板块代码","板块名称","股票数","板块封住1","市场封住1","比例1","板块封住2","市场封住2","比例2","板块封住3","市场封住3","比例3","股票名称","股票代码","上板时间","买入前一日板高","盈利"};
         PoiExcelUtil poiExcelUtil = new PoiExcelUtil("热点板块",rowNames,datas);
         try {
             poiExcelUtil.exportExcelUseExcelTitle("热点板块");
@@ -103,7 +111,7 @@ public class StrongBlockExploreComponent {
         }
     }
 
-    public List<StrongBlockBuyDTO> blockPlankRate(Map<String,List<String>> map){
+    public List<StrongBlockBuyDTO> blockPlankRate(Map<String,List<String>> map,Map<String,List<SBEHighTimeDTO>> dtoMap){
         List<StrongBlockBuyDTO> buys = Lists.newArrayList();
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
         tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20180101",DateUtil.yyyyMMdd));
@@ -113,7 +121,8 @@ public class StrongBlockExploreComponent {
         for (TradeDatePool tradeDatePool:tradeDatePools){
             String tradeDate = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
             List<String> planks = map.get(tradeDate);
-            getBlockPlankPercent(tradeDate, planks,strongMap);
+            List<SBEHighTimeDTO> sbeHighTimeDTOS = dtoMap.get(tradeDate);
+            getBlockPlankPercent(tradeDate, planks,strongMap,sbeHighTimeDTOS);
         }
         HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
         query.setBlockType(1);
@@ -150,6 +159,14 @@ public class StrongBlockExploreComponent {
                     strongBlockBuyDTO.setRate3(strongPercentDTO3.getRate());
                     List<String> stocks = getBlockStocks(blockInfo.getBlockCode(), tradeDate);
                     strongBlockBuyDTO.setStockCount(stocks.size());
+                    if(strongPercentDTO3.getBuyDTO()!=null){
+                        SBEHighTimeDTO buyDTO = strongPercentDTO3.getBuyDTO();
+                        strongBlockBuyDTO.setStockCode(buyDTO.getStockCode());
+                        strongBlockBuyDTO.setStockName(buyDTO.getStockName());
+                        strongBlockBuyDTO.setPlanks(buyDTO.getPlanks());
+                        strongBlockBuyDTO.setPlankTime(buyDTO.getPlankTime());
+                        strongBlockBuyDTO.setProfit(buyDTO.getProfit());
+                    }
                     buys.add(strongBlockBuyDTO);
                 }
             }
@@ -157,12 +174,18 @@ public class StrongBlockExploreComponent {
         return buys;
     }
 
-    public void getBlockPlankPercent(String tradeDate,List<String> planks,Map<String,StrongPercentDTO> strongMap){
+    public void getBlockPlankPercent(String tradeDate,List<String> planks,Map<String,StrongPercentDTO> strongMap,List<SBEHighTimeDTO> sbeHighTimeDTOS){
         HistoryBlockStocksQuery stocksQuery = new HistoryBlockStocksQuery();
         stocksQuery.setTradeDate(tradeDate);
         List<HistoryBlockStocks> stocks = historyBlockStocksService.listByCondition(stocksQuery);
         if(CollectionUtils.isEmpty(stocks)||CollectionUtils.isEmpty(planks)){
             return;
+        }
+        Map<String, SBEHighTimeDTO> dtoMap = new HashMap<>();
+        if(!CollectionUtils.isEmpty(sbeHighTimeDTOS)) {
+            for (SBEHighTimeDTO timeDTO : sbeHighTimeDTOS) {
+                dtoMap.put(timeDTO.getStockCode(), timeDTO);
+            }
         }
         for (HistoryBlockStocks historyBlockStocks:stocks){
             String stockStr = historyBlockStocks.getStocks();
@@ -170,9 +193,27 @@ public class StrongBlockExploreComponent {
                 continue;
             }
             int count = 0;
+            SBEHighTimeDTO sbeDTO = null;
             for (String stockCode:planks){
                 if(stockStr.contains(stockCode)){
                     count++;
+                    SBEHighTimeDTO timeDTO = dtoMap.get(stockCode);
+                    if(timeDTO!=null) {
+                        if (sbeDTO == null) {
+                            sbeDTO = timeDTO;
+                        }else{
+                            if(timeDTO.getPlanks()>sbeDTO.getPlanks()){
+                                sbeDTO = timeDTO;
+                            } else if(timeDTO.getPlanks()==sbeDTO.getPlanks()){
+                                if(sbeDTO.getPlankTime()==null){
+                                    sbeDTO = timeDTO;
+                                }
+                                if(timeDTO.getPlankTime()!=null&&timeDTO.getPlankTime()< sbeDTO.getPlankTime()){
+                                    sbeDTO = timeDTO;
+                                }
+                            }
+                        }
+                    }
                 }
             }
             BigDecimal percent = new BigDecimal(count).divide(new BigDecimal(planks.size()), 2, BigDecimal.ROUND_HALF_UP);
@@ -181,13 +222,14 @@ public class StrongBlockExploreComponent {
                 strongPercentDTO.setBlockCount(count);
                 strongPercentDTO.setMarketCount(planks.size());
                 strongPercentDTO.setRate(percent);
+                strongPercentDTO.setBuyDTO(sbeDTO);
                 strongMap.put(historyBlockStocks.getBlockCode()+"_"+historyBlockStocks.getTradeDate(),strongPercentDTO);
             }
         }
     }
 
 
-    public Map<String, List<String>> getEndPlanks(List<CirculateInfo> circulateInfos){
+    public Map<String, List<String>> getEndPlanks(List<CirculateInfo> circulateInfos,Map<String,List<SBEHighTimeDTO>> highMapInfo,Map<String,String> nextTradeDateMap){
         Map<String, List<String>> map = new HashMap<>();
         int i =0;
         for (CirculateInfo circulateInfo:circulateInfos){
@@ -200,8 +242,10 @@ public class StrongBlockExploreComponent {
             if(CollectionUtils.isEmpty(stockKbars)){
                 continue;
             }
+            LimitQueue<StockKbar> limitQueue = new LimitQueue<>(10);
             StockKbar preKbar = null;
             for (StockKbar stockKbar:stockKbars){
+                limitQueue.add(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
                 if(date.before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd))){
                     continue;
@@ -212,17 +256,113 @@ public class StrongBlockExploreComponent {
                 if(preKbar!=null) {
                     boolean endUpper = PriceUtil.isHistoryUpperPrice(circulateInfo.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
                     if(endUpper){
+                        int planks = calPlanks(limitQueue);
                         List<String> lists = map.get(stockKbar.getKbarDate());
                         if(lists==null){
                             lists = Lists.newArrayList();
                             map.put(stockKbar.getKbarDate(),lists);
                         }
                         lists.add(stockKbar.getStockCode());
+                        if(planks>=2){
+                            List<SBEHighTimeDTO> sbeHighTimeDTOS = highMapInfo.get(stockKbar.getKbarDate());
+                            if(sbeHighTimeDTOS==null){
+                                sbeHighTimeDTOS = Lists.newArrayList();
+                                highMapInfo.put(stockKbar.getKbarDate(),sbeHighTimeDTOS);
+                            }
+                            SBEHighTimeDTO sbeHighTimeDTO = new SBEHighTimeDTO();
+                            sbeHighTimeDTO.setStockCode(circulateInfo.getStockCode());
+                            sbeHighTimeDTO.setPlanks(planks);
+                            getHighPlankInfo(nextTradeDateMap.get(stockKbar.getKbarDate()),stockKbars,sbeHighTimeDTO);
+                        }
                     }
 
                 }
                 preKbar = stockKbar;
             }
+        }
+        return map;
+    }
+    public void getHighPlankInfo(String nextTradeDate,List<StockKbar> stockKbars,SBEHighTimeDTO sbeHighTimeDTO){
+        int i = 0;
+        StockKbar preKbar = null;
+        StockKbar buyStockKbar = null;
+        for (StockKbar stockKbar:stockKbars){
+            if(i>=0){
+                if(sbeHighTimeDTO.getPlankTime()==null){
+                    return;
+                }
+                if(stockKbar.getHighPrice().compareTo(stockKbar.getLowPrice())!=0){
+                    BigDecimal avgPrice = stockKbar.getTradeAmount().divide(new BigDecimal(stockKbar.getTradeQuantity() * 100),2,BigDecimal.ROUND_HALF_UP);
+                    avgPrice = chuQuanAvgPrice(avgPrice, stockKbar);
+                    BigDecimal profit = PriceUtil.getPricePercentRate(avgPrice.subtract(buyStockKbar.getAdjHighPrice()), buyStockKbar.getAdjHighPrice());
+                    sbeHighTimeDTO.setProfit(profit);
+                    return;
+                }
+            }
+            if(stockKbar.getKbarDate().equals(nextTradeDate)){
+                buyStockKbar = stockKbar;
+                if(stockKbar.getHighPrice().compareTo(stockKbar.getLowPrice())==0){
+                    return;
+                }
+                Long stockBuyTime = getStockBuyTime(stockKbar,preKbar.getClosePrice());
+                sbeHighTimeDTO.setPlankTime(stockBuyTime);
+                i++;
+            }
+            preKbar = stockKbar;
+        }
+    }
+
+
+    public Long getStockBuyTime(StockKbar stockKbar,BigDecimal preEndPrice){
+        List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockKbar.getStockCode(), DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd));
+        if(CollectionUtils.isEmpty(datas)){
+            return null;
+        }
+        int index = 0;
+        String preMin = "09:25";
+        boolean preIsUpper = true;
+        for (ThirdSecondTransactionDataDTO data:datas){
+            if(data.getTradeTime().equals(preMin)){
+                index++;
+            }else{
+                preMin = data.getTradeTime();
+                index = 0;
+            }
+            BigDecimal tradePrice = data.getTradePrice();
+            boolean upperPrice = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), tradePrice, preEndPrice,stockKbar.getKbarDate());
+            if(data.getTradeTime().equals("09:25")&&upperPrice){
+                preIsUpper = true;
+            }
+            Integer tradeType = data.getTradeType();
+            if(tradeType!=0&&tradeType!=1){
+                continue;
+            }
+            if(upperPrice&&tradeType==1){
+                if(!preIsUpper){
+                    long buyTime = timeToLong(data.getTradeTime(), index);
+                    return buyTime;
+                }
+                preIsUpper = true;
+            }else{
+                preIsUpper = false;
+            }
+        }
+        return null;
+    }
+
+    public Map<String,String> getNextTradeDateMap(){
+        Map<String, String> map = new HashMap<>();
+        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20180101",DateUtil.yyyyMMdd));
+        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
+        String preTradeDate = null;
+        for (TradeDatePool tradeDatePool:tradeDatePools){
+            String format = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+            if(preTradeDate!=null){
+                map.put(preTradeDate,format);
+            }
+            preTradeDate = format;
         }
         return map;
     }
