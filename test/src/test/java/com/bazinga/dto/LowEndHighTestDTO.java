@@ -6,7 +6,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class GatherPlankTestDTO {
+public class LowEndHighTestDTO {
     private String stockCode;
     private String stockName;
     private String tradeDate;

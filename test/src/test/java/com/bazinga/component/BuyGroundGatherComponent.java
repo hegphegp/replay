@@ -64,9 +64,9 @@ public class BuyGroundGatherComponent {
 
     public void gatherGround(){
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
-        List<GatherPlankTestDTO> buys = getPlankTimePairs(circulateInfos);
+        List<LowEndHighTestDTO> buys = getPlankTimePairs(circulateInfos);
         List<Object[]> datas = Lists.newArrayList();
-        for (GatherPlankTestDTO dto:buys) {
+        for (LowEndHighTestDTO dto:buys) {
             List<Object> list = new ArrayList<>();
             list.add(dto.getStockCode());
             list.add(dto.getStockCode());
@@ -75,31 +75,30 @@ public class BuyGroundGatherComponent {
             list.add(dto.getTenDayRate());
             list.add(dto.getTenDayPlanks());
             list.add(dto.getContinuePlanks());
-            list.add(dto.getProfit());
             Object[] objects = list.toArray();
             datas.add(objects);
         }
 
 
-        String[] rowNames = {"index","股票代码","股票名称","交易日期","10天涨幅","10天封住次数","前一天连板高度","盈利"};
-        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("高位集合低开",rowNames,datas);
+        String[] rowNames = {"index","股票代码","股票名称","交易日期","前10日内涨幅","前10日内封板成功次数","前一日连扳高度"};
+        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("高位地天板",rowNames,datas);
         try {
-            poiExcelUtil.exportExcelUseExcelTitle("高位集合低开");
+            poiExcelUtil.exportExcelUseExcelTitle("高位地天板");
         }catch (Exception e){
             log.info(e.getMessage());
         }
     }
 
 
-    public List<GatherPlankTestDTO> getPlankTimePairs(List<CirculateInfo> circulateInfos){
-        List<GatherPlankTestDTO> buys = Lists.newArrayList();
+    public List<LowEndHighTestDTO> getPlankTimePairs(List<CirculateInfo> circulateInfos){
+        List<LowEndHighTestDTO> buys = Lists.newArrayList();
         int i =0;
         for (CirculateInfo circulateInfo:circulateInfos){
             i++;
             System.out.println(circulateInfo.getStockCode()+"-----"+i);
-            if(buys.size()>=10){
+           /* if(buys.size()>=10){
                 return buys;
-            }
+            }*/
             List<StockKbar> stockKbars = getStockKBarsDelete30Days(circulateInfo.getStockCode());
             if(CollectionUtils.isEmpty(stockKbars)){
                 continue;
@@ -120,22 +119,25 @@ public class BuyGroundGatherComponent {
                 }
 
                 if(preKbar!=null) {
-                    BigDecimal openRate = PriceUtil.getPricePercentRate(stockKbar.getAdjOpenPrice().subtract(preKbar.getAdjClosePrice()), preKbar.getAdjClosePrice());
-                    if(openRate.compareTo(new BigDecimal("0.9"))==-1){
-                        GatherPlankTestDTO gatherPlankTestDTO = new GatherPlankTestDTO();
+                    BigDecimal lowRate = PriceUtil.getPricePercentRate(stockKbar.getAdjLowPrice().subtract(preKbar.getAdjClosePrice()), preKbar.getAdjClosePrice());
+                    boolean endUpper = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
+                    if(!endUpper){
+                        endUpper = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getAdjClosePrice(), preKbar.getAdjClosePrice(), stockKbar.getKbarDate());
+                    }
+                    if(lowRate.compareTo(new BigDecimal("-9"))<=0 && endUpper){
+                        LowEndHighTestDTO gatherPlankTestDTO = new LowEndHighTestDTO();
                         gatherPlankTestDTO.setStockCode(stockKbar.getStockCode());
                         gatherPlankTestDTO.setStockName(stockKbar.getStockName());
                         gatherPlankTestDTO.setTradeDate(stockKbar.getKbarDate());
                         tenDayPlanks(limitQueue12,gatherPlankTestDTO);
-                        if(gatherPlankTestDTO.getTenDayRate()!=null&&gatherPlankTestDTO.getTenDayRate().compareTo(new BigDecimal(50))>=0){
-                            boolean gatherSudden = gatherIsSudden(stockKbar, preKbar.getClosePrice());
-                            if(!gatherSudden) {
-                                int planks = calPlanks(limitQueue12);
-                                gatherPlankTestDTO.setContinuePlanks(planks);
-                                BigDecimal profit = calProfit(stockKbars, stockKbar);
-                                gatherPlankTestDTO.setProfit(profit);
-                                buys.add(gatherPlankTestDTO);
-                            }
+                        if(gatherPlankTestDTO.getTenDayRate()!=null/*&&gatherPlankTestDTO.getTenDayRate().compareTo(new BigDecimal(30))>=0*/){
+                            int planks = calPlanks(limitQueue12);
+                            gatherPlankTestDTO.setContinuePlanks(planks);
+                            /*BigDecimal profit = calProfit(stockKbars, stockKbar);
+                            BigDecimal endNoPlankProfit = calEndNoPlankProfit(stockKbars, stockKbar);
+                            gatherPlankTestDTO.setProfit(profit);
+                            gatherPlankTestDTO.setEndNoPlankSellProfit(endNoPlankProfit);*/
+                            buys.add(gatherPlankTestDTO);
                         }
                     }
 
@@ -360,7 +362,6 @@ public class BuyGroundGatherComponent {
                 if(stockKbar.getHighPrice().compareTo(stockKbar.getLowPrice())!=0) {
                     i++;
                 }
-                i++;
             }
             if(i==1){
                 BigDecimal avgPrice = stockKbar.getTradeAmount().divide(new BigDecimal(stockKbar.getTradeQuantity() * 100),2,BigDecimal.ROUND_HALF_UP);
@@ -372,6 +373,34 @@ public class BuyGroundGatherComponent {
                 flag = true;
             }
         }
+        return null;
+    }
+
+    public BigDecimal calEndNoPlankProfit(List<StockKbar> stockKbars,StockKbar buyStockKbar){
+        boolean flag = false;
+        int i=0;
+        StockKbar preKbar = null;
+        for (StockKbar stockKbar:stockKbars){
+            if(flag){
+                boolean endUpper = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
+                if(!endUpper){
+                    endUpper = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getAdjClosePrice(), preKbar.getAdjClosePrice(), stockKbar.getKbarDate());
+                }
+                if(!endUpper) {
+                    i++;
+                }
+            }
+            if(i==1){
+                BigDecimal avgPrice = stockKbar.getAdjClosePrice();
+                BigDecimal profit = PriceUtil.getPricePercentRate(avgPrice.subtract(buyStockKbar.getAdjOpenPrice()), buyStockKbar.getAdjOpenPrice());
+                return profit;
+            }
+            if(buyStockKbar.getKbarDate().equals(stockKbar.getKbarDate())){
+                flag = true;
+            }
+            preKbar = stockKbar;
+        }
+
         return null;
     }
 
@@ -417,7 +446,7 @@ public class BuyGroundGatherComponent {
             return 0;
         }
         List<StockKbar> reverse = Lists.reverse(stockKbars);
-        int planks = 1;
+        int planks = 0;
         int i=0;
         StockKbar nextStockKbar = null;
         for (StockKbar stockKbar:reverse){
@@ -434,7 +463,7 @@ public class BuyGroundGatherComponent {
         }
         return planks;
     }
-    public void tenDayPlanks(LimitQueue<StockKbar> limitQueue,GatherPlankTestDTO testDTO){
+    public void tenDayPlanks(LimitQueue<StockKbar> limitQueue,LowEndHighTestDTO testDTO){
         List<StockKbar> stockKbars = limitQueueToList(limitQueue);
         if(CollectionUtils.isEmpty(stockKbars)||stockKbars.size()<12){
             return;
@@ -443,6 +472,7 @@ public class BuyGroundGatherComponent {
         StockKbar preStockKbar = null;
         int i= 0;
         for (StockKbar stockKbar:stockKbars){
+            i++;
             if(preStockKbar!=null&&i<stockKbars.size()){
                 boolean endUpper = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getClosePrice(), preStockKbar.getClosePrice(), preStockKbar.getKbarDate());
                 if(endUpper){
