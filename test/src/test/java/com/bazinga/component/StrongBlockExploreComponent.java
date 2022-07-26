@@ -245,14 +245,14 @@ public class StrongBlockExploreComponent {
             LimitQueue<StockKbar> limitQueue = new LimitQueue<>(10);
             StockKbar preKbar = null;
             for (StockKbar stockKbar:stockKbars){
-                limitQueue.add(stockKbar);
+                limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20200101", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                /*if(date.after(DateUtil.parseDate("20220401", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220701", DateUtil.yyyyMMdd))){
                     continue;
-                }*/
+                }
                 if(preKbar!=null) {
                     boolean endUpper = PriceUtil.isHistoryUpperPrice(circulateInfo.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
                     if(endUpper){
@@ -271,8 +271,10 @@ public class StrongBlockExploreComponent {
                             }
                             SBEHighTimeDTO sbeHighTimeDTO = new SBEHighTimeDTO();
                             sbeHighTimeDTO.setStockCode(circulateInfo.getStockCode());
+                            sbeHighTimeDTO.setStockName(circulateInfo.getStockName());
                             sbeHighTimeDTO.setPlanks(planks);
                             getHighPlankInfo(nextTradeDateMap.get(stockKbar.getKbarDate()),stockKbars,sbeHighTimeDTO);
+                            sbeHighTimeDTOS.add(sbeHighTimeDTO);
                         }
                     }
 
@@ -287,7 +289,7 @@ public class StrongBlockExploreComponent {
         StockKbar preKbar = null;
         StockKbar buyStockKbar = null;
         for (StockKbar stockKbar:stockKbars){
-            if(i>=0){
+            if(i>0){
                 if(sbeHighTimeDTO.getPlankTime()==null){
                     return;
                 }
