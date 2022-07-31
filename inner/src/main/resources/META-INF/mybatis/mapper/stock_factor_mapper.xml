@@ -232,6 +232,16 @@
             and create_time <= #{createTimeTo, jdbcType=TIMESTAMP}
             ]]>
         </if>
+        <if test="kbarDateFrom != null">
+            <![CDATA[
+            and kbar_date >= #{kbarDateFrom, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
+        <if test="kbarDateTo != null">
+            <![CDATA[
+            and kbar_date >= #{kbarDateTo, jdbcType=TIMESTAMP}
+            ]]>
+        </if>
         <if test="updateTimeFrom != null">
             <![CDATA[
             and update_time >= #{updateTimeFrom, jdbcType=TIMESTAMP}
