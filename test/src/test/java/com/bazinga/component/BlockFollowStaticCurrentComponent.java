@@ -79,12 +79,12 @@ public class BlockFollowStaticCurrentComponent {
             if(byRedisKey!=null){
                 continue;
             }
-            if(tradeDate.equals("20220719")){
+            if(tradeDate.equals("20220721")){
                 System.out.println(1111111111);
             }else{
                 continue;
             }
-            List<String> planksReal =Lists.newArrayList("000970","002765","002715","000158","603758","600686","002641","000899","002616","605319","002121","603527","600458","002168","603421","002866","002863","002896","002823","603366","000544","000548","605088","002374","605069","603289","000715","603170","002591","600872","002547","600847","003033","603950","000619","603085");
+            List<String> planksReal =Lists.newArrayList("002715","603690","000890","002665","301041","002963","002965","002112","002121","600405","002161","002150","002168","002077","002037","000533","002339","002342","002227","002204","601388","002502","002523","002520","603186","603170","000782","600898","600892","002547","003043","603969","000619","002441");
             List<String> realMore = Lists.newArrayList();
             List<String> afterMore = Lists.newArrayList();
             System.out.println(index+"===="+count);
@@ -223,11 +223,11 @@ public class BlockFollowStaticCurrentComponent {
         int planksBlockCount =0;
         int allBuyCount = 0;
         int oneBuyCount = 0;
-        List<String> threePlankblocks = Lists.newArrayList("885311","885338","885412","885413","885431","885461","885467","885517","885563","885619"
-                ,"885694","885710","885757","885779","885854","885867","885991");
+        List<String> threePlankblocks = Lists.newArrayList("885311","885338","885413","885427","885431","885461","885517","885556","885563","885571"
+                ,"885603","885641","885675","885700","885710","885742","885744","885867","885921","885949");
         for (HistoryBlockInfo blockInfo:blockInfos){
             List<PlankTimePairDTO> blockPairs = Lists.newArrayList();
-            List<String> stocks = getBlockStocks(blockInfo.getBlockCode(), tradeDate);
+            List<String> stocks = getBlockStocks(blockInfo.getBlockCode(), "20220720");
             if(CollectionUtils.isEmpty(stocks)){
                 continue;
             }
@@ -255,6 +255,9 @@ public class BlockFollowStaticCurrentComponent {
                     System.out.println(111);;
                 }
                 for (MarketMoneyDTO first:firsts){
+                    if(first.getStockCode().equals("301178")||first.getStockCode().equals("301053")){
+                        System.out.println(111);
+                    }
                     BlocKFollowStaticBuyDTO buyDTO = new BlocKFollowStaticBuyDTO();
                     buyDTO.setStockCode(first.getStockCode());
                     buyDTO.setStockName(first.getStockName());
@@ -428,7 +431,11 @@ public class BlockFollowStaticCurrentComponent {
     }
 
     public static void main(String[] args) {
-        BlocKFollowStaticBuyDTO buyDTO1 = new BlocKFollowStaticBuyDTO();
+        ArrayList<String> strings = Lists.newArrayList("111", "222", "333");
+        if(strings.contains("111")){
+            System.out.println(111);
+        }
+        /*BlocKFollowStaticBuyDTO buyDTO1 = new BlocKFollowStaticBuyDTO();
         buyDTO1.setAmountRate(new BigDecimal(10));
         BlocKFollowStaticBuyDTO buyDTO2 = new BlocKFollowStaticBuyDTO();
         buyDTO2.setAmountRate(new BigDecimal(20));
@@ -442,7 +449,7 @@ public class BlockFollowStaticCurrentComponent {
         List<BlocKFollowStaticBuyDTO> buysAmountSorts = buys.stream().sorted(Comparator.comparing(BlocKFollowStaticBuyDTO::getAmountRate)).collect(Collectors.toList());
 
         List<BlocKFollowStaticBuyDTO> blocKFollowStaticBuyDTOS = BlocKFollowStaticBuyDTO.amountRateSort(buys);
-        System.out.println(blocKFollowStaticBuyDTOS);
+        System.out.println(blocKFollowStaticBuyDTOS);*/
     }
 
     public List<PlankTimePairDTO> judgePlanks100000(List<PlankTimePairDTO> pairs){
@@ -560,7 +567,10 @@ public class BlockFollowStaticCurrentComponent {
         List<BlocKFollowStaticBuyDTO> list = Lists.newArrayList();
         Map<String, BlocKFollowStaticBuyDTO> map = new HashMap<>();
         for (BlocKFollowStaticBuyDTO dto:buyDTOS){
-            BlocKFollowStaticBuyDTO buyDTO = map.get(dto.getStockCode());
+            if(dto.getStockCode().equals("301178")||dto.getStockCode().equals("301053")){
+                System.out.println(111);
+            }
+           /* BlocKFollowStaticBuyDTO buyDTO = map.get(dto.getStockCode());
             if(buyDTO!=null){
                 dto.setAmountRate(buyDTO.getAmountRate());
                 dto.setProfit(buyDTO.getProfit());
@@ -568,7 +578,7 @@ public class BlockFollowStaticCurrentComponent {
                     list.add(dto);
                 }
                 continue;
-            }
+            }*/
             StockKbar stockKbar = stockKbarMap.get(dto.getStockCode());
             StockKbar nextStockKbar = nextStockKbarMap.get(dto.getStockCode());
             StockKbar preStockKbar = preStockKbarMap.get(dto.getStockCode());
@@ -960,7 +970,6 @@ public class BlockFollowStaticCurrentComponent {
 
         }
     }
-
 
 
 }

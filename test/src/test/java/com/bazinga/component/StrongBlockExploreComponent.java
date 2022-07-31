@@ -127,11 +127,11 @@ public class StrongBlockExploreComponent {
         HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
         query.setBlockType(1);
         List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
-        LimitQueue<String> limitQueue = new LimitQueue<>(3);
+        LimitQueue<String> limitQueue = new LimitQueue<>(2);
         for (TradeDatePool tradeDatePool:tradeDatePools){
             String tradeDate = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
             limitQueue.offer(tradeDate);
-            if(limitQueue.size()<3){
+            if(limitQueue.size()<2){
                 continue;
             }
             List<String> tradeDates = Lists.newArrayList();
@@ -142,25 +142,25 @@ public class StrongBlockExploreComponent {
             for (HistoryBlockInfo blockInfo:historyBlockInfos){
                 StrongPercentDTO strongPercentDTO1 = strongMap.get(blockInfo.getBlockCode() + "_" + tradeDates.get(0));
                 StrongPercentDTO strongPercentDTO2 = strongMap.get(blockInfo.getBlockCode() + "_" + tradeDates.get(1));
-                StrongPercentDTO strongPercentDTO3 = strongMap.get(blockInfo.getBlockCode() + "_" + tradeDates.get(2));
-                if(strongPercentDTO1!=null&&strongPercentDTO2!=null&&strongPercentDTO3!=null){
+                //StrongPercentDTO strongPercentDTO3 = strongMap.get(blockInfo.getBlockCode() + "_" + tradeDates.get(2));
+                if(strongPercentDTO1!=null&&strongPercentDTO2!=null){
                     StrongBlockBuyDTO strongBlockBuyDTO = new StrongBlockBuyDTO();
                     strongBlockBuyDTO.setBlockCode(blockInfo.getBlockCode());
                     strongBlockBuyDTO.setBlockName(blockInfo.getBlockName());
                     strongBlockBuyDTO.setTradeDate(tradeDate);
                     strongBlockBuyDTO.setMarketCount1(strongPercentDTO1.getMarketCount());
                     strongBlockBuyDTO.setMarketCount2(strongPercentDTO2.getMarketCount());
-                    strongBlockBuyDTO.setMarketCount3(strongPercentDTO3.getMarketCount());
+                    //strongBlockBuyDTO.setMarketCount3(strongPercentDTO3.getMarketCount());
                     strongBlockBuyDTO.setBlockCount1(strongPercentDTO1.getBlockCount());
                     strongBlockBuyDTO.setBlockCount2(strongPercentDTO2.getBlockCount());
-                    strongBlockBuyDTO.setBlockCount3(strongPercentDTO3.getBlockCount());
+                    //strongBlockBuyDTO.setBlockCount3(strongPercentDTO3.getBlockCount());
                     strongBlockBuyDTO.setRate1(strongPercentDTO1.getRate());
                     strongBlockBuyDTO.setRate2(strongPercentDTO2.getRate());
-                    strongBlockBuyDTO.setRate3(strongPercentDTO3.getRate());
+                    //strongBlockBuyDTO.setRate3(strongPercentDTO3.getRate());
                     List<String> stocks = getBlockStocks(blockInfo.getBlockCode(), tradeDate);
                     strongBlockBuyDTO.setStockCount(stocks.size());
-                    if(strongPercentDTO3.getBuyDTO()!=null){
-                        SBEHighTimeDTO buyDTO = strongPercentDTO3.getBuyDTO();
+                    if(strongPercentDTO2.getBuyDTO()!=null){
+                        SBEHighTimeDTO buyDTO = strongPercentDTO2.getBuyDTO();
                         strongBlockBuyDTO.setStockCode(buyDTO.getStockCode());
                         strongBlockBuyDTO.setStockName(buyDTO.getStockName());
                         strongBlockBuyDTO.setPlanks(buyDTO.getPlanks());
@@ -247,7 +247,7 @@ public class StrongBlockExploreComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20200101", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 if(date.after(DateUtil.parseDate("20220701", DateUtil.yyyyMMdd))){
@@ -293,9 +293,13 @@ public class StrongBlockExploreComponent {
                 if(sbeHighTimeDTO.getPlankTime()==null){
                     return;
                 }
-                if(stockKbar.getHighPrice().compareTo(stockKbar.getLowPrice())!=0){
-                    BigDecimal avgPrice = stockKbar.getTradeAmount().divide(new BigDecimal(stockKbar.getTradeQuantity() * 100),2,BigDecimal.ROUND_HALF_UP);
-                    avgPrice = chuQuanAvgPrice(avgPrice, stockKbar);
+                boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(),stockKbar.getKbarDate());
+                if(!historyUpperPrice) {
+                    historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getAdjClosePrice(), preKbar.getAdjClosePrice(), stockKbar.getKbarDate());
+                }
+
+                if(!historyUpperPrice){
+                    BigDecimal avgPrice = stockKbar.getAdjClosePrice();
                     BigDecimal profit = PriceUtil.getPricePercentRate(avgPrice.subtract(buyStockKbar.getAdjHighPrice()), buyStockKbar.getAdjHighPrice());
                     sbeHighTimeDTO.setProfit(profit);
                     return;

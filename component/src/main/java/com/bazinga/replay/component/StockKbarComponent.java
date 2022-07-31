@@ -312,7 +312,11 @@ public class StockKbarComponent {
         query.setStockCode(stockCode);
         int count = stockKbarService.countByCondition(query);
         if (count == 0) {
-            initAndSaveKbarData(stockCode, stockName, 105);
+            try {
+                initAndSaveKbarData(stockCode, stockName, 105);
+            }catch (Exception e){
+                log.info(e.getMessage(),e);
+            }
         }
     }
 
