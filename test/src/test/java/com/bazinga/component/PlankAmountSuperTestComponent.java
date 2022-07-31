@@ -171,6 +171,33 @@ public class PlankAmountSuperTestComponent {
 
 
 
+
+    public static long timeToLong(String time,int index){
+        String timeStr = time.replace(":", "");
+        if(timeStr.startsWith("09")){
+            timeStr = timeStr.substring(1);
+        }
+        int second = index * 3;
+        if(second<10) {
+            timeStr = timeStr + "0" +second;
+        }else{
+            timeStr = timeStr+second;
+        }
+        Long timeLong = Long.valueOf(timeStr);
+        return timeLong;
+    }
+
+    public static long timeToLong(String time){
+        String timeStr = time.replace(":", "");
+        if(timeStr.startsWith("09")){
+            timeStr = timeStr.substring(1);
+        }
+        Long timeLong = Long.valueOf(timeStr);
+        return timeLong;
+    }
+
+
+
     public static void main(String[] args) {
 
     }

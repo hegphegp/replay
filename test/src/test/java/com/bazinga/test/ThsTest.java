@@ -73,11 +73,17 @@ public class ThsTest {
     private BlockFollowStaticCurrentComponent blockFollowStaticCurrentComponent;
     @Autowired
     private PlankAmountSuperTestComponent plankAmountSuperTestComponent;
+    @Autowired
+    private BuyGroundGatherComponent buyGroundGatherComponent;
+    @Autowired
+    private BuyTwoToThreeComponent buyTwoToThreeComponent;
 
 
     @Test
     public void test1() {
-        plankAmountSuperTestComponent.plankAmountInfo();
+        buyTwoToThreeComponent.buyTwoThree();
+        //buyGroundGatherComponent.gatherGround();
+        //plankAmountSuperTestComponent.plankAmountInfo();
         //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         //strongBlockExploreComponent.highLowPlank();
         /*List<String> list = Lists.newArrayList("000950","002767","002718","600624","603669","001308","603595","002992","002813","002864","002888","002077","600336","603329","603327","000533","000545","002317","002337","002339","600259","600192","600152","000404","002225","600101","002272","000722","603122","000755","600056","000709","002514","603191","002526","603161","002589","600868","600833","603969","603963","000601","000600");
