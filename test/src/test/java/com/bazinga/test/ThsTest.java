@@ -75,13 +75,14 @@ public class ThsTest {
     private PlankAmountSuperTestComponent plankAmountSuperTestComponent;
     @Autowired
     private BuyGroundGatherComponent buyGroundGatherComponent;
+    @Autowired
+    private BuyTwoToThreeComponent buyTwoToThreeComponent;
 
 
     @Test
     public void test1() {
-        //plankAmountSuperTestComponent.plankAmountInfo();
-        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
-        buyGroundGatherComponent.gatherGround();
+        buyTwoToThreeComponent.buyTwoThree();
+        //buyGroundGatherComponent.gatherGround();
         //plankAmountSuperTestComponent.plankAmountInfo();
         //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         //strongBlockExploreComponent.highLowPlank();

@@ -95,6 +95,10 @@ public class StockFactorQuery extends PagingQuery implements Serializable {
      */
     private BigDecimal index7;
 
+    private String kbarDateFrom;
+
+    private String kbarDateTo;
+
     /**
      * 创建时间 开始
      */
