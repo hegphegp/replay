@@ -273,7 +273,7 @@ public class StockKbarComponent {
                 } else {
                     log.info("复权因子发生变更 stockCode ={}", stockCode);
                     stockKbarService.deleteByStockCode(stockCode);
-                    initAndSaveKbarData(stockCode, stockName, 500);
+                    initAndSaveKbarData(stockCode, stockName, 105);
                 }
             }
         }

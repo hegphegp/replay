@@ -81,7 +81,7 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        buyTwoToThreeComponent.buyTwoThree();
+        //buyTwoToThreeComponent.buyTwoThree();
         //buyGroundGatherComponent.gatherGround();
         //plankAmountSuperTestComponent.plankAmountInfo();
         //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
@@ -120,7 +120,7 @@ public class ThsTest {
         //northSouthMoneyComponent.calHenShenStockKbar10();
         /*List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("999999", "20220602");
         System.out.println(data);*/
-        //thsBlockKbarComponent.initHistoryBlockKbars();
+        thsBlockKbarComponent.initHistoryBlockKbars();
     }
 
     @Test
