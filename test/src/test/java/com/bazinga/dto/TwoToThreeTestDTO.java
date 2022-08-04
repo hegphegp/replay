@@ -20,6 +20,7 @@ public class TwoToThreeTestDTO {
     private Long circulate;
     private BigDecimal plankPrice;
     private Integer tenDayPlanks;
+    private BigDecimal tenDayRate;
     private BigDecimal profit;
     private BigDecimal endNoPlankSellProfit;
 
