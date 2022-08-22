@@ -15,8 +15,11 @@ public class StrongPlankDefineTestDTO {
     private String openTime;
     private Integer second;
     private BigDecimal speedRate;
+    private BigDecimal speedRate5;
+    private BigDecimal speedRate5Min;
     private Integer heartTimes;
     private int endFlag = 0;
+    private String twoPlankTime;
     private BigDecimal profit;
 
 }
