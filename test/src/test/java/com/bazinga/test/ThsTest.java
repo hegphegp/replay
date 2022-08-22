@@ -85,8 +85,8 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        strongPlankDefineComponent.strongPlank();
-        //stockBlockLevelComponent.stockFirstBlockInfo();
+       /* strongPlankDefineComponent.strongPlank();
+        stockBlockLevelComponent.stockFirstBlockInfo();*/
         //buyTwoToThreeComponent.buyTwoThree();
         //buyTwoToThreeComponent.buyTwoThree();
         //buyGroundGatherComponent.gatherGround();
