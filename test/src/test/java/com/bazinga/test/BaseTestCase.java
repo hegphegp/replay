@@ -171,6 +171,11 @@ public class BaseTestCase {
     public void test9() {
         historyBlockInfoComponent.initHistoryBlockInfo();
     }
+
+    @Test
+    public void test11() {
+        historyBlockInfoComponent.getPreBlockStocks("20220810","20220811");
+    }
     @Test
     public void test10(){
         CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();

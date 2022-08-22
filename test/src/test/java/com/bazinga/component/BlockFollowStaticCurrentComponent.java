@@ -79,12 +79,12 @@ public class BlockFollowStaticCurrentComponent {
             if(byRedisKey!=null){
                 continue;
             }
-            if(tradeDate.equals("20220721")){
+            if(tradeDate.equals("20220822")){
                 System.out.println(1111111111);
             }else{
                 continue;
             }
-            List<String> planksReal =Lists.newArrayList("002715","603690","000890","002665","301041","002963","002965","002112","002121","600405","002161","002150","002168","002077","002037","000533","002339","002342","002227","002204","601388","002502","002523","002520","603186","603170","000782","600898","600892","002547","003043","603969","000619","002441");
+            List<String> planksReal =Lists.newArrayList("605588","603721","603679","000820","001330","000045","002906","002103","002169","002173","002877","002855","002037","603366","002351","002395","603255","600992","002296","600051","000702","002587","600892","001222","001231","002546","001236","600750","002434","002445");
             List<String> realMore = Lists.newArrayList();
             List<String> afterMore = Lists.newArrayList();
             System.out.println(index+"===="+count);
@@ -144,7 +144,7 @@ public class BlockFollowStaticCurrentComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220701", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220810", DateUtil.yyyyMMdd))){
                     continue;
                 }
                 /*if(date.after(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
