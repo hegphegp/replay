@@ -5,8 +5,10 @@ import com.bazinga.component.*;
 import com.bazinga.replay.component.*;
 import com.bazinga.replay.dto.BigExchangeTestBuyDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
+import com.bazinga.replay.model.CirculateInfo;
 import com.bazinga.replay.model.StockIndex;
 import com.bazinga.replay.model.TradeDatePool;
+import com.bazinga.replay.query.CirculateInfoQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.CirculateInfoService;
 import com.bazinga.replay.service.StockIndexService;
@@ -81,17 +83,28 @@ public class ThsTest {
     private StockBlockLevelComponent stockBlockLevelComponent;
     @Autowired
     private StrongPlankDefineComponent strongPlankDefineComponent;
+    @Autowired
+    private FirstPlankBuyTimeLevelComponent firstPlankBuyTimeLevelComponent;
+    @Autowired
+    private  CirculateInfoService circulateInfoService;
+    @Autowired
+    private StockFactorTestOneComponent stockFactorTestOneComponent;
+    @Autowired
+    private StockFactorTestTwoComponent stockFactorTestTwoComponent;
 
 
     @Test
     public void test1() {
-       /* strongPlankDefineComponent.strongPlank();
+        //stockFactorTestTwoComponent.factorTest();
+        stockFactorTestOneComponent.factorTest();
+        //firstPlankBuyTimeLevelComponent.strongPlank();
+        /*strongPlankDefineComponent.strongPlank();
         stockBlockLevelComponent.stockFirstBlockInfo();*/
         //buyTwoToThreeComponent.buyTwoThree();
         //buyTwoToThreeComponent.buyTwoThree();
         //buyGroundGatherComponent.gatherGround();
         //plankAmountSuperTestComponent.plankAmountInfo();
-        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         //strongBlockExploreComponent.highLowPlank();
         /*List<String> list = Lists.newArrayList("000950","002767","002718","600624","603669","001308","603595","002992","002813","002864","002888","002077","600336","603329","603327","000533","000545","002317","002337","002339","600259","600192","600152","000404","002225","600101","002272","000722","603122","000755","600056","000709","002514","603191","002526","603161","002589","600868","600833","603969","603963","000601","000600");
         blockFollowTestComponent.blockFollowBuyStock(list);*/
@@ -132,7 +145,16 @@ public class ThsTest {
 
     @Test
     public void test2() {
-        stockKbarComponent.batchKbarDataInit();
+        //stockKbarComponent.batchKbarDataInitToStock();
+
+        CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
+        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
+        int i= 0;
+        for (CirculateInfo item:circulateInfos){
+            i++;
+            System.out.println(i);
+            stockKbarComponent.batchKbarDataInitToStock(item.getStockCode(),item.getStockName(),350);
+        }
     }
 
 }
