@@ -77,11 +77,22 @@ public class ThsTest {
     private BuyGroundGatherComponent buyGroundGatherComponent;
     @Autowired
     private BuyTwoToThreeComponent buyTwoToThreeComponent;
+    @Autowired
+    private StockBlockLevelComponent stockBlockLevelComponent;
+    @Autowired
+    private StrongPlankDefineComponent strongPlankDefineComponent;
+    @Autowired
+    private BlockFollowStaticCurrentHistoryComponent blockFollowStaticCurrentHistoryComponent;
 
 
     @Test
     public void test1() {
-        buyTwoToThreeComponent.buyTwoThree();
+        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
+       /* strongPlankDefineComponent.strongPlank();
+        stockBlockLevelComponent.stockFirstBlockInfo();*/
+        //buyTwoToThreeComponent.buyTwoThree();
+        //buyTwoToThreeComponent.buyTwoThree();
         //buyGroundGatherComponent.gatherGround();
         //plankAmountSuperTestComponent.plankAmountInfo();
         //blockFollowStaticCurrentComponent.blockFollowStaticInfo();

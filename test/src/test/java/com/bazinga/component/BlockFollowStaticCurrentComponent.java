@@ -14,6 +14,7 @@ import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.*;
 import com.bazinga.replay.service.*;
+import com.bazinga.replay.util.PoiExcelUtil;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
@@ -67,7 +68,7 @@ public class BlockFollowStaticCurrentComponent {
 
 
     public void blockFollowStaticInfo(){
-        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
+        /*List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
         Map<String, CirculateInfo> circulateInfoMap = getCirculateInfoMap(circulateInfos);
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
         Map<String, List<PlankTimePairDTO>> pairsMap = getPlankTimePairs(circulateInfos);
@@ -79,35 +80,14 @@ public class BlockFollowStaticCurrentComponent {
             if(byRedisKey!=null){
                 continue;
             }
-            if(tradeDate.equals("20220719")){
+            *//*if(tradeDate.equals("20220905")){
                 System.out.println(1111111111);
             }else{
                 continue;
-            }
-            List<String> planksReal =Lists.newArrayList("000970","002765","002715","000158","603758","600686","002641","000899","002616","605319","002121","603527","600458","002168","603421","002866","002863","002896","002823","603366","000544","000548","605088","002374","605069","603289","000715","603170","002591","600872","002547","600847","003033","603950","000619","603085");
-            List<String> realMore = Lists.newArrayList();
-            List<String> afterMore = Lists.newArrayList();
-            System.out.println(index+"===="+count);
-            //THREAD_POOL_QUOTE.execute(() ->{
-                List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
-                List<PlankTimePairDTO> plankTens = judgePlanks100000(plankTimePairDTOS);
-                for (PlankTimePairDTO dto:plankTens){
-                    if(!planksReal.contains(dto.getStockCode())){
-                        afterMore.add(dto.getStockCode());
-                    }
-                }
-            for (String string:planksReal){
-                boolean flag = false;
-               for (PlankTimePairDTO plankTen:plankTens){
-                   if(plankTen.getStockCode().equals(string)){
-                       flag = true;
-                   }
-               }
-               if(!flag){
-                   realMore.add(string);
-               }
-            }
+            }*//*
 
+            THREAD_POOL_QUOTE.execute(() ->{
+                List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
                 BlocKFollowStaticTotalDTO blocKFollowStaticTotalDTO = blockBuys(blockInfos, plankTimePairDTOS, circulateInfoMap, tradeDate);
                 if(blocKFollowStaticTotalDTO!=null) {
                     RedisMonior redisMonior = new RedisMonior();
@@ -115,8 +95,78 @@ public class BlockFollowStaticCurrentComponent {
                     redisMonior.setRedisValue(JSONObject.toJSONString(blocKFollowStaticTotalDTO));
                     redisMoniorService.save(redisMonior);
                 }
-           // });
+            });
 
+        }
+
+        try {
+            Thread.sleep(10000000000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+
+        List<BlocKFollowStaticTotalDTO> buys = Lists.newArrayList();
+        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
+        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
+        for (TradeDatePool tradeDatePool:tradeDatePools){
+            boolean before = tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220501", DateUtil.yyyyMMdd));
+            boolean after = tradeDatePool.getTradeDate().after(DateUtil.parseDate("20230101", DateUtil.yyyyMMdd));
+            if((!before)&&(!after)) {
+                String format = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+                String key = format + "_total_static";
+                RedisMonior redisMonior = redisMoniorService.getByRedisKey(key);
+                if (redisMonior != null) {
+                    String redisValue = redisMonior.getRedisValue();
+                    BlocKFollowStaticTotalDTO follow = JSONObject.parseObject(redisValue, BlocKFollowStaticTotalDTO.class);
+                    buys.add(follow);
+                }
+            }
+        }
+
+        List<Object[]> datas = Lists.newArrayList();
+        for (BlocKFollowStaticTotalDTO dto:buys) {
+            List<Object> list = new ArrayList<>();
+            list.add(dto.getTradeDate());
+            list.add(dto.getTradeDate());
+            list.add(dto.getPlanksTenCount());
+            list.add(dto.getPlankBlockCount());
+            list.add(dto.getAllBuyCount());
+            list.add(dto.getOneBuyCount());
+            list.add(dto.getBuyBlocks());
+
+            list.add(dto.getBuys());
+            list.add(dto.getProfit());
+            list.add(dto.getNoSameBuys());
+            list.add(dto.getNoSameProfit());
+
+            list.add(dto.getAmountBuys());
+            list.add(dto.getAmountProfit());
+            list.add(dto.getNoSameAmountBuys());
+            list.add(dto.getNoSameAmountProfit());
+
+            list.add(dto.getRateBuys());
+            list.add(dto.getRateProfit());
+            list.add(dto.getNoSameRateBuys());
+            list.add(dto.getNoSameRateProfit());
+            list.add(dto.getNoSameRateProfitEnd());
+            list.add(dto.getNoSameRateProfitTen());
+
+
+
+            Object[] objects = list.toArray();
+            datas.add(objects);
+        }
+
+
+        String[] rowNames = {"index","交易日期","10点前市场涨停数量","10点前有涨停股票板块数量","10点前满足3中买入方式板块数量","10点前满足任何一种买入方式数量","原始板块数量","原始买入数量","原始总利润","去重数量","去重总盈亏"
+                ,"成交额较前日排序买入数量","成交额较前日排序总利润","成交额较前日排序去重买入数量","成交额较前日排序去重总盈亏"
+                ,"买入时涨幅排序买入数量","买入时涨幅排序总利润","买入时涨幅排序去重买入数量","买入时涨幅排序去重总盈亏","买入时涨幅排序去重10点盈亏","买入时涨幅排序去重收盘盈亏"};
+        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("板块跟随统计买入",rowNames,datas);
+        try {
+            poiExcelUtil.exportExcelUseExcelTitle("板块跟随统计买入");
+        }catch (Exception e){
+            log.info(e.getMessage());
         }
 
 
@@ -144,10 +194,10 @@ public class BlockFollowStaticCurrentComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220701", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220501", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                /*if(date.after(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
+                /*if(date.after(DateUtil.parseDate("20220828", DateUtil.yyyyMMdd))){
                     continue;
                 }*/
                 /*List<String> olds = Lists.newArrayList();
@@ -223,11 +273,10 @@ public class BlockFollowStaticCurrentComponent {
         int planksBlockCount =0;
         int allBuyCount = 0;
         int oneBuyCount = 0;
-        List<String> threePlankblocks = Lists.newArrayList("885311","885338","885412","885413","885431","885461","885467","885517","885563","885619"
-                ,"885694","885710","885757","885779","885854","885867","885991");
+        List<String> threePlankblocks = Lists.newArrayList("885338","885413","885418","885694","885709","885757");
         for (HistoryBlockInfo blockInfo:blockInfos){
             List<PlankTimePairDTO> blockPairs = Lists.newArrayList();
-            List<String> stocks = getBlockStocks(blockInfo.getBlockCode(), tradeDate);
+            List<String> stocks = getBlockStocks(blockInfo.getBlockCode(), "20220905");
             if(CollectionUtils.isEmpty(stocks)){
                 continue;
             }
@@ -251,9 +300,10 @@ public class BlockFollowStaticCurrentComponent {
             Long threePlankTime = judgeThreePlanks(blockPairs);
             Long threeFirstPlankTime = judgeThreeFirstPlanks(blockPairs);
             if(plankTens.size()>=3){
-                if(threePlankblocks.contains(blockInfo.getBlockCode())){
+                System.out.println(blockInfo.getBlockCode());
+               /* if(threePlankblocks.contains(blockInfo.getBlockCode())){
                     System.out.println(111);;
-                }
+                }*/
                 for (MarketMoneyDTO first:firsts){
                     BlocKFollowStaticBuyDTO buyDTO = new BlocKFollowStaticBuyDTO();
                     buyDTO.setStockCode(first.getStockCode());
@@ -278,32 +328,26 @@ public class BlockFollowStaticCurrentComponent {
                 oneBuyCount++;
             }
         }
-        List<BlocKFollowStaticBuyDTO> buys = getBuysProfit(buyStocks, "100000", stockMap, nestStockMap, preStockMap);
+        List<PlankTimePairDTO> plankTens = judgePlanks100000(pairs);
+        List<BlocKFollowStaticBuyDTO> buys = getBuysProfit(buyStocks, plankTens,"100000", stockMap, nestStockMap, preStockMap);
         if(CollectionUtils.isEmpty(buys)){
             return null;
         }
-       // List<BlocKFollowStaticBuyDTO> buysAmountSorts = BlocKFollowStaticBuyDTO.amountRateSort(buys);
-       /* List<BlocKFollowStaticBuyDTO> buysAmountSorts = buys.stream().sorted(Comparator.comparing(BlocKFollowStaticBuyDTO::getAmountRate)).collect(Collectors.toList());
-        List<BlocKFollowStaticBuyDTO> reverses = Lists.reverse(buysAmountSorts);*/
-       /* List<BlocKFollowStaticBuyDTO> amountRateBuys = Lists.newArrayList();
-        amountRateBuys.addAll(buysAmountSorts);
-        if(amountRateBuys.size()>150){
-            amountRateBuys = amountRateBuys.subList(0,150);
-        }*/
         List<BlocKFollowStaticBuyDTO> buysRateSorts = BlocKFollowStaticBuyDTO.rateSort(buys);
         List<BlocKFollowStaticBuyDTO> rateBuys = Lists.newArrayList();
         rateBuys.addAll(buysRateSorts);
         List<String> noSames = Lists.newArrayList();
         if(rateBuys.size()>150){
             rateBuys = rateBuys.subList(0,150);
-            for (BlocKFollowStaticBuyDTO staticBuyDTO:rateBuys){
-                if(!noSames.contains(staticBuyDTO.getStockCode())) {
-                    noSames.add(staticBuyDTO.getStockCode());
-                    System.out.println(staticBuyDTO.getStockCode()+"==="+staticBuyDTO.getBlockCode());
-                }
-
-            }
         }
+        for (BlocKFollowStaticBuyDTO staticBuyDTO:rateBuys){
+            if(!noSames.contains(staticBuyDTO.getStockCode())) {
+                noSames.add(staticBuyDTO.getStockCode());
+                System.out.println(staticBuyDTO.getStockCode());
+            }
+
+        }
+
         calTenSellAndEndSell(rateBuys,tradeDate);
         List<PlankTimePairDTO> planksTen = judgePlanks100000(pairs);
         BlocKFollowStaticTotalDTO staticDTO = new BlocKFollowStaticTotalDTO();
@@ -428,7 +472,11 @@ public class BlockFollowStaticCurrentComponent {
     }
 
     public static void main(String[] args) {
-        BlocKFollowStaticBuyDTO buyDTO1 = new BlocKFollowStaticBuyDTO();
+        ArrayList<String> strings = Lists.newArrayList("111", "222", "333");
+        if(strings.contains("111")){
+            System.out.println(111);
+        }
+        /*BlocKFollowStaticBuyDTO buyDTO1 = new BlocKFollowStaticBuyDTO();
         buyDTO1.setAmountRate(new BigDecimal(10));
         BlocKFollowStaticBuyDTO buyDTO2 = new BlocKFollowStaticBuyDTO();
         buyDTO2.setAmountRate(new BigDecimal(20));
@@ -442,7 +490,7 @@ public class BlockFollowStaticCurrentComponent {
         List<BlocKFollowStaticBuyDTO> buysAmountSorts = buys.stream().sorted(Comparator.comparing(BlocKFollowStaticBuyDTO::getAmountRate)).collect(Collectors.toList());
 
         List<BlocKFollowStaticBuyDTO> blocKFollowStaticBuyDTOS = BlocKFollowStaticBuyDTO.amountRateSort(buys);
-        System.out.println(blocKFollowStaticBuyDTOS);
+        System.out.println(blocKFollowStaticBuyDTOS);*/
     }
 
     public List<PlankTimePairDTO> judgePlanks100000(List<PlankTimePairDTO> pairs){
@@ -556,27 +604,25 @@ public class BlockFollowStaticCurrentComponent {
         map.put("three",threeStocks);
         return map;
     }
-    public List<BlocKFollowStaticBuyDTO> getBuysProfit(List<BlocKFollowStaticBuyDTO> buyDTOS,String tradeTime,Map<String, StockKbar> stockKbarMap,Map<String, StockKbar> nextStockKbarMap,Map<String, StockKbar> preStockKbarMap){
+    public List<BlocKFollowStaticBuyDTO> getBuysProfit(List<BlocKFollowStaticBuyDTO> buyDTOS,List<PlankTimePairDTO> plankTens,String tradeTime,Map<String, StockKbar> stockKbarMap,Map<String, StockKbar> nextStockKbarMap,Map<String, StockKbar> preStockKbarMap){
         List<BlocKFollowStaticBuyDTO> list = Lists.newArrayList();
-        Map<String, BlocKFollowStaticBuyDTO> map = new HashMap<>();
+        List<String> planks = Lists.newArrayList();
+        if(!CollectionUtils.isEmpty(plankTens)) {
+            for (PlankTimePairDTO dto : plankTens) {
+                planks.add(dto.getStockCode());
+            }
+        }
         for (BlocKFollowStaticBuyDTO dto:buyDTOS){
-            BlocKFollowStaticBuyDTO buyDTO = map.get(dto.getStockCode());
-            if(buyDTO!=null){
-                dto.setAmountRate(buyDTO.getAmountRate());
-                dto.setProfit(buyDTO.getProfit());
-                if(dto.getProfit()!=null){
-                    list.add(dto);
-                }
+            if(planks.contains(dto.getStockCode())){
                 continue;
             }
             StockKbar stockKbar = stockKbarMap.get(dto.getStockCode());
             StockKbar nextStockKbar = nextStockKbarMap.get(dto.getStockCode());
             StockKbar preStockKbar = preStockKbarMap.get(dto.getStockCode());
             if(stockKbar==null||preStockKbar==null||nextStockKbar==null){
-                System.out.println(JSONObject.toJSONString(dto));
                 continue;
             }
-            BigDecimal buyPrice = getStockBuyPrice(dto.getStockCode(), stockKbar.getKbarDate(), tradeTime, preStockKbar,dto);
+            BigDecimal buyPrice = getStockBuyPrice(dto.getStockCode(), stockKbar.getKbarDate(), tradeTime, preStockKbar, dto);
             if(buyPrice!=null){
                 dto.setBuyPrice(buyPrice);
                 BigDecimal chuQuanBuyPrice = chuQuanAvgPrice(buyPrice, stockKbar);
@@ -595,7 +641,6 @@ public class BlockFollowStaticCurrentComponent {
                 dto.setProfit(profit);
                 list.add(dto);
             }
-            map.put(dto.getStockCode(),dto);
         }
         return list;
     }
@@ -623,9 +668,9 @@ public class BlockFollowStaticCurrentComponent {
             }
             long timeLong = timeToLong(tradeTime, index);
             if (timeLong >= buyTimeInt) {
-                if (historyUpperPrice && tradeType == 1) {
+               /* if (historyUpperPrice && tradeType == 1) {
                     return null;
-                }
+                }*/
                 BigDecimal amountRate = tradeAmount.divide(preStockKbar.getTradeAmount(), 8, BigDecimal.ROUND_HALF_UP);
                 buyDTO.setAmountRate(amountRate);
                 return tradePrice;
@@ -960,7 +1005,6 @@ public class BlockFollowStaticCurrentComponent {
 
         }
     }
-
 
 
 }

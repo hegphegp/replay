@@ -273,7 +273,7 @@ public class StockKbarComponent {
                 } else {
                     log.info("复权因子发生变更 stockCode ={}", stockCode);
                     stockKbarService.deleteByStockCode(stockCode);
-                    initAndSaveKbarData(stockCode, stockName, 500);
+                    initAndSaveKbarData(stockCode, stockName, 105);
                 }
             }
         }
@@ -302,7 +302,7 @@ public class StockKbarComponent {
             query.setStockCode(item.getStockCode());
             int count = stockKbarService.countByCondition(query);
             if (count == 0) {
-                batchInitAndSaveKbarDate(item.getStockCode(), item.getStockName(), 1100);
+                batchInitAndSaveKbarDate(item.getStockCode(), item.getStockName(), 300);
             }
         });
     }
@@ -312,8 +312,20 @@ public class StockKbarComponent {
         query.setStockCode(stockCode);
         int count = stockKbarService.countByCondition(query);
         if (count == 0) {
-            initAndSaveKbarData(stockCode, stockName, 105);
+            try {
+                initAndSaveKbarData(stockCode, stockName, 105);
+            }catch (Exception e){
+                log.info(e.getMessage(),e);
+            }
         }
+    }
+
+    public void batchKbarDataInitToStock(String stockCode,String stockName,int days) {
+            try {
+                initAndSaveKbarData(stockCode, stockName, days);
+            }catch (Exception e){
+                log.info(e.getMessage(),e);
+            }
     }
 
     public static void main(String[] args) {

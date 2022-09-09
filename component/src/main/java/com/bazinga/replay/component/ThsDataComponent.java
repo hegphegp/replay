@@ -301,7 +301,7 @@ public class ThsDataComponent {
     public int thsLogin(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("ylz198", "307435");
+            int ret = JDIBridge.THS_iFinDLogin("ylz202", "397092");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);
@@ -312,7 +312,7 @@ public class ThsDataComponent {
     public int thsLoginOut(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("ylz198", "307435");
+            int ret = JDIBridge.THS_iFinDLogin("ylz202", "397092");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);

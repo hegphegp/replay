@@ -173,9 +173,12 @@ public class ThsBlockKbarComponent {
         int ret = thsLogin();
         HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
         query.setBlockType(1);
+        int i  = 0;
         List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
         for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
-            StockKbar byUniqueKey = stockKbarService.getByUniqueKey(historyBlockInfo.getBlockCode()+"_"+"20220713");
+            i++;
+            System.out.println(historyBlockInfo.getBlockCode()+"===="+historyBlockInfo.getBlockName()+"===="+i);
+            StockKbar byUniqueKey = stockKbarService.getByUniqueKey(historyBlockInfo.getBlockCode()+"_"+"20220729");
             if(byUniqueKey==null) {
                 getBlockKbar(historyBlockInfo.getBlockCode(), historyBlockInfo.getBlockName());
             }
@@ -184,8 +187,7 @@ public class ThsBlockKbarComponent {
     }
 
     public void getBlockKbar(String blockCode,String blockName){
-        System.out.println(blockCode);
-        String quote_str = JDIBridge.THS_HistoryQuotes(blockCode+".TI","open,high,low,close,volume,amount","","2017-01-01","2022-07-13");
+        String quote_str = JDIBridge.THS_HistoryQuotes(blockCode+".TI","open,high,low,close,volume,amount","","2017-09-01","2022-07-29");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);
             JSONArray tables = jsonObject.getJSONArray("tables");
@@ -217,8 +219,16 @@ public class ThsBlockKbarComponent {
                 stockKbar.setClosePrice(closes.get(i));
                 stockKbar.setHighPrice(highs.get(i));
                 stockKbar.setLowPrice(lows.get(i));
-                stockKbar.setTradeAmount(amounts.get(i));
-                stockKbar.setTradeQuantity(volumes.get(i));
+                if(amounts.get(i)!=null) {
+                    stockKbar.setTradeAmount(amounts.get(i));
+                }else{
+                    stockKbar.setTradeAmount(new BigDecimal(0));
+                }
+                if(volumes.get(i)!=null) {
+                    stockKbar.setTradeQuantity(volumes.get(i));
+                }else{
+                    stockKbar.setTradeQuantity(0L);
+                }
                 StockKbar byUniqueKey = stockKbarService.getByUniqueKey(stockKbar.getUniqueKey());
                 if(byUniqueKey==null) {
                     stockKbarService.save(stockKbar);
@@ -483,6 +493,21 @@ public class ThsBlockKbarComponent {
         }
         else {
             System.out.println("Login failed == > " + ret);
+        }
+    }
+
+
+    public void historyBlockKbarsCheck(){
+        HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
+        query.setBlockType(1);
+        List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
+        int i = 0;
+        for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
+            StockKbar byUniqueKey = stockKbarService.getByUniqueKey(historyBlockInfo.getBlockCode()+"_"+"20220609");
+            if(byUniqueKey==null) {
+                i++;
+                System.out.println(i+"====="+historyBlockInfo.getBlockCode()+"======="+historyBlockInfo.getBlockName());
+            }
         }
     }
 

@@ -1,7 +1,11 @@
 package com.bazinga.component;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
-import com.bazinga.dto.*;
+import com.bazinga.dto.BlocKFollowStaticBuyDTO;
+import com.bazinga.dto.BlocKFollowStaticTotalDTO;
+import com.bazinga.dto.MarketMoneyDTO;
+import com.bazinga.dto.PlankTimePairDTO;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.CommonComponent;
 import com.bazinga.replay.component.HistoryTransactionDataComponent;
@@ -16,9 +20,9 @@ import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
 import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
-import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -26,7 +30,6 @@ import org.springframework.util.CollectionUtils;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 
 /**
@@ -35,7 +38,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
-public class StrongBlockExploreComponent {
+public class BlockFollowStaticCurrentHistoryComponent {
     @Autowired
     private CirculateInfoService circulateInfoService;
     @Autowired
@@ -63,180 +66,122 @@ public class StrongBlockExploreComponent {
 
 
 
-    public void highLowPlank(){
-        Map<String, String> nextTradeDateMap = getNextTradeDateMap();
+    public void blockFollowStaticInfo(){
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
-        Map<String,List<SBEHighTimeDTO>> highMapInfo = new HashMap<>();
-        Map<String, List<String>> map = getEndPlanks(circulateInfos,highMapInfo,nextTradeDateMap);
-        List<StrongBlockBuyDTO> buys = blockPlankRate(map,highMapInfo);
+        Map<String, CirculateInfo> circulateInfoMap = getCirculateInfoMap(circulateInfos);
+        List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
+        Map<String, List<PlankTimePairDTO>> pairsMap = getPlankTimePairs(circulateInfos);
+        int count = pairsMap.size();
+        int index = 0;
+        for (String tradeDate:pairsMap.keySet()) {
+            index++;
+            RedisMonior byRedisKey = redisMoniorService.getByRedisKey(tradeDate + "_total_static");
+            if(byRedisKey!=null){
+                continue;
+            }
+            if(tradeDate.equals("20220823")){
+                System.out.println(1111111111);
+            }else{
+                continue;
+            }
+            System.out.println(index+"===="+count);
+            /*THREAD_POOL_QUOTE.execute(() ->{*/
+                List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
+                BlocKFollowStaticTotalDTO blocKFollowStaticTotalDTO = blockBuys(blockInfos, plankTimePairDTOS, circulateInfoMap, tradeDate);
+                if(blocKFollowStaticTotalDTO!=null) {
+                    RedisMonior redisMonior = new RedisMonior();
+                    redisMonior.setRedisKey(blocKFollowStaticTotalDTO.getTradeDate()+"_total_static");
+                    redisMonior.setRedisValue(JSONObject.toJSONString(blocKFollowStaticTotalDTO));
+                    redisMoniorService.save(redisMonior);
+                }
+            /*});*/
+
+        }
+        /*try {
+            Thread.sleep(10000000000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+
+        /*List<BlocKFollowStaticTotalDTO> buys = Lists.newArrayList();
+        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
+        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
+        for (TradeDatePool tradeDatePool:tradeDatePools){
+            boolean before = tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220501", DateUtil.yyyyMMdd));
+            boolean after = tradeDatePool.getTradeDate().after(DateUtil.parseDate("20230101", DateUtil.yyyyMMdd));
+            if((!before)&&(!after)) {
+                String format = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+                String key = format + "_total_static";
+                RedisMonior redisMonior = redisMoniorService.getByRedisKey(key);
+                if (redisMonior != null) {
+                    String redisValue = redisMonior.getRedisValue();
+                    BlocKFollowStaticTotalDTO follow = JSONObject.parseObject(redisValue, BlocKFollowStaticTotalDTO.class);
+                    buys.add(follow);
+                }
+            }
+        }
+
         List<Object[]> datas = Lists.newArrayList();
-        for (StrongBlockBuyDTO dto:buys) {
+        for (BlocKFollowStaticTotalDTO dto:buys) {
             List<Object> list = new ArrayList<>();
             list.add(dto.getTradeDate());
             list.add(dto.getTradeDate());
-            list.add(dto.getBlockCode());
-            list.add(dto.getBlockName());
-            list.add(dto.getStockCount());
+            list.add(dto.getPlanksTenCount());
+            list.add(dto.getPlankBlockCount());
+            list.add(dto.getAllBuyCount());
+            list.add(dto.getOneBuyCount());
+            list.add(dto.getBuyBlocks());
 
-            list.add(dto.getBlockCount1());
-            list.add(dto.getMarketCount1());
-            list.add(dto.getRate1());
-
-
-            list.add(dto.getBlockCount2());
-            list.add(dto.getMarketCount2());
-            list.add(dto.getRate2());
-
-            list.add(dto.getBlockCount3());
-            list.add(dto.getMarketCount3());
-            list.add(dto.getRate3());
-
-            list.add(dto.getStockCode());
-            list.add(dto.getStockName());
-            list.add(dto.getPlankTime());
-            list.add(dto.getPlanks());
+            list.add(dto.getBuys());
             list.add(dto.getProfit());
+            list.add(dto.getNoSameBuys());
+            list.add(dto.getNoSameProfit());
+
+            list.add(dto.getAmountBuys());
+            list.add(dto.getAmountProfit());
+            list.add(dto.getNoSameAmountBuys());
+            list.add(dto.getNoSameAmountProfit());
+
+            list.add(dto.getRateBuys());
+            list.add(dto.getRateProfit());
+            list.add(dto.getNoSameRateBuys());
+            list.add(dto.getNoSameRateProfit());
+            list.add(dto.getNoSameRateProfitEnd());
+            list.add(dto.getNoSameRateProfitTen());
+
+
 
             Object[] objects = list.toArray();
             datas.add(objects);
         }
 
 
-        String[] rowNames = {"index","日期","板块代码","板块名称","股票数","板块封住1","市场封住1","比例1","板块封住2","市场封住2","比例2","板块封住3","市场封住3","比例3","股票名称","股票代码","上板时间","买入前一日板高","盈利"};
-        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("热点板块",rowNames,datas);
+        String[] rowNames = {"index","交易日期","10点前市场涨停数量","10点前有涨停股票板块数量","10点前满足3中买入方式板块数量","10点前满足任何一种买入方式数量","原始板块数量","原始买入数量","原始总利润","去重数量","去重总盈亏"
+                ,"成交额较前日排序买入数量","成交额较前日排序总利润","成交额较前日排序去重买入数量","成交额较前日排序去重总盈亏"
+                ,"买入时涨幅排序买入数量","买入时涨幅排序总利润","买入时涨幅排序去重买入数量","买入时涨幅排序去重总盈亏","买入时涨幅排序去重10点盈亏","买入时涨幅排序去重收盘盈亏"};
+        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("板块跟随统计买入",rowNames,datas);
         try {
-            poiExcelUtil.exportExcelUseExcelTitle("热点板块");
+            poiExcelUtil.exportExcelUseExcelTitle("板块跟随统计买入");
         }catch (Exception e){
             log.info(e.getMessage());
-        }
-    }
+        }*/
 
-    public List<StrongBlockBuyDTO> blockPlankRate(Map<String,List<String>> map,Map<String,List<SBEHighTimeDTO>> dtoMap){
-        List<StrongBlockBuyDTO> buys = Lists.newArrayList();
-        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20180101",DateUtil.yyyyMMdd));
-        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
-        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
-        Map<String, StrongPercentDTO> strongMap = new HashMap<>();
-        for (TradeDatePool tradeDatePool:tradeDatePools){
-            String tradeDate = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
-            List<String> planks = map.get(tradeDate);
-            List<SBEHighTimeDTO> sbeHighTimeDTOS = dtoMap.get(tradeDate);
-            getBlockPlankPercent(tradeDate, planks,strongMap,sbeHighTimeDTOS);
-        }
-        HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
-        query.setBlockType(1);
-        List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
-        LimitQueue<String> limitQueue = new LimitQueue<>(2);
-        for (TradeDatePool tradeDatePool:tradeDatePools){
-            String tradeDate = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
-            limitQueue.offer(tradeDate);
-            if(limitQueue.size()<2){
-                continue;
-            }
-            List<String> tradeDates = Lists.newArrayList();
-            Iterator<String> iterator = limitQueue.iterator();
-            while (iterator.hasNext()){
-                tradeDates.add(iterator.next());
-            }
-            for (HistoryBlockInfo blockInfo:historyBlockInfos){
-                StrongPercentDTO strongPercentDTO1 = strongMap.get(blockInfo.getBlockCode() + "_" + tradeDates.get(0));
-                StrongPercentDTO strongPercentDTO2 = strongMap.get(blockInfo.getBlockCode() + "_" + tradeDates.get(1));
-                //StrongPercentDTO strongPercentDTO3 = strongMap.get(blockInfo.getBlockCode() + "_" + tradeDates.get(2));
-                if(strongPercentDTO1!=null&&strongPercentDTO2!=null){
-                    StrongBlockBuyDTO strongBlockBuyDTO = new StrongBlockBuyDTO();
-                    strongBlockBuyDTO.setBlockCode(blockInfo.getBlockCode());
-                    strongBlockBuyDTO.setBlockName(blockInfo.getBlockName());
-                    strongBlockBuyDTO.setTradeDate(tradeDate);
-                    strongBlockBuyDTO.setMarketCount1(strongPercentDTO1.getMarketCount());
-                    strongBlockBuyDTO.setMarketCount2(strongPercentDTO2.getMarketCount());
-                    //strongBlockBuyDTO.setMarketCount3(strongPercentDTO3.getMarketCount());
-                    strongBlockBuyDTO.setBlockCount1(strongPercentDTO1.getBlockCount());
-                    strongBlockBuyDTO.setBlockCount2(strongPercentDTO2.getBlockCount());
-                    //strongBlockBuyDTO.setBlockCount3(strongPercentDTO3.getBlockCount());
-                    strongBlockBuyDTO.setRate1(strongPercentDTO1.getRate());
-                    strongBlockBuyDTO.setRate2(strongPercentDTO2.getRate());
-                    //strongBlockBuyDTO.setRate3(strongPercentDTO3.getRate());
-                    List<String> stocks = getBlockStocks(blockInfo.getBlockCode(), tradeDate);
-                    strongBlockBuyDTO.setStockCount(stocks.size());
-                    if(strongPercentDTO2.getBuyDTO()!=null){
-                        SBEHighTimeDTO buyDTO = strongPercentDTO2.getBuyDTO();
-                        strongBlockBuyDTO.setStockCode(buyDTO.getStockCode());
-                        strongBlockBuyDTO.setStockName(buyDTO.getStockName());
-                        strongBlockBuyDTO.setPlanks(buyDTO.getPlanks());
-                        strongBlockBuyDTO.setPlankTime(buyDTO.getPlankTime());
-                        strongBlockBuyDTO.setProfit(buyDTO.getProfit());
-                    }
-                    buys.add(strongBlockBuyDTO);
-                }
-            }
-        }
-        return buys;
-    }
 
-    public void getBlockPlankPercent(String tradeDate,List<String> planks,Map<String,StrongPercentDTO> strongMap,List<SBEHighTimeDTO> sbeHighTimeDTOS){
-        HistoryBlockStocksQuery stocksQuery = new HistoryBlockStocksQuery();
-        stocksQuery.setTradeDate(tradeDate);
-        List<HistoryBlockStocks> stocks = historyBlockStocksService.listByCondition(stocksQuery);
-        if(CollectionUtils.isEmpty(stocks)||CollectionUtils.isEmpty(planks)){
-            return;
-        }
-        Map<String, SBEHighTimeDTO> dtoMap = new HashMap<>();
-        if(!CollectionUtils.isEmpty(sbeHighTimeDTOS)) {
-            for (SBEHighTimeDTO timeDTO : sbeHighTimeDTOS) {
-                dtoMap.put(timeDTO.getStockCode(), timeDTO);
-            }
-        }
-        for (HistoryBlockStocks historyBlockStocks:stocks){
-            String stockStr = historyBlockStocks.getStocks();
-            if(StringUtils.isBlank(stockStr)){
-                continue;
-            }
-            int count = 0;
-            SBEHighTimeDTO sbeDTO = null;
-            for (String stockCode:planks){
-                if(stockStr.contains(stockCode)){
-                    count++;
-                    SBEHighTimeDTO timeDTO = dtoMap.get(stockCode);
-                    if(timeDTO!=null) {
-                        if (sbeDTO == null) {
-                            sbeDTO = timeDTO;
-                        }else{
-                            if(timeDTO.getPlanks()>sbeDTO.getPlanks()){
-                                sbeDTO = timeDTO;
-                            } else if(timeDTO.getPlanks()==sbeDTO.getPlanks()){
-                                if(sbeDTO.getPlankTime()==null){
-                                    sbeDTO = timeDTO;
-                                }
-                                if(timeDTO.getPlankTime()!=null&&timeDTO.getPlankTime()< sbeDTO.getPlankTime()){
-                                    sbeDTO = timeDTO;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            BigDecimal percent = new BigDecimal(count).divide(new BigDecimal(planks.size()), 2, BigDecimal.ROUND_HALF_UP);
-            if(percent.compareTo(new BigDecimal("0.1"))==1){
-                StrongPercentDTO strongPercentDTO = new StrongPercentDTO();
-                strongPercentDTO.setBlockCount(count);
-                strongPercentDTO.setMarketCount(planks.size());
-                strongPercentDTO.setRate(percent);
-                strongPercentDTO.setBuyDTO(sbeDTO);
-                strongMap.put(historyBlockStocks.getBlockCode()+"_"+historyBlockStocks.getTradeDate(),strongPercentDTO);
-            }
-        }
     }
 
 
-    public Map<String, List<String>> getEndPlanks(List<CirculateInfo> circulateInfos,Map<String,List<SBEHighTimeDTO>> highMapInfo,Map<String,String> nextTradeDateMap){
-        Map<String, List<String>> map = new HashMap<>();
-        int i =0;
+    public Map<String, List<PlankTimePairDTO>> getPlankTimePairs(List<CirculateInfo> circulateInfos){
+        Map<String, List<PlankTimePairDTO>> map = new HashMap<>();
+        int m = 0;
         for (CirculateInfo circulateInfo:circulateInfos){
-            i++;
-            System.out.println(circulateInfo.getStockCode()+"-----"+i);
-           /* if(buys.size()>=10){
-                return;
+            m++;
+            System.out.println(circulateInfo.getStockCode()+"======"+m);
+            /*if(!circulateInfo.getStockCode().equals("002882")){
+                continue;
+            }*/
+           /* if(m>=500){
+                return map;
             }*/
             List<StockKbar> stockKbars = getStockKBarsDelete30Days(circulateInfo.getStockCode());
             if(CollectionUtils.isEmpty(stockKbars)){
@@ -247,141 +192,45 @@ public class StrongBlockExploreComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220817", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220701", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20220828", DateUtil.yyyyMMdd))){
                     continue;
+                }
+                List<String> olds = Lists.newArrayList();
+                RedisMonior redisMonior = redisMoniorService.getByRedisKey(circulateInfo.getStockCode());
+                if(redisMonior!=null&&!redisMonior.getRedisValue().equals("test")){
+                    String[] split = redisMonior.getRedisValue().split(",");
+                    List<String> strings = Arrays.asList(split);
+                    olds.addAll(strings);
                 }
                 if(preKbar!=null) {
-                    boolean endUpper = PriceUtil.isHistoryUpperPrice(circulateInfo.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
-                    if(endUpper){
+                    boolean highUpper = PriceUtil.isHistoryUpperPrice(circulateInfo.getStockCode(), stockKbar.getHighPrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
+                    if(highUpper){
                         int planks = calPlanks(limitQueue);
-                        List<String> lists = map.get(stockKbar.getKbarDate());
-                        if(lists==null){
-                            lists = Lists.newArrayList();
-                            map.put(stockKbar.getKbarDate(),lists);
-                        }
-                        lists.add(stockKbar.getStockCode());
-                        if(planks>=2){
-                            List<SBEHighTimeDTO> sbeHighTimeDTOS = highMapInfo.get(stockKbar.getKbarDate());
-                            if(sbeHighTimeDTOS==null){
-                                sbeHighTimeDTOS = Lists.newArrayList();
-                                highMapInfo.put(stockKbar.getKbarDate(),sbeHighTimeDTOS);
+                        List<PlankTimePairDTO> plankPairs = getPlankPairs(stockKbar, preKbar.getAdjClosePrice(),planks);
+                        if(!CollectionUtils.isEmpty(plankPairs)){
+                            List<PlankTimePairDTO> pairs = map.get(stockKbar.getKbarDate());
+                            if(pairs==null){
+                                pairs = Lists.newArrayList();
+                                map.put(stockKbar.getKbarDate(),pairs);
                             }
-                            SBEHighTimeDTO sbeHighTimeDTO = new SBEHighTimeDTO();
-                            sbeHighTimeDTO.setStockCode(circulateInfo.getStockCode());
-                            sbeHighTimeDTO.setStockName(circulateInfo.getStockName());
-                            sbeHighTimeDTO.setPlanks(planks);
-                            getHighPlankInfo(nextTradeDateMap.get(stockKbar.getKbarDate()),stockKbars,sbeHighTimeDTO);
-                            sbeHighTimeDTOS.add(sbeHighTimeDTO);
+                            pairs.addAll(plankPairs);
                         }
                     }
-
                 }
                 preKbar = stockKbar;
             }
         }
         return map;
     }
-    public void getHighPlankInfo(String nextTradeDate,List<StockKbar> stockKbars,SBEHighTimeDTO sbeHighTimeDTO){
-        int i = 0;
-        StockKbar preKbar = null;
-        StockKbar buyStockKbar = null;
-        for (StockKbar stockKbar:stockKbars){
-            if(i>0){
-                if(sbeHighTimeDTO.getPlankTime()==null){
-                    return;
-                }
-                boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(),stockKbar.getKbarDate());
-                if(!historyUpperPrice) {
-                    historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getAdjClosePrice(), preKbar.getAdjClosePrice(), stockKbar.getKbarDate());
-                }
 
-                if(!historyUpperPrice){
-                    BigDecimal avgPrice = stockKbar.getAdjClosePrice();
-                    BigDecimal profit = PriceUtil.getPricePercentRate(avgPrice.subtract(buyStockKbar.getAdjHighPrice()), buyStockKbar.getAdjHighPrice());
-                    sbeHighTimeDTO.setProfit(profit);
-                    return;
-                }
-            }
-            if(stockKbar.getKbarDate().equals(nextTradeDate)){
-                buyStockKbar = stockKbar;
-                if(stockKbar.getHighPrice().compareTo(stockKbar.getLowPrice())==0){
-                    return;
-                }
-                Long stockBuyTime = getStockBuyTime(stockKbar,preKbar.getClosePrice());
-                sbeHighTimeDTO.setPlankTime(stockBuyTime);
-                i++;
-            }
-            preKbar = stockKbar;
-        }
-    }
-
-
-    public Long getStockBuyTime(StockKbar stockKbar,BigDecimal preEndPrice){
-        List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockKbar.getStockCode(), DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd));
-        if(CollectionUtils.isEmpty(datas)){
-            return null;
-        }
-        int index = 0;
-        String preMin = "09:25";
-        boolean preIsUpper = true;
-        for (ThirdSecondTransactionDataDTO data:datas){
-            if(data.getTradeTime().equals(preMin)){
-                index++;
-            }else{
-                preMin = data.getTradeTime();
-                index = 0;
-            }
-            BigDecimal tradePrice = data.getTradePrice();
-            boolean upperPrice = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), tradePrice, preEndPrice,stockKbar.getKbarDate());
-            if(data.getTradeTime().equals("09:25")&&upperPrice){
-                preIsUpper = true;
-            }
-            Integer tradeType = data.getTradeType();
-            if(tradeType!=0&&tradeType!=1){
-                continue;
-            }
-            if(upperPrice&&tradeType==1){
-                if(!preIsUpper){
-                    long buyTime = timeToLong(data.getTradeTime(), index);
-                    return buyTime;
-                }
-                preIsUpper = true;
-            }else{
-                preIsUpper = false;
-            }
-        }
-        return null;
-    }
-
-    public Map<String,String> getNextTradeDateMap(){
-        Map<String, String> map = new HashMap<>();
-        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20180101",DateUtil.yyyyMMdd));
-        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
-        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
-        String preTradeDate = null;
-        for (TradeDatePool tradeDatePool:tradeDatePools){
-            String format = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
-            if(preTradeDate!=null){
-                map.put(preTradeDate,format);
-            }
-            preTradeDate = format;
-        }
-        return map;
-    }
-
-    public Map<String,HistoryBlockInfo> getHistoryBlockInfo(){
-        Map<String, HistoryBlockInfo> map = new HashMap<>();
+    public List<HistoryBlockInfo> getHistoryBlockInfo(){
         HistoryBlockInfoQuery query = new HistoryBlockInfoQuery();
         query.setBlockType(1);
         List<HistoryBlockInfo> historyBlockInfos = historyBlockInfoService.listByCondition(query);
-        for (HistoryBlockInfo blockInfo:historyBlockInfos){
-            map.put(blockInfo.getBlockCode(),blockInfo);
-        }
-        return map;
+        return historyBlockInfos;
     }
 
     public BlocKFollowStaticTotalDTO blockBuys(List<HistoryBlockInfo> blockInfos,List<PlankTimePairDTO> pairs,Map<String, CirculateInfo> circulateInfoMap,String tradeDate){
@@ -463,22 +312,29 @@ public class StrongBlockExploreComponent {
         if(CollectionUtils.isEmpty(buys)){
             return null;
         }
-        List<BlocKFollowStaticBuyDTO> buysAmountSorts = BlocKFollowStaticBuyDTO.amountRateSort(buys);
+       // List<BlocKFollowStaticBuyDTO> buysAmountSorts = BlocKFollowStaticBuyDTO.amountRateSort(buys);
        /* List<BlocKFollowStaticBuyDTO> buysAmountSorts = buys.stream().sorted(Comparator.comparing(BlocKFollowStaticBuyDTO::getAmountRate)).collect(Collectors.toList());
         List<BlocKFollowStaticBuyDTO> reverses = Lists.reverse(buysAmountSorts);*/
-        List<BlocKFollowStaticBuyDTO> amountRateBuys = Lists.newArrayList();
+       /* List<BlocKFollowStaticBuyDTO> amountRateBuys = Lists.newArrayList();
         amountRateBuys.addAll(buysAmountSorts);
         if(amountRateBuys.size()>150){
             amountRateBuys = amountRateBuys.subList(0,150);
-        }
+        }*/
         List<BlocKFollowStaticBuyDTO> buysRateSorts = BlocKFollowStaticBuyDTO.rateSort(buys);
-        /*List<BlocKFollowStaticBuyDTO> buysRateSorts = buys.stream().sorted(Comparator.comparing(BlocKFollowStaticBuyDTO::getRate)).collect(Collectors.toList());
-        List<BlocKFollowStaticBuyDTO> rateReverse = Lists.reverse(buysRateSorts);*/
         List<BlocKFollowStaticBuyDTO> rateBuys = Lists.newArrayList();
         rateBuys.addAll(buysRateSorts);
+        List<String> noSames = Lists.newArrayList();
         if(rateBuys.size()>150){
             rateBuys = rateBuys.subList(0,150);
         }
+        for (BlocKFollowStaticBuyDTO staticBuyDTO:rateBuys){
+            if(!noSames.contains(staticBuyDTO.getStockCode())) {
+                noSames.add(staticBuyDTO.getStockCode());
+                System.out.println("股票_"+staticBuyDTO.getStockCode());
+            }
+
+        }
+
         calTenSellAndEndSell(rateBuys,tradeDate);
         List<PlankTimePairDTO> planksTen = judgePlanks100000(pairs);
         BlocKFollowStaticTotalDTO staticDTO = new BlocKFollowStaticTotalDTO();
@@ -488,7 +344,7 @@ public class StrongBlockExploreComponent {
         staticDTO.setAllBuyCount(allBuyCount);
         staticDTO.setOneBuyCount(oneBuyCount);
         calTotalInfo(buys,staticDTO,1);
-        calTotalInfo(amountRateBuys,staticDTO,2);
+        //calTotalInfo(amountRateBuys,staticDTO,2);
         calTotalInfo(rateBuys,staticDTO,3);
         return staticDTO;
     }
@@ -603,7 +459,11 @@ public class StrongBlockExploreComponent {
     }
 
     public static void main(String[] args) {
-        BlocKFollowStaticBuyDTO buyDTO1 = new BlocKFollowStaticBuyDTO();
+        ArrayList<String> strings = Lists.newArrayList("111", "222", "333");
+        if(strings.contains("111")){
+            System.out.println(111);
+        }
+        /*BlocKFollowStaticBuyDTO buyDTO1 = new BlocKFollowStaticBuyDTO();
         buyDTO1.setAmountRate(new BigDecimal(10));
         BlocKFollowStaticBuyDTO buyDTO2 = new BlocKFollowStaticBuyDTO();
         buyDTO2.setAmountRate(new BigDecimal(20));
@@ -617,7 +477,7 @@ public class StrongBlockExploreComponent {
         List<BlocKFollowStaticBuyDTO> buysAmountSorts = buys.stream().sorted(Comparator.comparing(BlocKFollowStaticBuyDTO::getAmountRate)).collect(Collectors.toList());
 
         List<BlocKFollowStaticBuyDTO> blocKFollowStaticBuyDTOS = BlocKFollowStaticBuyDTO.amountRateSort(buys);
-        System.out.println(blocKFollowStaticBuyDTOS);
+        System.out.println(blocKFollowStaticBuyDTOS);*/
     }
 
     public List<PlankTimePairDTO> judgePlanks100000(List<PlankTimePairDTO> pairs){
@@ -865,6 +725,10 @@ public class StrongBlockExploreComponent {
 
 
     public List<String> getBlockStocks(String blockCode,String tradeDate){
+        if(tradeDate.equals(DateUtil.format(new Date(),DateUtil.yyyyMMdd))){
+            Date preTradeDate = commonComponent.preTradeDate(new Date());
+            tradeDate = DateUtil.format(preTradeDate,DateUtil.yyyyMMdd);
+        }
         List<String> list = Lists.newArrayList();
         HistoryBlockStocksQuery query = new HistoryBlockStocksQuery();
         query.setBlockCode(blockCode);
@@ -906,37 +770,71 @@ public class StrongBlockExploreComponent {
     }
 
 
-    public boolean isHighLowPlank(StockKbar stockKbar,BigDecimal preEndPrice,HighLowPlankDTO highLowPlankDTO){
+    public List<PlankTimePairDTO> getPlankPairs(StockKbar stockKbar,BigDecimal preEndPrice,int planks){
+        List<PlankTimePairDTO> pairs = Lists.newArrayList();
         List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockKbar.getStockCode(), DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd));
         if(CollectionUtils.isEmpty(datas)){
-            return false;
+            return pairs;
         }
-        boolean upperFlag = false;
+        int i = 0;
+        int index = 0;
+        String preMin = "09:25";
+        boolean gatherUpper = false;
         for (ThirdSecondTransactionDataDTO data:datas){
+            if(data.getTradeTime().equals(preMin)){
+                index++;
+            }else{
+                preMin = data.getTradeTime();
+                index = 0;
+            }
             BigDecimal tradePrice = data.getTradePrice();
             boolean upperPrice = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), tradePrice, preEndPrice,stockKbar.getKbarDate());
-            boolean suddenPrice = PriceUtil.isHistorySuddenPrice(stockKbar.getStockCode(), tradePrice, preEndPrice,stockKbar.getKbarDate());
             if(data.getTradeTime().equals("09:25")&&upperPrice){
-                upperFlag = true;
-            }
-            if(data.getTradeTime().equals("09:25")){
-                continue;
+                gatherUpper = true;
             }
             Integer tradeType = data.getTradeType();
+            i++;
+            if(i==2&&gatherUpper&&upperPrice&&tradeType==1){
+                PlankTimePairDTO pairDTO = new PlankTimePairDTO();
+                pairDTO.setStockCode(stockKbar.getStockCode());
+                pairDTO.setPlanks(planks);
+                pairDTO.setStart(92500l);
+                pairs.add(pairDTO);
+                continue;
+            }
+            if(data.getTradeTime().equals("15:00")){
+                if(upperPrice&&pairs.size()>0&&pairs.get(pairs.size()-1).getEnd()==null){
+                    pairs.get(pairs.size()-1).setEnd(150000l);
+                }
+                continue;
+            }
             if(tradeType!=0&&tradeType!=1){
                 continue;
             }
-            if(tradeType==1&&upperPrice){
-                upperFlag=true;
+            PlankTimePairDTO pair = null;
+            if(pairs.size()>0){
+                pair = pairs.get(pairs.size()-1);
             }
-            if(suddenPrice&&tradeType==0){
-                if(upperFlag){
-                    highLowPlankDTO.setSuddenTime(data.getTradeTime());
-                    return true;
+            if(i>=1){
+                if(pair==null||pair.getEnd()!=null){
+                    if(upperPrice&&tradeType==1) {
+                        PlankTimePairDTO pairDTO = new PlankTimePairDTO();
+                        pairDTO.setPlanks(planks);
+                        pairDTO.setStockCode(stockKbar.getStockCode());
+                        long start = timeToLong(data.getTradeTime(), index);
+                        pairDTO.setStart(start);
+                        pairs.add(pairDTO);
+                    }
+                }
+                if (pair!=null&&pair.getEnd()==null){
+                    if(!upperPrice||tradeType!=1){
+                        long end = timeToLong(data.getTradeTime(), index);
+                        pair.setEnd(end);
+                    }
                 }
             }
         }
-        return false;
+        return pairs;
     }
 
     public static long timeToLong(String time,int index){
@@ -1007,8 +905,8 @@ public class StrongBlockExploreComponent {
                     result.add(stockKbar);
                 }
             }
-            List<StockKbar> best = commonComponent.deleteNewStockTimes(stockKbars, 2000);
-            return best;
+            //List<StockKbar> best = commonComponent.deleteNewStockTimes(stockKbars, 2000);
+            return result;
         }catch (Exception e){
             return null;
         }
@@ -1096,7 +994,6 @@ public class StrongBlockExploreComponent {
 
         }
     }
-
 
 
 }

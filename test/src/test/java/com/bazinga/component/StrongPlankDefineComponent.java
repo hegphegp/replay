@@ -3,7 +3,7 @@ package com.bazinga.component;
 import com.bazinga.base.Sort;
 import com.bazinga.dto.BlocKFollowStaticBuyDTO;
 import com.bazinga.dto.LowEndHighTestDTO;
-import com.bazinga.dto.TwoToThreeTestDTO;
+import com.bazinga.dto.StrongPlankDefineTestDTO;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.CommonComponent;
 import com.bazinga.replay.component.HistoryTransactionDataComponent;
@@ -18,12 +18,14 @@ import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
 import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
+import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import javax.rmi.PortableRemoteObject;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -36,7 +38,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
-public class BuyTwoToThreeComponent {
+public class StrongPlankDefineComponent {
     @Autowired
     private CirculateInfoService circulateInfoService;
     @Autowired
@@ -64,97 +66,84 @@ public class BuyTwoToThreeComponent {
 
 
 
-    public void buyTwoThree(){
+    public void strongPlank(){
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
-        List<TwoToThreeTestDTO> buys = getPlankTimePairs(circulateInfos);
+        List<StrongPlankDefineTestDTO> buys = getPlankTimePairs(circulateInfos);
         List<Object[]> datas = Lists.newArrayList();
-        for (TwoToThreeTestDTO dto:buys) {
+        for (StrongPlankDefineTestDTO dto:buys) {
             List<Object> list = new ArrayList<>();
             list.add(dto.getStockCode());
             list.add(dto.getStockCode());
             list.add(dto.getStockName());
             list.add(dto.getTradeDate());
-            list.add(dto.getTFlag());
-            list.add(dto.getOpenRate());
+            list.add(dto.getPlankTime());
+            list.add(dto.getSpeedRate());
+            list.add(dto.getSpeedRate5());
+            list.add(dto.getSpeedRate5Min());
+            list.add(dto.getIsTPlank());
+            list.add(dto.getOpenTime());
+            list.add(dto.getSecond());
             list.add(dto.getEndFlag());
-            list.add(dto.getBuyTime());
-            list.add(dto.getGatherAmount());
-            list.add(dto.getPreAmount());
-            list.add(dto.getCirculateZ());
-            list.add(dto.getCirculate());
-            list.add(dto.getPlankPrice());
-            list.add(dto.getTenDayPlanks());
-            list.add(dto.getTenDayRate());
+            list.add(dto.getTwoPlankTime());
             list.add(dto.getProfit());
-            list.add(dto.getEndNoPlankSellProfit());
             Object[] objects = list.toArray();
             datas.add(objects);
         }
 
 
-        String[] rowNames = {"index","股票代码","股票名称","交易日期","是否是t板（0不是 1是）","开盘涨幅","尾盘是否封住（0 不是 1是）"
-                ,"买入时间","集合成交额","昨日成交额","流通z","总流通","板价","前10天板数","前10日涨幅","次日盈利","尾盘不板卖出盈利" };
-        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("二进三",rowNames,datas);
+        String[] rowNames = {"index","股票代码","股票名称","交易日期","上板时间","2min内最大涨速","5Min内最大涨速","5Min内涨速","是否是t板（0 不是 1是）","开板时间","开板到回封时间","尾盘是否封住（0 未封住 1封住）","回封时间","盈利"};
+        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("3板强弱判断",rowNames,datas);
         try {
-            poiExcelUtil.exportExcelUseExcelTitle("二进三");
+            poiExcelUtil.exportExcelUseExcelTitle("3板强弱判断");
         }catch (Exception e){
             log.info(e.getMessage());
         }
     }
 
 
-    public List<TwoToThreeTestDTO> getPlankTimePairs(List<CirculateInfo> circulateInfos){
-        List<TwoToThreeTestDTO> buys = Lists.newArrayList();
+    public List<StrongPlankDefineTestDTO> getPlankTimePairs(List<CirculateInfo> circulateInfos){
+        List<StrongPlankDefineTestDTO> buys = Lists.newArrayList();
         int i =0;
         for (CirculateInfo circulateInfo:circulateInfos){
             i++;
             System.out.println(circulateInfo.getStockCode()+"-----"+i);
-            /*if(buys.size()>=10){
+            /*if(buys.size()>=100){
                 return buys;
+            }
+            if(!circulateInfo.getStockCode().equals("603366")){
+                continue;
             }*/
             List<StockKbar> stockKbars = getStockKBarsDelete30Days(circulateInfo.getStockCode());
             if(CollectionUtils.isEmpty(stockKbars)){
                 continue;
             }
-            LimitQueue<StockKbar> limitQueue12 = new LimitQueue<>(12);
+            LimitQueue<StockKbar> limitQueue = new LimitQueue<>(10);
             StockKbar preKbar = null;
             for (StockKbar stockKbar:stockKbars){
-                limitQueue12.offer(stockKbar);
+                limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20171201", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                /*if(date.after(DateUtil.parseDate("20220401", DateUtil.yyyyMMdd))){
-                    continue;
-                }*/
                 if(preKbar!=null) {
-                    boolean highUpper = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getHighPrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
                     boolean endUpper = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
-                    int continuePlanks = calPlanks(limitQueue12);
-                    if(highUpper&&continuePlanks==2){
-                        BigDecimal openRate = PriceUtil.getPricePercentRate(stockKbar.getAdjOpenPrice().subtract(preKbar.getAdjClosePrice()), preKbar.getAdjClosePrice());
-                        TwoToThreeTestDTO testDTO = new TwoToThreeTestDTO();
-                        String buyTime = getBuyTime(circulateInfo.getStockCode(), stockKbar.getKbarDate(), preKbar.getClosePrice(), testDTO);
-                        if(StringUtils.isNotBlank(buyTime)) {
-                            testDTO.setStockCode(stockKbar.getStockCode());
-                            testDTO.setStockName(stockKbar.getStockName());
-                            testDTO.setTradeDate(stockKbar.getKbarDate());
-                            testDTO.setCirculate(circulateInfo.getCirculate());
-                            testDTO.setCirculateZ(circulateInfo.getCirculateZ());
-                            testDTO.setPlankPrice(stockKbar.getHighPrice());
-                            testDTO.setOpenRate(openRate);
-                            int tenDayPlanks = tenDayPlanks(limitQueue12,testDTO);
-                            testDTO.setTenDayPlanks(tenDayPlanks);
-                            testDTO.setPreAmount(preKbar.getTradeAmount());
-                            if(endUpper) {
-                                testDTO.setEndFlag(1);
-                            }
-
+                    boolean highUpper = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getHighPrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
+                    if(highUpper){
+                        int planks = calPlanks(limitQueue);
+                        if(planks==3){
+                            StrongPlankDefineTestDTO buyDTO = new StrongPlankDefineTestDTO();
+                            buyDTO.setStockCode(circulateInfo.getStockCode());
+                            buyDTO.setStockName(circulateInfo.getStockName());
+                            buyDTO.setTradeDate(stockKbar.getKbarDate());
+                            getBuyInfo(circulateInfo.getStockCode(),stockKbar.getKbarDate(),preKbar,buyDTO);
                             BigDecimal profit = calProfit(stockKbars, stockKbar);
-                            BigDecimal endNoPlankProfit = calEndNoPlankProfit(stockKbars, stockKbar);
-                            testDTO.setProfit(profit);
-                            testDTO.setEndNoPlankSellProfit(endNoPlankProfit);
-                            buys.add(testDTO);
+                            buyDTO.setProfit(profit);
+                            if(endUpper) {
+                                buyDTO.setEndFlag(1);
+                            }
+                            if(buyDTO.getPlankTime()!=null) {
+                                buys.add(buyDTO);
+                            }
                         }
 
                     }
@@ -164,46 +153,6 @@ public class BuyTwoToThreeComponent {
             }
         }
         return buys;
-    }
-
-
-    public String getBuyTime(String stockCode,String tradeDate,BigDecimal preEndPrice,TwoToThreeTestDTO testDTO){
-        List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockCode, tradeDate);
-        if(CollectionUtils.isEmpty(datas)){
-            return null;
-        }
-        boolean prePlankFlag = false;
-        for (ThirdSecondTransactionDataDTO data:datas){
-            Integer tradeType = data.getTradeType();
-            BigDecimal tradePrice = data.getTradePrice();
-            boolean upperPrice = PriceUtil.isHistoryUpperPrice(stockCode, tradePrice, preEndPrice, tradeDate);
-            if(data.getTradeTime().equals("09:25")){
-                BigDecimal gatherAmount = new BigDecimal(data.getTradeQuantity() * 100).multiply(data.getTradePrice());
-                testDTO.setGatherAmount(gatherAmount);
-                if(upperPrice) {
-                    testDTO.setTFlag(1);
-                    prePlankFlag = true;
-                }
-                continue;
-            }
-            if(tradeType!=1&&tradeType!=0){
-                continue;
-            }
-            boolean plankFlag = false;
-            if(tradeType==1&&upperPrice){
-                plankFlag = true;
-            }
-            if(plankFlag&&!prePlankFlag){
-                testDTO.setBuyTime(data.getTradeTime());
-                return data.getTradeTime();
-            }
-            if(plankFlag){
-                prePlankFlag = true;
-            }else{
-                prePlankFlag = false;
-            }
-        }
-        return null;
     }
 
 
@@ -229,20 +178,22 @@ public class BuyTwoToThreeComponent {
 
 
 
-    public BigDecimal getStockBuyPrice(String stockCode,String tradeDate,String buyTime,StockKbar preStockKbar,BlocKFollowStaticBuyDTO buyDTO){
+    public void  getBuyInfo(String stockCode,String tradeDate,StockKbar preStockKbar,StrongPlankDefineTestDTO buyDTO){
         List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockCode, tradeDate);
-        long buyTimeInt = timeToLong(buyTime);
+        String twoPlankTimes = twoPlankTime(stockCode, preStockKbar, tradeDate, datas);
+        buyDTO.setTwoPlankTime(twoPlankTimes);
         String preMin = "09:25";
         Integer index = -1;
-        BigDecimal tradeAmount = BigDecimal.ZERO;
+        boolean preIsUpper = false;
+
+        LimitQueue<ThirdSecondTransactionDataDTO> limitQueue1 = new LimitQueue<>(40);
+        LimitQueue<ThirdSecondTransactionDataDTO> limitQueue2 = new LimitQueue<>(100);
         for (ThirdSecondTransactionDataDTO data : datas) {
+            limitQueue1.offer(data);
+            limitQueue2.offer(data);
             BigDecimal tradePrice = data.getTradePrice();
             Integer tradeType = data.getTradeType();
             String tradeTime = data.getTradeTime();
-            BigDecimal amount = tradePrice.multiply(new BigDecimal(data.getTradeQuantity() * 100));
-            if(tradeAmount!=null){
-                tradeAmount = tradeAmount.add(amount);
-            }
             boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockCode, tradePrice, preStockKbar.getClosePrice(), tradeDate);
             if (tradeTime.equals(preMin)) {
                 index++;
@@ -250,14 +201,159 @@ public class BuyTwoToThreeComponent {
                 preMin = tradeTime;
                 index = 0;
             }
-            long timeLong = timeToLong(tradeTime, index);
-            if (timeLong >= buyTimeInt) {
-                if (historyUpperPrice && tradeType == 1) {
-                    return null;
+            if(tradeTime.equals("09:25")&&historyUpperPrice){
+                preIsUpper = true;
+                buyDTO.setIsTPlank(1);
+            }
+            if (tradeType!=0 && tradeType != 1) {
+                continue;
+            }
+            String timeLong = timeToSecond(tradeTime, index);
+            if(buyDTO.getIsTPlank()==1){
+                if((!historyUpperPrice)||tradeType!=1){
+                    if(buyDTO.getOpenTime()==null) {
+                        buyDTO.setOpenTime(timeLong);
+                    }
+
                 }
-                BigDecimal amountRate = tradeAmount.divide(preStockKbar.getTradeAmount(), 8, BigDecimal.ROUND_HALF_UP);
-                buyDTO.setAmountRate(amountRate);
-                return tradePrice;
+            }
+            if(historyUpperPrice&&tradeType==1){
+                if(preIsUpper==false){
+                    buyDTO.setPlankTime(timeLong);
+                    getRateSpeed(limitQueue1,preStockKbar.getClosePrice(),buyDTO);
+                    getRateSpeed5(limitQueue2,preStockKbar.getClosePrice(),buyDTO);
+                    if(buyDTO.getIsTPlank()==1){
+                        Integer seconds = interSecond(buyDTO.getOpenTime(), buyDTO.getPlankTime());
+                        buyDTO.setSecond(seconds);
+                    }
+                    return;
+                }
+                preIsUpper = true;
+            }else{
+                preIsUpper = false;
+            }
+
+
+        }
+    }
+
+    public String twoPlankTime(String stockCode,StockKbar preStockKbar,String tradeDate,List<ThirdSecondTransactionDataDTO> datas){
+        if(CollectionUtils.isEmpty(datas)){
+            return null;
+        }
+        String preMin = "09:25";
+        Integer index = -1;
+        boolean preIsUpper = false;
+        int planks = 0;
+        for (ThirdSecondTransactionDataDTO data:datas){
+            BigDecimal tradePrice = data.getTradePrice();
+            Integer tradeType = data.getTradeType();
+            String tradeTime = data.getTradeTime();
+            boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockCode, tradePrice, preStockKbar.getClosePrice(), tradeDate);
+            if (tradeTime.equals(preMin)) {
+                index++;
+            } else {
+                preMin = tradeTime;
+                index = 0;
+            }
+            if(tradeTime.equals("09:25")&&historyUpperPrice){
+                preIsUpper = true;
+            }
+            if (tradeType!=0 && tradeType != 1) {
+                continue;
+            }
+            String timeLong = timeToSecond(tradeTime, index);
+            if(historyUpperPrice&&tradeType==1){
+                if(!preIsUpper){
+                    planks++;
+                    if(planks==2){
+                        return timeLong;
+                    }
+                }
+                preIsUpper = true;
+            }else{
+                preIsUpper = false;
+            }
+        }
+        return null;
+    }
+
+
+    public void getRateSpeed(LimitQueue<ThirdSecondTransactionDataDTO> limitQueue,BigDecimal preEndPrice,StrongPlankDefineTestDTO buyDTO){
+        if(limitQueue.size()<2){
+            return;
+        }
+        Iterator<ThirdSecondTransactionDataDTO> iterator = limitQueue.iterator();
+        BigDecimal lowPrice = null;
+        int i = 0;
+        int index = 0;
+        while (iterator.hasNext()){
+            index++;
+            i++;
+            ThirdSecondTransactionDataDTO next = iterator.next();
+            if(index==limitQueue.size()){
+                BigDecimal plankSpeed = PriceUtil.getPricePercentRate(next.getTradePrice().subtract(lowPrice), preEndPrice);
+                buyDTO.setHeartTimes(i);
+                buyDTO.setSpeedRate(plankSpeed);
+            }
+            if(lowPrice==null || next.getTradePrice().compareTo(lowPrice)<=0){
+                lowPrice = next.getTradePrice();
+                i=0;
+            }
+        }
+    }
+
+    public void getRateSpeed5(LimitQueue<ThirdSecondTransactionDataDTO> limitQueue,BigDecimal preEndPrice,StrongPlankDefineTestDTO buyDTO){
+        if(limitQueue.size()<2){
+            return;
+        }
+        Iterator<ThirdSecondTransactionDataDTO> iterator = limitQueue.iterator();
+        BigDecimal lowPrice = null;
+        BigDecimal first = null;
+        int i = 0;
+        int index = 0;
+        while (iterator.hasNext()){
+            index++;
+            i++;
+            ThirdSecondTransactionDataDTO next = iterator.next();
+            if(i==1){
+                first = next.getTradePrice();
+            }
+            if(index==limitQueue.size()){
+                BigDecimal plankSpeed = PriceUtil.getPricePercentRate(next.getTradePrice().subtract(lowPrice), preEndPrice);
+                BigDecimal plankSpeed5Min = PriceUtil.getPricePercentRate(next.getTradePrice().subtract(first), preEndPrice);
+                buyDTO.setSpeedRate5(plankSpeed);
+                buyDTO.setSpeedRate5Min(plankSpeed5Min);
+            }
+            if(lowPrice==null || next.getTradePrice().compareTo(lowPrice)<=0){
+                lowPrice = next.getTradePrice();
+                i=0;
+            }
+        }
+    }
+
+    public Integer interSecond(String start,String end){
+        if(StringUtils.isBlank(start)||StringUtils.isBlank(end)){
+            return null;
+        }
+        Date startTime = DateUtil.parseDate(start, DateUtil.HHmmss_DEFALT);
+        Date endTime = DateUtil.parseDate(end, DateUtil.HHmmss_DEFALT);
+        Date morningStart = DateUtil.parseDate("09:30:00", DateUtil.HHmmss_DEFALT);
+        Date morningEnd = DateUtil.parseDate("11:30:00", DateUtil.HHmmss_DEFALT);
+        Date afterStart = DateUtil.parseDate("13:00:00", DateUtil.HHmmss_DEFALT);
+        if(!endTime.after(startTime)){
+            return null;
+        }
+        for (int i = 1;i<=100000;i++){
+            if(startTime.before(morningStart)){
+                startTime = morningStart;
+            }
+            if((!startTime.before(morningEnd))&&startTime.before(afterStart)){
+                startTime = afterStart;
+            }
+            startTime = DateUtil.addSeconds(startTime, 1);
+            if(!startTime.before(endTime)){
+                return i;
             }
         }
         return null;
@@ -352,6 +448,16 @@ public class BuyTwoToThreeComponent {
         return timeLong;
     }
 
+    public static String timeToSecond(String time,int index){
+        int second = index * 3;
+        if(second<10) {
+            time = time + ":0" +second;
+        }else{
+            time = time+":"+second;
+        }
+        return time;
+    }
+
     public static long timeToLong(String time){
         String timeStr = time.replace(":", "");
         if(timeStr.startsWith("09")){
@@ -400,7 +506,7 @@ public class BuyTwoToThreeComponent {
             }
             if(i==1){
                 BigDecimal avgPrice = stockKbar.getAdjClosePrice();
-                BigDecimal profit = PriceUtil.getPricePercentRate(avgPrice.subtract(buyStockKbar.getAdjHighPrice()), buyStockKbar.getAdjHighPrice());
+                BigDecimal profit = PriceUtil.getPricePercentRate(avgPrice.subtract(buyStockKbar.getAdjOpenPrice()), buyStockKbar.getAdjOpenPrice());
                 return profit;
             }
             if(buyStockKbar.getKbarDate().equals(stockKbar.getKbarDate())){
@@ -450,11 +556,11 @@ public class BuyTwoToThreeComponent {
 
     public int calPlanks(LimitQueue<StockKbar> limitQueue){
         List<StockKbar> stockKbars = limitQueueToList(limitQueue);
-        if(CollectionUtils.isEmpty(stockKbars)||stockKbars.size()<12){
+        if(CollectionUtils.isEmpty(stockKbars)||stockKbars.size()<10){
             return 0;
         }
         List<StockKbar> reverse = Lists.reverse(stockKbars);
-        int planks = 0;
+        int planks = 1;
         int i=0;
         StockKbar nextStockKbar = null;
         for (StockKbar stockKbar:reverse){
@@ -471,10 +577,10 @@ public class BuyTwoToThreeComponent {
         }
         return planks;
     }
-    public int tenDayPlanks(LimitQueue<StockKbar> limitQueue,TwoToThreeTestDTO testDTO){
+    public void tenDayPlanks(LimitQueue<StockKbar> limitQueue,LowEndHighTestDTO testDTO){
         List<StockKbar> stockKbars = limitQueueToList(limitQueue);
-        if(CollectionUtils.isEmpty(stockKbars)||stockKbars.size()<3){
-            return 0;
+        if(CollectionUtils.isEmpty(stockKbars)||stockKbars.size()<12){
+            return;
         }
         int planks = 0;
         StockKbar preStockKbar = null;
@@ -489,11 +595,11 @@ public class BuyTwoToThreeComponent {
             }
             preStockKbar = stockKbar;
         }
+        testDTO.setTenDayPlanks(planks);
         StockKbar first = stockKbars.get(0);
         StockKbar last = stockKbars.get(stockKbars.size() - 2);
         BigDecimal tenDatRate = PriceUtil.getPricePercentRate(last.getAdjClosePrice().subtract(first.getAdjClosePrice()), first.getAdjClosePrice());
         testDTO.setTenDayRate(tenDatRate);
-        return planks;
     }
 
     public List<StockKbar> getStockKbarsByKBarDate(String kbarDate){

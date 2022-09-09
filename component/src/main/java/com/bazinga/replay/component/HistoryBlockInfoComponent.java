@@ -11,6 +11,7 @@ import com.bazinga.replay.model.HistoryBlockStocks;
 import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.CirculateInfoQuery;
 import com.bazinga.replay.query.HistoryBlockInfoQuery;
+import com.bazinga.replay.query.HistoryBlockStocksQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.*;
 import com.bazinga.util.CommonUtil;
@@ -76,6 +77,24 @@ public class HistoryBlockInfoComponent {
         }
         for (HistoryBlockStocks history:historyBlockStocks){
             historyBlockStocksService.save(history);
+        }
+    }
+
+    public void getPreBlockStocks(String preTradeDate,String tradeDate) {
+        HistoryBlockStocksQuery historyBlockStocksQuery = new HistoryBlockStocksQuery();
+        historyBlockStocksQuery.setTradeDate(preTradeDate);
+        List<HistoryBlockStocks> historyBlockStocks = historyBlockStocksService.listByCondition(historyBlockStocksQuery);
+        if(historyBlockStocks==null){
+            return;
+        }
+        for (HistoryBlockStocks history:historyBlockStocks){
+            HistoryBlockStocks stocks = new HistoryBlockStocks();
+            stocks.setBlockCode(history.getBlockCode());
+            stocks.setBlockName(history.getBlockName());
+            stocks.setStocks(history.getStocks());
+            stocks.setTradeDate(tradeDate);
+            stocks.setCreateTime(new Date());
+            historyBlockStocksService.save(stocks);
         }
     }
 
