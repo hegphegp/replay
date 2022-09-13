@@ -174,7 +174,7 @@ public class BaseTestCase {
 
     @Test
     public void test11() {
-        historyBlockInfoComponent.getPreBlockStocks("20220810","20220811");
+        historyBlockInfoComponent.getPreBlockStocks("20220908","20220909");
     }
     @Test
     public void test10(){
