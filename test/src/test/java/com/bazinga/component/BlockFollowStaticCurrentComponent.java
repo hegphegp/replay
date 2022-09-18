@@ -83,7 +83,7 @@ public class BlockFollowStaticCurrentComponent {
             if(byRedisKey!=null){
                 continue;
             }
-            if(tradeDate.equals("20220617")){
+            if(tradeDate.equals("20220914")){
                 System.out.println(11111111);
             }else{
                 continue;
@@ -197,12 +197,12 @@ public class BlockFollowStaticCurrentComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220610", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220910", DateUtil.yyyyMMdd))){
                     continue;
                 }
-                if(date.after(DateUtil.parseDate("20220620", DateUtil.yyyyMMdd))){
+               /* if(date.after(DateUtil.parseDate("20220620", DateUtil.yyyyMMdd))){
                     continue;
-                }
+                }*/
                 /*List<String> olds = Lists.newArrayList();
                 RedisMonior redisMonior = redisMoniorService.getByRedisKey(circulateInfo.getStockCode());
                 if(redisMonior!=null&&!redisMonior.getRedisValue().equals("test")){
