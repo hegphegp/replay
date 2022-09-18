@@ -91,12 +91,15 @@ public class ThsTest {
     private StockFactorTestOneComponent stockFactorTestOneComponent;
     @Autowired
     private StockFactorTestTwoComponent stockFactorTestTwoComponent;
+    @Autowired
+    private HighMarketExplorComponent highMarketExplorComponent;
 
 
     @Test
     public void test1() {
+        highMarketExplorComponent.bigMarketExplor();
         //stockFactorTestTwoComponent.factorTest();
-        stockFactorTestOneComponent.factorTest();
+        //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
         /*strongPlankDefineComponent.strongPlank();
         stockBlockLevelComponent.stockFirstBlockInfo();*/
