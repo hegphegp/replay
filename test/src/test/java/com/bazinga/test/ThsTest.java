@@ -91,6 +91,7 @@ public class ThsTest {
     private StockFactorTestTwoComponent stockFactorTestTwoComponent;
     @Autowired
     private HighMarketExplorComponent highMarketExplorComponent;
+    @Autowired
     private BlockFollowStaticCurrentHistoryComponent blockFollowStaticCurrentHistoryComponent;
 
 
