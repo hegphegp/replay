@@ -5,10 +5,8 @@ import com.bazinga.component.*;
 import com.bazinga.replay.component.*;
 import com.bazinga.replay.dto.BigExchangeTestBuyDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
-import com.bazinga.replay.model.CirculateInfo;
 import com.bazinga.replay.model.StockIndex;
 import com.bazinga.replay.model.TradeDatePool;
-import com.bazinga.replay.query.CirculateInfoQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.CirculateInfoService;
 import com.bazinga.replay.service.StockIndexService;
@@ -93,6 +91,7 @@ public class ThsTest {
     private StockFactorTestTwoComponent stockFactorTestTwoComponent;
     @Autowired
     private HighMarketExplorComponent highMarketExplorComponent;
+    private BlockFollowStaticCurrentHistoryComponent blockFollowStaticCurrentHistoryComponent;
 
 
     @Test
@@ -102,6 +101,9 @@ public class ThsTest {
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
         /*strongPlankDefineComponent.strongPlank();
+        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
+       /* strongPlankDefineComponent.strongPlank();
         stockBlockLevelComponent.stockFirstBlockInfo();*/
         //buyTwoToThreeComponent.buyTwoThree();
         //buyTwoToThreeComponent.buyTwoThree();
@@ -148,16 +150,7 @@ public class ThsTest {
 
     @Test
     public void test2() {
-        //stockKbarComponent.batchKbarDataInitToStock();
-
-        CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
-        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
-        int i= 0;
-        for (CirculateInfo item:circulateInfos){
-            i++;
-            System.out.println(i);
-            stockKbarComponent.batchKbarDataInitToStock(item.getStockCode(),item.getStockName(),350);
-        }
+        stockKbarComponent.batchKbarDataInit();
     }
 
 }
