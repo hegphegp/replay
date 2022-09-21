@@ -77,6 +77,8 @@ public class HighMarketExplorComponent {
             list.add(dto.isHighUpper());
             list.add(dto.getNextHighRate());
             list.add(dto.getNextLowRate());
+            list.add(dto.getNextOpenRate());
+            list.add(dto.getNextEndRate());
             list.add(dto.getBeforeRateDay3());
             list.add(dto.getBeforeRateDay5());
             list.add(dto.getBeforeRateDay10());
@@ -84,12 +86,25 @@ public class HighMarketExplorComponent {
             list.add(dto.getHighDay3());
             list.add(dto.getLowDay3());
             list.add(dto.getEndDay3());
+            list.add(dto.getLevel());
+            list.add(dto.getProfit1());
+            list.add(dto.getProfit2());
+            list.add(dto.getProfit3());
+            list.add(dto.getProfit4());
+            list.add(dto.getProfit5());
+            list.add(dto.getProfit6());
+            list.add(dto.getProfit7());
+            list.add(dto.getProfit8());
+            list.add(dto.getProfit9());
+            list.add(dto.getProfit10());
+            list.add(dto.getProfit11());
             Object[] objects = list.toArray();
             datas.add(objects);
         }
 
 
-        String[] rowNames = {"index","股票代码","股票名称","交易日期","买入日收盘涨幅","市值","是否触碰涨停","次日最高涨幅","次日最低涨幅","前3日涨幅","前5日涨幅","前10日涨幅","前5日最大涨幅","后3日最高涨幅","后3日最低涨幅","后3日收盘涨幅"};
+        String[] rowNames = {"index","股票代码","股票名称","交易日期","买入日收盘涨幅","市值","是否触碰涨停","次日最高涨幅","次日最低涨幅","次日开盘涨幅","次日收盘涨幅","前3日涨幅","前5日涨幅","前10日涨幅","前5日最大涨幅","后3日最高涨幅","后3日最低涨幅"
+                ,"后3日收盘涨幅","level","1个点盈利","2个点盈利","3个点盈利","4个点盈利","5个点盈利","6个点盈利","7个点盈利","8个点盈利","9个点盈利","10个点盈利","11个点盈利"};
         PoiExcelUtil poiExcelUtil = new PoiExcelUtil("大市值异动",rowNames,datas);
         try {
             poiExcelUtil.exportExcelUseExcelTitle("大市值异动");
@@ -100,24 +115,29 @@ public class HighMarketExplorComponent {
 
 
     public List<HighMarketExplorDTO> marketBuy(List<CirculateInfo> circulateInfos){
+        Map<String, String> stInfoMap = getStInfo();
+        Map<String, List<HighMarketExplorDTO>> map = new HashMap<>();
         List<HighMarketExplorDTO> buys = Lists.newArrayList();
         int i =0;
         for (CirculateInfo circulateInfo:circulateInfos){
             i++;
             System.out.println(circulateInfo.getStockCode()+"-----"+i);
-            if(buys.size()>=100){
+            /*if(buys.size()>=100){
                 return buys;
-            }
+            }*/
             List<StockKbar> stockKbars = getStockKBarsDelete30Days(circulateInfo.getStockCode());
             if(CollectionUtils.isEmpty(stockKbars)){
                 continue;
             }
             LimitQueue<StockKbar> limitQueue = new LimitQueue<>(3);
+            LimitQueue<StockKbar> limitQueue4 = new LimitQueue<>(3);
             StockKbar preKbar = null;
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
+                limitQueue4.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220501", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd))){
+                    preKbar = stockKbar;
                     continue;
                 }
                 if(preKbar!=null) {
@@ -125,7 +145,8 @@ public class HighMarketExplorComponent {
                     boolean highUpper = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getHighPrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
                     BigDecimal endRate = PriceUtil.getPricePercentRate(stockKbar.getAdjClosePrice().subtract(preKbar.getAdjClosePrice()),preKbar.getAdjClosePrice());
                     BigDecimal marketValue = (new BigDecimal(circulateInfo.getCirculate()).multiply(preKbar.getClosePrice())).divide(new BigDecimal("100000000"),2,BigDecimal.ROUND_HALF_UP);
-                    if(marketValue.compareTo(new BigDecimal("100"))>=0 && (!endUpper) && endRate.compareTo(new BigDecimal("5"))==1){
+                    boolean buyReason = getBuyReason(limitQueue4);
+                    if(buyReason && marketValue.compareTo(new BigDecimal("100"))>0){
                         HighMarketExplorDTO buyDTO = new HighMarketExplorDTO();
                         buyDTO.setStockCode(circulateInfo.getStockCode());
                         buyDTO.setStockName(circulateInfo.getStockName());
@@ -135,11 +156,43 @@ public class HighMarketExplorComponent {
                         buyDTO.setHighUpper(highUpper);
                         getBeforeRateInfo(stockKbar,buyDTO,stockKbars);
                         getNextRateInfo(stockKbar,buyDTO,stockKbars);
-                        buys.add(buyDTO);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("1"),1);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("2"),2);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("3"),3);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("4"),4);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("5"),5);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("6"),6);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("7"),7);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("8"),8);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("9"),9);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("10"),10);
+                        getProfitInfo(stockKbar,buyDTO,stockKbars,new BigDecimal("11"),11);
+                        List<HighMarketExplorDTO> dtos = map.get(buyDTO.getTradeDate());
+                        if(dtos==null){
+                            dtos = Lists.newArrayList();
+                            map.put(buyDTO.getTradeDate(),dtos);
+                        }
+                        String stString = stInfoMap.get(stockKbar.getKbarDate());
+                        if(!stString.contains(stockKbar.getStockCode())) {
+                            dtos.add(buyDTO);
+                        }else{
+                            System.out.println(stockKbar.getStockCode()+"=========="+stockKbar.getKbarDate());
+                        }
                     }
                 }
                 preKbar = stockKbar;
             }
+        }
+        for (String tradeDate:map.keySet()){
+            List<HighMarketExplorDTO> dtos = map.get(tradeDate);
+            List<HighMarketExplorDTO> sortDtos = HighMarketExplorDTO.endRateSort(dtos);
+            List<HighMarketExplorDTO> reverse = Lists.reverse(sortDtos);
+            int level = 0;
+            for (HighMarketExplorDTO rev:reverse){
+                level++;
+                rev.setLevel(level);
+            }
+            buys.addAll(reverse);
         }
         return buys;
     }
@@ -220,8 +273,12 @@ public class HighMarketExplorComponent {
             if(i==1){
                 BigDecimal highRate = PriceUtil.getPricePercentRate(stockKbar.getAdjHighPrice().subtract(buyKbar.getAdjClosePrice()), buyKbar.getAdjClosePrice());
                 BigDecimal lowRate = PriceUtil.getPricePercentRate(stockKbar.getAdjLowPrice().subtract(buyKbar.getAdjClosePrice()), buyKbar.getAdjClosePrice());
+                BigDecimal endRate = PriceUtil.getPricePercentRate(stockKbar.getAdjClosePrice().subtract(buyKbar.getAdjClosePrice()), buyKbar.getAdjClosePrice());
+                BigDecimal openRate = PriceUtil.getPricePercentRate(stockKbar.getAdjOpenPrice().subtract(buyKbar.getAdjClosePrice()), buyKbar.getAdjClosePrice());
                 dto.setNextHighRate(highRate);
                 dto.setNextLowRate(lowRate);
+                dto.setNextOpenRate(openRate);
+                dto.setNextEndRate(endRate);
             }
             if(i>=1 && i<=3){
                 BigDecimal highRate = PriceUtil.getPricePercentRate(stockKbar.getAdjHighPrice().subtract(buyKbar.getAdjClosePrice()), buyKbar.getAdjClosePrice());
@@ -245,31 +302,89 @@ public class HighMarketExplorComponent {
         }
     }
 
-
-
-
-    public void getRateSpeed(LimitQueue<ThirdSecondTransactionDataDTO> limitQueue,BigDecimal preEndPrice,StrongPlankDefineTestDTO buyDTO){
-        if(limitQueue.size()<2){
-            return;
-        }
-        Iterator<ThirdSecondTransactionDataDTO> iterator = limitQueue.iterator();
-        BigDecimal lowPrice = null;
+    public void  getProfitInfo(StockKbar buyKbar,HighMarketExplorDTO dto,List<StockKbar> stockKbars,BigDecimal sellRate,int rateType){
+        boolean flag = false;
         int i = 0;
-        int index = 0;
-        while (iterator.hasNext()){
-            index++;
-            i++;
-            ThirdSecondTransactionDataDTO next = iterator.next();
-            if(index==limitQueue.size()){
-                BigDecimal plankSpeed = PriceUtil.getPricePercentRate(next.getTradePrice().subtract(lowPrice), preEndPrice);
-                buyDTO.setHeartTimes(i);
-                buyDTO.setSpeedRate(plankSpeed);
+        BigDecimal profit = null;
+        for (StockKbar stockKbar:stockKbars){
+            if(flag){
+                i++;
             }
-            if(lowPrice==null || next.getTradePrice().compareTo(lowPrice)<=0){
-                lowPrice = next.getTradePrice();
-                i=0;
+            if(i>=1 && i<=3){
+                BigDecimal highRate = PriceUtil.getPricePercentRate(stockKbar.getAdjHighPrice().subtract(buyKbar.getAdjClosePrice()), buyKbar.getAdjClosePrice());
+                BigDecimal openRate = PriceUtil.getPricePercentRate(stockKbar.getAdjOpenPrice().subtract(buyKbar.getAdjClosePrice()), buyKbar.getAdjClosePrice());
+                if(openRate.compareTo(sellRate)>=0){
+                    profit = openRate;
+                    break;
+                }
+                if(highRate.compareTo(sellRate)>=0){
+                    profit = sellRate;
+                    break;
+                }
+            }
+            if(i==3){
+                BigDecimal endRate = PriceUtil.getPricePercentRate(stockKbar.getAdjClosePrice().subtract(buyKbar.getAdjClosePrice()), buyKbar.getAdjClosePrice());
+                profit = endRate;
+                break;
+            }
+            if(stockKbar.getKbarDate().equals(buyKbar.getKbarDate())){
+                flag = true;
             }
         }
+        if(profit!=null){
+            if(rateType==1){
+                dto.setProfit1(profit);
+            }else if(rateType == 2){
+                dto.setProfit2(profit);
+            }else if(rateType == 3){
+                dto.setProfit3(profit);
+            }else if(rateType == 4){
+                dto.setProfit4(profit);
+            }else if(rateType == 5){
+                dto.setProfit5(profit);
+            }else if(rateType ==6){
+                dto.setProfit6(profit);
+            }else if(rateType == 7){
+                dto.setProfit7(profit);
+            }else if(rateType == 8){
+                dto.setProfit8(profit);
+            }else if(rateType ==9){
+                dto.setProfit9(profit);
+            }else if(rateType == 10){
+                dto.setProfit10(profit);
+            }else if(rateType == 11){
+                dto.setProfit11(profit);
+            }
+        }
+    }
+
+
+
+
+    public boolean getBuyReason(LimitQueue<StockKbar> limitQueue){
+        if(limitQueue.size()<3){
+            return false;
+        }
+        Iterator<StockKbar> iterator = limitQueue.iterator();
+        StockKbar preKbar = null;
+        while (iterator.hasNext()){
+            StockKbar next = iterator.next();
+            if(preKbar!=null){
+                boolean upperFlag = PriceUtil.isHistoryUpperPrice(next.getStockCode(), next.getHighPrice(), preKbar.getClosePrice(), next.getKbarDate());
+                BigDecimal endRate = PriceUtil.getPricePercentRate(next.getAdjClosePrice().subtract(preKbar.getAdjClosePrice()), preKbar.getAdjClosePrice());
+                if(upperFlag){
+                    return false;
+                }
+                if(endRate.compareTo(new BigDecimal("2"))==-1){
+                    return false;
+                }
+                if(endRate.compareTo(new BigDecimal("5"))==1){
+                    return false;
+                }
+            }
+            preKbar = next;
+        }
+        return true;
     }
 
 
@@ -281,6 +396,17 @@ public class HighMarketExplorComponent {
         query.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(query);
         return tradeDatePools;
+    }
+
+    public Map<String,String> getStInfo(){
+        Map<String, String> map = new HashMap<>();
+        HistoryBlockStocksQuery query = new HistoryBlockStocksQuery();
+        query.setBlockCode("885699");
+        List<HistoryBlockStocks> historyBlockStocks = historyBlockStocksService.listByCondition(query);
+        for (HistoryBlockStocks stocks:historyBlockStocks){
+            map.put(stocks.getTradeDate(),stocks.getStocks());
+        }
+        return map;
     }
 
 
