@@ -101,8 +101,8 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        //tenDayExplorComponent.tenDayExplor();
-        //realMoneyComponent.realMoneyExplor();
+        tenDayExplorComponent.tenDayExplor();
+        realMoneyComponent.realMoneyExplor();
         //highMarketExplorComponent.bigMarketExplor();
         //stockFactorTestTwoComponent.factorTest();
         //stockFactorTestOneComponent.factorTest();
