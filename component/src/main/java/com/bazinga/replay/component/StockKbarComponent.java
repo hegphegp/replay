@@ -302,7 +302,7 @@ public class StockKbarComponent {
             query.setStockCode(item.getStockCode());
             int count = stockKbarService.countByCondition(query);
             if (count == 0) {
-                batchInitAndSaveKbarDate(item.getStockCode(), item.getStockName(), 300);
+                batchInitAndSaveKbarDate(item.getStockCode(), item.getStockName(), 900);
             }
         });
     }

@@ -82,15 +82,36 @@ public class ThsTest {
     @Autowired
     private StrongPlankDefineComponent strongPlankDefineComponent;
     @Autowired
+    private FirstPlankBuyTimeLevelComponent firstPlankBuyTimeLevelComponent;
+    @Autowired
+    private  CirculateInfoService circulateInfoService;
+    @Autowired
+    private StockFactorTestOneComponent stockFactorTestOneComponent;
+    @Autowired
+    private StockFactorTestTwoComponent stockFactorTestTwoComponent;
+    @Autowired
+    private HighMarketExplorComponent highMarketExplorComponent;
+    @Autowired
     private BlockFollowStaticCurrentHistoryComponent blockFollowStaticCurrentHistoryComponent;
+    @Autowired
+    private RealMoneyComponent realMoneyComponent;
+    @Autowired
+    private TenDayExplorComponent tenDayExplorComponent;
 
 
     @Test
     public void test1() {
+        tenDayExplorComponent.tenDayExplor();
+        realMoneyComponent.realMoneyExplor();
+        //highMarketExplorComponent.bigMarketExplor();
+        //stockFactorTestTwoComponent.factorTest();
+        //stockFactorTestOneComponent.factorTest();
+        //firstPlankBuyTimeLevelComponent.strongPlank();
+       // strongPlankDefineComponent.strongPlank();
         blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
        /* strongPlankDefineComponent.strongPlank();
-        stockBlockLevelComponent.stockFirstBlockInfo();*/
+        stockBlockLevelComponent.stockFirstBlockInfo();
         //buyTwoToThreeComponent.buyTwoThree();
         //buyTwoToThreeComponent.buyTwoThree();
         //buyGroundGatherComponent.gatherGround();
