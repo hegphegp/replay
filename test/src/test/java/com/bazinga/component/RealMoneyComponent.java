@@ -92,6 +92,47 @@ public class RealMoneyComponent {
         }
     }
 
+    public Map<String, List<String>> marketBuyList(){
+        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
+        Map<String, String> stInfoMap = getStInfo();
+        Map<String, List<String>> map = new HashMap<>();
+        int i =0;
+        for (CirculateInfo circulateInfo:circulateInfos){
+            i++;
+            System.out.println(circulateInfo.getStockCode()+"-----"+i);
+            List<StockKbar> stockKbars = getStockKBarsDelete30Days(circulateInfo.getStockCode());
+            if(CollectionUtils.isEmpty(stockKbars)){
+                continue;
+            }
+            LimitQueue<StockKbar> limitQueue10 = new LimitQueue<>(11);
+            StockKbar preKbar = null;
+            for (StockKbar stockKbar:stockKbars){
+                limitQueue10.offer(stockKbar);
+                Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
+                if(date.before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd))){
+                    preKbar = stockKbar;
+                    continue;
+                }
+                if(preKbar!=null) {
+                    BigDecimal highMoney = getHighMoneyTwo(limitQueue10);
+                    if(highMoney!=null){
+                        String stString = stInfoMap.get(stockKbar.getKbarDate());
+                        if(!stString.contains(stockKbar.getStockCode())) {
+                            List<String> stocks = map.get(stockKbar.getKbarDate());
+                            if(stocks==null){
+                                stocks = new ArrayList<>();
+                                map.put(stockKbar.getKbarDate(),stocks);
+                            }
+                            stocks.add(stockKbar.getStockCode());
+                        }
+                    }
+                }
+                preKbar = stockKbar;
+            }
+        }
+        return map;
+    }
+
 
     public Map<String, RealMoneyDTO> marketBuy(List<CirculateInfo> circulateInfos){
         Map<String, String> stInfoMap = getStInfo();
