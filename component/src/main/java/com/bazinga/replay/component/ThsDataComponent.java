@@ -73,12 +73,6 @@ public class ThsDataComponent {
                 System.out.println(blockCode+"===========结束了"+i);
             //});
         }
-        try{
-            Thread.sleep(100000000l);
-        }catch (Exception e){
-
-        }
-
         thsLoginOut();
     }
     public void saveBlockStocks(String blockCode,List<HistoryBlockStocks> historyBlockStocks) {

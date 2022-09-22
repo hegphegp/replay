@@ -138,6 +138,7 @@ public class BaseTestCase {
         stockAttributeReplayComponent.saveStockAttributeReplay(date);
         stockPlankDailyComponent.handleStopTradeStock(date);
         stockBollingComponent.calCurrentDayBoll(date);
+        historyBlockInfoComponent.initHistoryBlockInfo();
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
     }

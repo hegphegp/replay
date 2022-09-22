@@ -95,17 +95,20 @@ public class ThsTest {
     private BlockFollowStaticCurrentHistoryComponent blockFollowStaticCurrentHistoryComponent;
     @Autowired
     private RealMoneyComponent realMoneyComponent;
+    @Autowired
+    private TenDayExplorComponent tenDayExplorComponent;
 
 
     @Test
     public void test1() {
-        realMoneyComponent.realMoneyExplor();
+        //tenDayExplorComponent.tenDayExplor();
+        //realMoneyComponent.realMoneyExplor();
         //highMarketExplorComponent.bigMarketExplor();
         //stockFactorTestTwoComponent.factorTest();
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
-        /*strongPlankDefineComponent.strongPlank();
-        blockFollowStaticCurrentComponent.blockFollowStaticInfo();*/
+       // strongPlankDefineComponent.strongPlank();
+        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
        /* strongPlankDefineComponent.strongPlank();
         stockBlockLevelComponent.stockFirstBlockInfo();
