@@ -6,10 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
 import com.bazinga.replay.dto.BlockStockDTO;
-import com.bazinga.replay.model.HistoryBlockInfo;
-import com.bazinga.replay.model.HistoryBlockStocks;
-import com.bazinga.replay.model.StockIndex;
-import com.bazinga.replay.model.TradeDatePool;
+import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.HistoryBlockInfoQuery;
 import com.bazinga.replay.query.StockIndexQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
@@ -47,6 +44,8 @@ public class ThsStockIndexComponent {
     private StockIndexService stockIndexService;
     @Autowired
     private HistoryBlockInfoService historyBlockInfoService;
+    @Autowired
+    private ThsBlockKbarComponent thsBlockKbarComponent;
 
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
@@ -56,7 +55,7 @@ public class ThsStockIndexComponent {
     public void shMACDIndex(){
         TradeDatePoolQuery query = new TradeDatePoolQuery();
         query.setTradeDateFrom(DateUtil.parseDate("20180101",DateUtil.yyyyMMdd));
-        query.setTradeDateTo(DateUtil.parseDate("20220523",DateUtil.yyyyMMdd));
+        query.setTradeDateTo(new Date());
         query.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(query);
         List<String> list = Lists.newArrayList();
@@ -64,10 +63,18 @@ public class ThsStockIndexComponent {
             String tradeDateStr = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyy_MM_dd);
             list.add(tradeDateStr);
         }
-        List<StockIndex> szIndexs = thsDataComponent.initStockIndex("000001.SH", "上证指数", list);
+        String stockCode = "399300";
+        String stockName = "沪深300";
+        List<StockIndex> szIndexs = thsDataComponent.initStockIndex(stockCode+".SZ", stockName, list);
+        int ret = thsDataComponent.thsLogin();
+        int i = 0;
         for (StockIndex stockIndex:szIndexs){
+            i++;
+            System.out.println(stockIndex.getKbarDate()+"========"+i);
+            getStockIndex(stockCode,stockName,stockIndex.getKbarDate(),stockIndex,".SZ");
             stockIndexService.save(stockIndex);
         }
+        thsDataComponent.thsLoginOut();
     }
 
     /**
@@ -118,6 +125,55 @@ public class ThsStockIndexComponent {
         }
 
     }
+
+    public void getStockIndex(String blockCode,String blockName,String tradeDate,StockIndex stockIndex,String diff){
+        System.out.println(blockCode+"_"+blockName+"_"+tradeDate);
+        String quote_str = JDIBridge.THS_BasicData(blockCode+diff, "ths_bias_index;ths_macd_index", tradeDate+",6,100;"+tradeDate+",26,12,9,102,100");
+        if(!StringUtils.isEmpty(quote_str)){
+            JSONObject jsonObject = JSONObject.parseObject(quote_str);
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            List<BigDecimal> biass = tableInfo.getJSONArray("ths_bias_index").toJavaList(BigDecimal.class);
+            List<BigDecimal> macds = tableInfo.getJSONArray("ths_macd_index").toJavaList(BigDecimal.class);
+            BigDecimal bias = biass.get(0);
+            BigDecimal macd = macds.get(0);
+            stockIndex.setBias6(bias);
+            //stockIndex.setMacd(macd);
+        }
+        String quote_str1 = JDIBridge.THS_BasicData(blockCode+diff, "ths_bias_index", tradeDate+",12,100");
+        if(!StringUtils.isEmpty(quote_str1)){
+            JSONObject jsonObject = JSONObject.parseObject(quote_str1);
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            List<BigDecimal> biass = tableInfo.getJSONArray("ths_bias_index").toJavaList(BigDecimal.class);
+            BigDecimal bias = biass.get(0);
+            stockIndex.setBias12(bias);
+        }
+
+        String quote_str2 = JDIBridge.THS_BasicData(blockCode+diff, "ths_bias_index", tradeDate+",24,100");
+        if(!StringUtils.isEmpty(quote_str2)){
+            JSONObject jsonObject = JSONObject.parseObject(quote_str2);
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            List<BigDecimal> biass = tableInfo.getJSONArray("ths_bias_index").toJavaList(BigDecimal.class);
+            BigDecimal bias = biass.get(0);
+            stockIndex.setBias24(bias);
+        }
+
+    }
+
 
 
 }
