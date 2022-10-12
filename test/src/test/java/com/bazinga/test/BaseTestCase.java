@@ -132,6 +132,7 @@ public class BaseTestCase {
         stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
         badPlankComponent.badPlankJudge(date);
         stockPlankDailyComponent.superFactor(date);
         stockKbarComponent.calCurrentDayAvgLine(date);
@@ -191,14 +192,14 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        Date date = new Date();
+        /*Date date = new Date();
         long time = date.getTime();
         System.out.println(time);
         List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("002121", "20220610");
         List<ThirdSecondTransactionDataDTO> data1 = currentDayTransactionDataComponent.getData("002121");
-        System.out.println(111);
+        System.out.println(111);*/
         //synInfoComponent.synHSTECH();
-        //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300",1500);
         /*historyBlockInfoComponent.initHistoryBlockInfo();
         stockKbarComponent.batchKbarDataInit();
        // stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
