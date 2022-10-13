@@ -101,13 +101,14 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        tenDayExplorComponent.tenDayExplor();
-        realMoneyComponent.realMoneyExplor();
+        //tenDayExplorComponent.tenDayExplor();
+        //realMoneyComponent.realMoneyExplor();
         //highMarketExplorComponent.bigMarketExplor();
         //stockFactorTestTwoComponent.factorTest();
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
        // strongPlankDefineComponent.strongPlank();
+        //用于板块跟随回测
         blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
        /* strongPlankDefineComponent.strongPlank();

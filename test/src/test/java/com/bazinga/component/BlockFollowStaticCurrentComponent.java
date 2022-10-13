@@ -83,7 +83,7 @@ public class BlockFollowStaticCurrentComponent {
             if(byRedisKey!=null){
                 continue;
             }
-            if(tradeDate.equals("20220920")){
+            if(tradeDate.equals("20221011")){
                 System.out.println(11111111);
             }else{
                 continue;
@@ -113,7 +113,7 @@ public class BlockFollowStaticCurrentComponent {
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            boolean before = tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220915", DateUtil.yyyyMMdd));
+            boolean before = tradeDatePool.getTradeDate().before(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd));
             boolean after = tradeDatePool.getTradeDate().after(DateUtil.parseDate("20230101", DateUtil.yyyyMMdd));
             if((!before)&&(!after)) {
                 String format = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
@@ -197,7 +197,7 @@ public class BlockFollowStaticCurrentComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220914", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220901", DateUtil.yyyyMMdd))){
                     continue;
                 }
                /* if(date.after(DateUtil.parseDate("20220620", DateUtil.yyyyMMdd))){
