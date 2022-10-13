@@ -108,7 +108,7 @@ public class ThsTest {
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
        // strongPlankDefineComponent.strongPlank();
-        //用于板块跟随回测
+        //用于板块跟随回测 用于线上使用
         blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
        /* strongPlankDefineComponent.strongPlank();

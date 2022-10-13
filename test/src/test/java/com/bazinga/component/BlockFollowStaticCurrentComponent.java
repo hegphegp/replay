@@ -83,11 +83,11 @@ public class BlockFollowStaticCurrentComponent {
             if(byRedisKey!=null){
                 continue;
             }
-            if(tradeDate.equals("20221011")){
+            /*if(tradeDate.equals("20221012")){
                 System.out.println(11111111);
             }else{
                 continue;
-            }
+            }*/
 
             THREAD_POOL_QUOTE.execute(() ->{
                 List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
@@ -197,7 +197,7 @@ public class BlockFollowStaticCurrentComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220901", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20220925", DateUtil.yyyyMMdd))){
                     continue;
                 }
                /* if(date.after(DateUtil.parseDate("20220620", DateUtil.yyyyMMdd))){

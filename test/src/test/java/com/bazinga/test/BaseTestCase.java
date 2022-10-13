@@ -199,7 +199,7 @@ public class BaseTestCase {
         List<ThirdSecondTransactionDataDTO> data1 = currentDayTransactionDataComponent.getData("002121");
         System.out.println(111);*/
         //synInfoComponent.synHSTECH();
-        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300",1500);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
         /*historyBlockInfoComponent.initHistoryBlockInfo();
         stockKbarComponent.batchKbarDataInit();
        // stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
