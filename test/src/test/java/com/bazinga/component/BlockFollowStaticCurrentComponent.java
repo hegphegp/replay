@@ -197,12 +197,12 @@ public class BlockFollowStaticCurrentComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220925", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20190101", DateUtil.yyyyMMdd))){
                     continue;
                 }
-               /* if(date.after(DateUtil.parseDate("20220620", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20191231", DateUtil.yyyyMMdd))){
                     continue;
-                }*/
+                }
                 /*List<String> olds = Lists.newArrayList();
                 RedisMonior redisMonior = redisMoniorService.getByRedisKey(circulateInfo.getStockCode());
                 if(redisMonior!=null&&!redisMonior.getRedisValue().equals("test")){
