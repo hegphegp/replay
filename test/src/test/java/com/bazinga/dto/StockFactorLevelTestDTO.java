@@ -15,6 +15,7 @@ public class StockFactorLevelTestDTO {
     private BigDecimal marketValue;
     private String tradeDate;
     private Integer level;
+    private Integer marketValueLevel;
     private BigDecimal openRate;
     private BigDecimal endRate;
     private BigDecimal beforeRateDay3;

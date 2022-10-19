@@ -104,12 +104,12 @@ public class ThsTest {
         //tenDayExplorComponent.tenDayExplor();
         //realMoneyComponent.realMoneyExplor();
         //highMarketExplorComponent.bigMarketExplor();
-        //stockFactorTestTwoComponent.factorTest();
+        stockFactorTestTwoComponent.factorTest();
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
        // strongPlankDefineComponent.strongPlank();
         //用于板块跟随回测 用于线上使用
-        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
        /* strongPlankDefineComponent.strongPlank();
         stockBlockLevelComponent.stockFirstBlockInfo();

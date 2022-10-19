@@ -200,7 +200,7 @@ public class BaseTestCase {
         System.out.println(111);*/
         //synInfoComponent.synHSTECH();
         stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",1500);
-        //stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
         /*historyBlockInfoComponent.initHistoryBlockInfo();
         stockKbarComponent.batchKbarDataInit();
        // stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
