@@ -104,7 +104,7 @@ public class ThsTest {
         //tenDayExplorComponent.tenDayExplor();
         //realMoneyComponent.realMoneyExplor();
         //highMarketExplorComponent.bigMarketExplor();
-        stockFactorTestTwoComponent.factorTest();
+        //stockFactorTestTwoComponent.factorTest();
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
        // strongPlankDefineComponent.strongPlank();
