@@ -20,7 +20,7 @@
         <!--<task:scheduled ref="stockPlankDailyJob" method="execute" cron="00 40 22 * * ?"/>-->
 
         <task:scheduled ref="newStockJob" method="execute" cron="00 00 23 * * ?"/>
-        <task:scheduled ref="dragonTigerOpenBuyJob" method="execute" cron="31 26 09 * * ?"/>
+        <task:scheduled ref="stockKbarCurrentJob" method="execute" cron="30 25 09 * * ?"/>
 
     </task:scheduled-tasks>
 

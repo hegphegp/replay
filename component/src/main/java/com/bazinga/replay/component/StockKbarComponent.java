@@ -193,6 +193,7 @@ public class StockKbarComponent {
                     stockKbar.setAdjLowPrice(stockKbar.getLowPrice());
                     StockKbar byUniqueKey = stockKbarService.getByUniqueKey(stockKbar.getUniqueKey());
                     if (byUniqueKey == null) {
+                        log.info("指数k线跑出来了 stockCode：{} stockKar：{}",stockKbar.getStockCode(),JSONObject.toJSONString(stockKbar));
                         stockKbarService.save(stockKbar);
                     }
                 }
