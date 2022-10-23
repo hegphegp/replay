@@ -98,6 +98,8 @@ public class BaseTestCase {
     private HistoryBlockInfoComponent historyBlockInfoComponent;
     @Autowired
     private CurrentDayTransactionDataComponent currentDayTransactionDataComponent;
+    @Autowired
+    private ThsStockIndexComponent thsStockIndexComponent;
 
 
     @Test
@@ -201,6 +203,9 @@ public class BaseTestCase {
         //synInfoComponent.synHSTECH();
         stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",1500);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
+        String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
+        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"399300","沪深300",".SZ");
+        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");
         /*historyBlockInfoComponent.initHistoryBlockInfo();
         stockKbarComponent.batchKbarDataInit();
        // stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);

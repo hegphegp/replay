@@ -52,9 +52,9 @@ public class ThsStockIndexComponent {
     /**
      * 上证macd diff dea
      */
-    public void shMACDIndex(){
+    public void shMACDIndex(String tradeDate,String stockCode,String stockName,String diff){
         TradeDatePoolQuery query = new TradeDatePoolQuery();
-        query.setTradeDateFrom(DateUtil.parseDate("20180101",DateUtil.yyyyMMdd));
+        query.setTradeDateFrom(DateUtil.parseDate(tradeDate,DateUtil.yyyyMMdd));
         query.setTradeDateTo(new Date());
         query.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(query);
@@ -63,15 +63,13 @@ public class ThsStockIndexComponent {
             String tradeDateStr = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyy_MM_dd);
             list.add(tradeDateStr);
         }
-        String stockCode = "399300";
-        String stockName = "沪深300";
-        List<StockIndex> szIndexs = thsDataComponent.initStockIndex(stockCode+".SZ", stockName, list);
+        List<StockIndex> szIndexs = thsDataComponent.initStockIndex(stockCode+diff, stockName, list);
         int ret = thsDataComponent.thsLogin();
         int i = 0;
         for (StockIndex stockIndex:szIndexs){
             i++;
             System.out.println(stockIndex.getKbarDate()+"========"+i);
-            getStockIndex(stockCode,stockName,stockIndex.getKbarDate(),stockIndex,".SZ");
+            getStockIndex(stockCode,stockName,stockIndex.getKbarDate(),stockIndex,diff);
             stockIndexService.save(stockIndex);
         }
         thsDataComponent.thsLoginOut();

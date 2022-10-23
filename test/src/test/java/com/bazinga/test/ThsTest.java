@@ -101,6 +101,8 @@ public class ThsTest {
 
     @Test
     public void test1() {
+        thsStockIndexComponent.shMACDIndex("20221021","399300","沪深300",".SZ");
+        thsStockIndexComponent.shMACDIndex("20221021","000001","上证指数",".SH");
         //tenDayExplorComponent.tenDayExplor();
         //realMoneyComponent.realMoneyExplor();
         //highMarketExplorComponent.bigMarketExplor();
