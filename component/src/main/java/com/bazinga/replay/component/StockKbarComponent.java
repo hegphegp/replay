@@ -195,7 +195,6 @@ public class StockKbarComponent {
                     if (byUniqueKey == null) {
                         stockKbarService.save(stockKbar);
                     }
-
                 }
             }
         }catch (Exception e){
