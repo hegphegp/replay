@@ -14,6 +14,12 @@ public class IndexController {
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     public String index() {
+
+        return "index";
+    }
+    @RequestMapping(value = "/haha", method = RequestMethod.GET)
+    public String haha() {
+        System.out.println("11111");
         return "index";
     }
 }
