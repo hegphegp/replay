@@ -201,11 +201,11 @@ public class BaseTestCase {
         List<ThirdSecondTransactionDataDTO> data1 = currentDayTransactionDataComponent.getData("002121");
         System.out.println(111);*/
         //synInfoComponent.synHSTECH();
-        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",1);
-        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1);
-       /* String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
+        /*stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);*/
+        String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
         thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"399300","沪深300",".SZ");
-        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");*/
+        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");
         /*historyBlockInfoComponent.initHistoryBlockInfo();
         stockKbarComponent.batchKbarDataInit();
        // stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
