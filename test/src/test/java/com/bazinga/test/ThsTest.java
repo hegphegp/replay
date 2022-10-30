@@ -103,14 +103,14 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        indexKbarCurrentComponent.indexKbarCurrent();
+        //indexKbarCurrentComponent.indexKbarCurrent();
         /*thsStockIndexComponent.shMACDIndex("20221021","3993ok
         00","沪深300",".SZ");
         thsStockIndexComponent.shMACDIndex("20221021","000001","上证指数",".SH");*/
         //tenDayExplorComponent.tenDayExplor();
         //realMoneyComponent.realMoneyExplor();
         //highMarketExplorComponent.bigMarketExplor();
-        //stockFactorTestTwoComponent.factorTest();
+        stockFactorTestTwoComponent.factorTest();
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
        // strongPlankDefineComponent.strongPlank();

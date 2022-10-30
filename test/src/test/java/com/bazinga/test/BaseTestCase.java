@@ -293,7 +293,7 @@ public class BaseTestCase {
     @Test
     public void test3() {
         //stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
-        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300",1200);
+        //stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300",1200);
         //stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
         //stockKbarComponent.initSpecialStockAndSaveKbarData("399001","深圳成指",1500);
         //stockKbarComponent.calCurrentDayAvgLine(DateUtil.parseDate("2022-04-18 15:30:30",DateUtil.DEFAULT_FORMAT));
@@ -332,7 +332,7 @@ public class BaseTestCase {
         //planksInfoComponent.planksInfo(DateUtil.parseDate("20211206",DateUtil.yyyyMMdd));
         //stockPlankDailyComponent.realPlanks(new Date());
 
-        //stockKbarComponent.batchKbarDataInit();
+        stockKbarComponent.batchKbarDataInit();
 
     }
 
