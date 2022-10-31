@@ -112,10 +112,10 @@ public class StockFactorTestTwoComponent {
         List<StockFactorLevelTestDTO> buys = Lists.newArrayList();
         int i =0;
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220930", DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20211231", DateUtil.yyyyMMdd))){
                 continue;
             }
             i++;
@@ -153,7 +153,7 @@ public class StockFactorTestTwoComponent {
                         buyDTO.setPlanks(planks);
                         buyDTO.setEndRate(endRate);
                         buyDTO.setMarketValue(marketValue);
-                        buyDTO.setIndex2a(stockFactor.getIndex4());
+                        buyDTO.setIndex2a(stockFactor.getIndex6());
                         buyDTO.setMarketValueLevel(marketSortMap.get(circulateInfo.getStockCode()));
                         StockKbar nextKbar = stockKbarService.getByUniqueKey(circulateInfo.getStockCode() + "_" + DateUtil.format(nextDate, DateUtil.yyyyMMdd));
                         if(nextKbar!=null){
@@ -562,7 +562,7 @@ public class StockFactorTestTwoComponent {
         try {
             StockFactorQuery query = new StockFactorQuery();
             query.setKbarDate(tradeDateString);
-            query.addOrderBy("index4", Sort.SortType.DESC);
+            query.addOrderBy("index6", Sort.SortType.DESC);
             query.setLimit(200);
             List<StockFactor> stockFactors = stockFactorService.listByCondition(query);
             return stockFactors;
