@@ -163,7 +163,7 @@ public class BaseTestCase {
 
     @Test
     public void test5() {
-        synInfoComponent.synTbondInfo();
+        synInfoComponent.synZiDingYiInfo();
     }
 
     @Test
