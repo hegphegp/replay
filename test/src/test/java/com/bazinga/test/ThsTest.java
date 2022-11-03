@@ -99,10 +99,13 @@ public class ThsTest {
     private TenDayExplorComponent tenDayExplorComponent;
     @Autowired
     private IndexKbarCurrentComponent indexKbarCurrentComponent;
+    @Autowired
+    private StockFactorTestThreeComponent stockFactorTestThreeComponent;
 
 
     @Test
     public void test1() {
+        stockFactorTestThreeComponent.factorTest();
         //indexKbarCurrentComponent.indexKbarCurrent();
         /*thsStockIndexComponent.shMACDIndex("20221021","3993ok
         00","沪深300",".SZ");
@@ -110,7 +113,7 @@ public class ThsTest {
         //tenDayExplorComponent.tenDayExplor();
         //realMoneyComponent.realMoneyExplor();
         //highMarketExplorComponent.bigMarketExplor();
-        stockFactorTestTwoComponent.factorTest();
+        //stockFactorTestTwoComponent.factorTest();
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
        // strongPlankDefineComponent.strongPlank();

@@ -91,27 +91,30 @@ public class StockFactorTestThreeComponent {
         }
 
 
-        String[] rowNames = {"index","股票代码","股票名称","交易日期","市值","当日收盘涨幅","次日开盘涨幅","次日35之前最低涨幅","次日35之前最搞涨幅","排名","市值排名","连板高度","index1"};
-        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("美国往事",rowNames,datas);
+        String[] rowNames = {"index","股票代码","股票名称","交易日期","因子巨变日期","市值","收盘涨幅","开盘涨幅","因子值","前一日因子值","连板","3日涨幅","5日涨幅","10日涨幅","盈利"};
+        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("因子巨变",rowNames,datas);
         try {
-            poiExcelUtil.exportExcelUseExcelTitle("美国往事");
+            poiExcelUtil.exportExcelUseExcelTitle("因子巨变");
         }catch (Exception e){
             log.info(e.getMessage());
         }
     }
     public List<StockFactorThreeTestDTO> factorBigChange(List<CirculateInfo> circulateInfos){
         List<StockFactorThreeTestDTO> list = Lists.newArrayList();
+        int h = 0;
         for (CirculateInfo circulateInfo:circulateInfos){
+            h++;
+            System.out.println(circulateInfo.getStockCode()+"==="+h);
             List<StockFactorThreeTestDTO> buys = Lists.newArrayList();
             List<StockFactor> stockFactors = getStockFactor(circulateInfo.getStockCode());
             BigDecimal preFactorValue = null;
             for (StockFactor factor:stockFactors){
-                if(preFactorValue!=null&&factor.getIndex1()!=null&&factor.getIndex1().subtract(new BigDecimal("0.0005")).compareTo(preFactorValue)>=0){
+                if(preFactorValue!=null&&factor.getIndex6()!=null&&factor.getIndex6().subtract(new BigDecimal("0.0005")).compareTo(preFactorValue)>=0){
                     StockFactorThreeTestDTO dto = new StockFactorThreeTestDTO();
                     dto.setStockCode(factor.getStockCode());
                     dto.setStockName(factor.getStockName());
                     dto.setFactorDate(factor.getKbarDate());
-                    dto.setFactorValue(factor.getIndex1());
+                    dto.setFactorValue(factor.getIndex6());
                     dto.setPreFactorValue(preFactorValue);
                     Date factorDate = DateUtil.parseDate(dto.getFactorDate(), DateUtil.yyyy_MM_dd);
                     Date firstDate = DateUtil.parseDate("20210101", DateUtil.yyyyMMdd);
@@ -119,7 +122,7 @@ public class StockFactorTestThreeComponent {
                         buys.add(dto);
                     }
                 }
-                preFactorValue = factor.getIndex1();
+                preFactorValue = factor.getIndex6();
             }
             if(buys.size()==0){
                 continue;
@@ -134,6 +137,7 @@ public class StockFactorTestThreeComponent {
                     list.add(buy);
                 }
             }
+
         }
         return list;
     }
@@ -156,6 +160,7 @@ public class StockFactorTestThreeComponent {
                         buy.setTradeDate(stockKbar.getKbarDate());
                         BigDecimal profit = calEndNoPlankProfit(stockKbars, stockKbar);
                         buy.setProfit(profit);
+                        break;
                     }
                 }
                 if(stockKbar.getKbarDate().equals(yyyymmdd)&&preKbar!=null) {
@@ -261,6 +266,7 @@ public class StockFactorTestThreeComponent {
     }
 
     public void calBeforeRate(List<StockKbar> stockKbars,StockFactorThreeTestDTO buy){
+        String yyyymmdd = DateUtil.dateStringFormat(buy.getFactorDate(), DateUtil.yyyy_MM_dd, DateUtil.yyyyMMdd);
         List<StockKbar> reverse = Lists.reverse(stockKbars);
         boolean flag = false;
         int i=0;
@@ -281,7 +287,7 @@ public class StockFactorTestThreeComponent {
                 BigDecimal rate = PriceUtil.getPricePercentRate(endStockKbar.getAdjClosePrice().subtract(stockKbar.getAdjClosePrice()), stockKbar.getAdjClosePrice());
                 buy.setBeforeRateDay10(rate);
             }
-            if(buy.getFactorDate().equals(stockKbar.getKbarDate())){
+            if(yyyymmdd.equals(stockKbar.getKbarDate())){
                 flag = true;
                 endStockKbar = stockKbar;
             }
