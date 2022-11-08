@@ -20,6 +20,16 @@ public class StockUtils {
         }
         return null;
     }
+    public static ExchangeId getIndexExchangeId(String stockCode) {
+        String market = getIndexMarket(stockCode);
+        if (market.startsWith("SZ.")) {
+            return ExchangeId.SZ;
+        }
+        if (market.startsWith("SH.")) {
+            return ExchangeId.SH;
+        }
+        return null;
+    }
 
     public static String getMarket(String stockCode) {
         if (StringUtils.isNotBlank(stockCode)) {
@@ -28,6 +38,70 @@ public class StockUtils {
             }
             if (stockCode.startsWith("200")) {
                 return "SZ.B";
+            }
+            if (stockCode.startsWith("002")) {
+                return "SZ.ZX";
+            }
+            if (stockCode.startsWith("300")) {
+                return "SZ.CY";
+            }
+            if (stockCode.startsWith("301")) {
+                return "SZ.CY";
+            }
+            if (stockCode.startsWith("080")) {
+                return "SZ.PG";
+            }
+            if (stockCode.startsWith("031")) {
+                return "SZ.QZ";
+            }
+            if (stockCode.startsWith("60")) {
+                return "SH.A";
+            }
+            if (stockCode.startsWith("900")) {
+                return "SH.B";
+            }
+            if (stockCode.startsWith("730")) {
+                return "SH.SG";
+            }
+            if (stockCode.startsWith("700")) {
+                return "SH.PG";
+            }
+            if (stockCode.startsWith("580")) {
+                return "SH.QZ";
+            }
+            if (stockCode.startsWith("880")) {
+                return "SH.BK";
+            }
+            if (stockCode.startsWith("999")) {
+                return "SH.DP";
+            }
+            if (stockCode.startsWith("399")) {
+                return "SZ.CY";
+            }
+            if (stockCode.startsWith("688")||stockCode.startsWith("689")) {
+                return "SH.KC";
+            }
+            if (stockCode.startsWith("128")) {
+                return "SZ.ZZ";
+            }
+
+            if (stockCode.startsWith("123")) {
+                return "SZ.ZZ";
+            }
+            if (stockCode.startsWith("113")) {
+                return "SZ.ZZ";
+            }
+        }
+        throw new IllegalArgumentException("股票代码(" + stockCode + ")不属于中国大陆证券代码.");
+    }
+
+    public static String getIndexMarket(String stockCode) {
+        if (StringUtils.isNotBlank(stockCode)) {
+            if (stockCode.equals("000016")||stockCode.equals("000852")) {
+                return "SH.A";
+            }
+            if (stockCode.startsWith("000")||stockCode.startsWith("001") || stockCode.startsWith("003")) {
+                return "SZ.A";
             }
             if (stockCode.startsWith("002")) {
                 return "SZ.ZX";

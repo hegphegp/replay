@@ -181,7 +181,7 @@ public class StockKbarComponent {
     public void initSpecialStockAndSaveKbarData(String stockCode, String stockName, int days) {
         try {
             for(int i=0;i<days;i++) {
-                DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, stockCode, i, 1);
+                DataTable dataTable = TdxHqUtil.getIndexSecurityBars(KCate.DAY, stockCode, i, 1);
                 List<StockKbar> stockKbarList = StockKbarConvert.convertSpecial(dataTable, stockCode, stockName);
                 if (CollectionUtils.isEmpty(stockKbarList)) {
                     return;

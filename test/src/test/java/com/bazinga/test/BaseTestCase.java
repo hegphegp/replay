@@ -2,6 +2,7 @@ package com.bazinga.test;
 
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
+import com.bazinga.component.ThsBlockStocksComponent;
 import com.bazinga.enums.PlankTypeEnum;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.*;
@@ -100,6 +101,8 @@ public class BaseTestCase {
     private CurrentDayTransactionDataComponent currentDayTransactionDataComponent;
     @Autowired
     private ThsStockIndexComponent thsStockIndexComponent;
+    @Autowired
+    private ThsBlockStocksComponent thsBlockStocksComponent;
 
 
     @Test
@@ -141,6 +144,7 @@ public class BaseTestCase {
         stockAttributeReplayComponent.saveStockAttributeReplay(date);
         stockPlankDailyComponent.handleStopTradeStock(date);
         stockBollingComponent.calCurrentDayBoll(date);
+        thsBlockStocksComponent.indexBLockDetail();
         historyBlockInfoComponent.initHistoryBlockInfo();
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
@@ -173,7 +177,11 @@ public class BaseTestCase {
 
     @Test
     public void test9() {
-        historyBlockInfoComponent.initHistoryBlockInfo();
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
+        String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
+        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"399300","沪深300",".SZ");
+        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");
     }
 
     @Test
@@ -194,6 +202,15 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",1200);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1200);
+        /*stockKbarComponent.initSpecialStockAndSaveKbarData("000016","上证50",1200);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("000852","中证1000",1200);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500",1200);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399903","中证100",1200);*/
+        /*String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
+        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"399300","沪深300",".SZ");
+        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");*/
         /*Date date = new Date();
         long time = date.getTime();
         System.out.println(time);
@@ -201,11 +218,6 @@ public class BaseTestCase {
         List<ThirdSecondTransactionDataDTO> data1 = currentDayTransactionDataComponent.getData("002121");
         System.out.println(111);*/
         //synInfoComponent.synHSTECH();
-        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
-        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
-        String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
-        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"399300","沪深300",".SZ");
-        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");
         /*historyBlockInfoComponent.initHistoryBlockInfo();
         stockKbarComponent.batchKbarDataInit();
        // stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",1500);
