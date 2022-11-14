@@ -93,7 +93,7 @@ public class StockFactorTestOneComponent {
         }
 
 
-        String[] rowNames = {"index","股票代码","股票名称","交易日期","市值","当日收盘涨幅","次日开盘涨幅","次日35之前最低涨幅","次日35之前最搞涨幅","排名","连板高度","index1","开盘涨幅","3日涨幅","5日涨幅","10日涨幅"};
+        String[] rowNames = {"index","股票代码","股票名称","交易日期","市值","当日收盘涨幅","次日开盘涨幅","次日35之前最低涨幅","次日35之前最搞涨幅","排名","连板高度","index2a","开盘涨幅","3日涨幅","5日涨幅","10日涨幅"};
         PoiExcelUtil poiExcelUtil = new PoiExcelUtil("美国往事",rowNames,datas);
         try {
             poiExcelUtil.exportExcelUseExcelTitle("美国往事");
@@ -114,7 +114,7 @@ public class StockFactorTestOneComponent {
         List<StockFactorLevelTestDTO> buys = Lists.newArrayList();
         int i =0;
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20210501", DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd))){
                 continue;
             }
            /* if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220810", DateUtil.yyyyMMdd))){
@@ -156,7 +156,7 @@ public class StockFactorTestOneComponent {
                         buyDTO.setEndRate(endRate);
                         buyDTO.setOpenRate(openRate);
                         buyDTO.setMarketValue(marketValue);
-                        buyDTO.setIndex2a(stockFactor.getIndex1());
+                        buyDTO.setIndex2a(stockFactor.getIndex2a());
                         beforeRate(limitQueue,buyDTO);
                         StockKbar nextKbar = stockKbarService.getByUniqueKey(circulateInfo.getStockCode() + "_" + DateUtil.format(nextDate, DateUtil.yyyyMMdd));
                         if(nextKbar!=null){

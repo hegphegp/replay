@@ -71,7 +71,7 @@ public class BlockFollowStaticCurrentComponent {
 
 
     public void blockFollowStaticInfo(){
-        List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
+        /*List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(new CirculateInfoQuery());
         Map<String, CirculateInfo> circulateInfoMap = getCirculateInfoMap(circulateInfos);
         List<HistoryBlockInfo> blockInfos = getHistoryBlockInfo();
         Map<String, List<PlankTimePairDTO>> pairsMap = getPlankTimePairs(circulateInfos);
@@ -83,11 +83,11 @@ public class BlockFollowStaticCurrentComponent {
             if(byRedisKey!=null){
                 continue;
             }
-            if(tradeDate.equals("20220920")){
+            *//*if(tradeDate.equals("20221012")){
                 System.out.println(11111111);
             }else{
                 continue;
-            }
+            }*//*
 
             THREAD_POOL_QUOTE.execute(() ->{
                 List<PlankTimePairDTO> plankTimePairDTOS = pairsMap.get(tradeDate);
@@ -106,14 +106,14 @@ public class BlockFollowStaticCurrentComponent {
             Thread.sleep(10000000000l);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
 
-        /*List<BlocKFollowStaticTotalDTO> buys = Lists.newArrayList();
+        List<BlocKFollowStaticTotalDTO> buys = Lists.newArrayList();
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(new TradeDatePoolQuery());
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            boolean before = tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220915", DateUtil.yyyyMMdd));
+            boolean before = tradeDatePool.getTradeDate().before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd));
             boolean after = tradeDatePool.getTradeDate().after(DateUtil.parseDate("20230101", DateUtil.yyyyMMdd));
             if((!before)&&(!after)) {
                 String format = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
@@ -170,7 +170,7 @@ public class BlockFollowStaticCurrentComponent {
             poiExcelUtil.exportExcelUseExcelTitle("板块跟随统计买入");
         }catch (Exception e){
             log.info(e.getMessage());
-        }*/
+        }
 
 
     }
@@ -197,12 +197,12 @@ public class BlockFollowStaticCurrentComponent {
             for (StockKbar stockKbar:stockKbars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20220914", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20190101", DateUtil.yyyyMMdd))){
                     continue;
                 }
-               /* if(date.after(DateUtil.parseDate("20220620", DateUtil.yyyyMMdd))){
+                if(date.after(DateUtil.parseDate("20191231", DateUtil.yyyyMMdd))){
                     continue;
-                }*/
+                }
                 /*List<String> olds = Lists.newArrayList();
                 RedisMonior redisMonior = redisMoniorService.getByRedisKey(circulateInfo.getStockCode());
                 if(redisMonior!=null&&!redisMonior.getRedisValue().equals("test")){

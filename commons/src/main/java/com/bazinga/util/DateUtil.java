@@ -99,6 +99,19 @@ public class DateUtil {
 		ca.set(Calendar.SECOND, 59);
 		return ca.getTime();
 	}
+	/**
+	 *
+	 * @param datesource yyyyddmm to yyyy-dd-mm   or   yyyy-dd-mm to   yyyyddmm
+	 * @return
+	 */
+	public static String dateStringFormat(String datesource, String formatSource,String formatTarget) {
+		Date date = DateUtil.parseDate(datesource, formatSource);
+		if(date==null){
+			return null;
+		}
+		String targetDateStr = DateUtil.format(date, formatTarget);
+		return targetDateStr;
+	}
 
 	public static DateFormat getNewDateFormat(String pattern) {
 		DateFormat df = new SimpleDateFormat(pattern);

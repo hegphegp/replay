@@ -97,19 +97,29 @@ public class ThsTest {
     private RealMoneyComponent realMoneyComponent;
     @Autowired
     private TenDayExplorComponent tenDayExplorComponent;
+    @Autowired
+    private IndexKbarCurrentComponent indexKbarCurrentComponent;
+    @Autowired
+    private StockFactorTestThreeComponent stockFactorTestThreeComponent;
 
 
     @Test
     public void test1() {
-        tenDayExplorComponent.tenDayExplor();
-        realMoneyComponent.realMoneyExplor();
+        //stockFactorTestThreeComponent.factorTest();
+        indexKbarCurrentComponent.indexKbarCurrent();
+        /*thsStockIndexComponent.shMACDIndex("20221021","3993ok
+        00","沪深300",".SZ");
+        thsStockIndexComponent.shMACDIndex("20221021","000001","上证指数",".SH");*/
+        //tenDayExplorComponent.tenDayExplor();
+        //realMoneyComponent.realMoneyExplor();
         //highMarketExplorComponent.bigMarketExplor();
         //stockFactorTestTwoComponent.factorTest();
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
        // strongPlankDefineComponent.strongPlank();
-        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
-        //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
+        //用于板块跟随回测 用于线上使用
+        //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
        /* strongPlankDefineComponent.strongPlank();
         stockBlockLevelComponent.stockFirstBlockInfo();
         //buyTwoToThreeComponent.buyTwoThree();

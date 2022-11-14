@@ -181,7 +181,7 @@ public class StockKbarComponent {
     public void initSpecialStockAndSaveKbarData(String stockCode, String stockName, int days) {
         try {
             for(int i=0;i<days;i++) {
-                DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, stockCode, i, 1);
+                DataTable dataTable = TdxHqUtil.getIndexSecurityBars(KCate.DAY, stockCode, i, 1);
                 List<StockKbar> stockKbarList = StockKbarConvert.convertSpecial(dataTable, stockCode, stockName);
                 if (CollectionUtils.isEmpty(stockKbarList)) {
                     return;
@@ -193,14 +193,31 @@ public class StockKbarComponent {
                     stockKbar.setAdjLowPrice(stockKbar.getLowPrice());
                     StockKbar byUniqueKey = stockKbarService.getByUniqueKey(stockKbar.getUniqueKey());
                     if (byUniqueKey == null) {
+                        log.info("指数k线跑出来了 stockCode：{} stockKar：{}",stockKbar.getStockCode(),JSONObject.toJSONString(stockKbar));
                         stockKbarService.save(stockKbar);
                     }
-
                 }
             }
         }catch (Exception e){
             log.info("跑昨日涨停数据异常",e);
         }
+    }
+
+    public BigDecimal calCurrentIndexKbarOpenPrice(String stockCode, String stockName, int days) {
+        try {
+            for(int i=0;i<days;i++) {
+                DataTable dataTable = TdxHqUtil.getSecurityBars(KCate.DAY, stockCode, i, 1);
+                List<StockKbar> stockKbarList = StockKbarConvert.convertSpecial(dataTable, stockCode, stockName);
+                if (CollectionUtils.isEmpty(stockKbarList)) {
+                    return null;
+                }
+                StockKbar stockKbar = stockKbarList.get(0);
+                return stockKbar.getOpenPrice();
+            }
+        }catch (Exception e){
+            log.info("跑昨日涨停数据异常",e);
+        }
+        return null;
     }
 
 
