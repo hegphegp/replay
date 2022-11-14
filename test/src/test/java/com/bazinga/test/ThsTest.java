@@ -105,8 +105,8 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        stockFactorTestThreeComponent.factorTest();
-        //indexKbarCurrentComponent.indexKbarCurrent();
+        //stockFactorTestThreeComponent.factorTest();
+        indexKbarCurrentComponent.indexKbarCurrent();
         /*thsStockIndexComponent.shMACDIndex("20221021","3993ok
         00","沪深300",".SZ");
         thsStockIndexComponent.shMACDIndex("20221021","000001","上证指数",".SH");*/
@@ -119,7 +119,7 @@ public class ThsTest {
        // strongPlankDefineComponent.strongPlank();
         //用于板块跟随回测 用于线上使用
         //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
-        //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
+        blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
        /* strongPlankDefineComponent.strongPlank();
         stockBlockLevelComponent.stockFirstBlockInfo();
         //buyTwoToThreeComponent.buyTwoThree();
