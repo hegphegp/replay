@@ -101,12 +101,15 @@ public class ThsTest {
     private IndexKbarCurrentComponent indexKbarCurrentComponent;
     @Autowired
     private StockFactorTestThreeComponent stockFactorTestThreeComponent;
+    @Autowired
+    private StockFactorWuDiNewTwoComponent stockFactorWuDiNewTwoComponent;
 
 
     @Test
     public void test1() {
+        stockFactorWuDiNewTwoComponent.factorTest();
         //stockFactorTestThreeComponent.factorTest();
-        indexKbarCurrentComponent.indexKbarCurrent();
+        //indexKbarCurrentComponent.indexKbarCurrent();
         /*thsStockIndexComponent.shMACDIndex("20221021","3993ok
         00","沪深300",".SZ");
         thsStockIndexComponent.shMACDIndex("20221021","000001","上证指数",".SH");*/
