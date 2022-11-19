@@ -107,6 +107,7 @@ public class ThsTest {
 
     @Test
     public void test1() {
+        //historyTransactionDataComponent.getFiveMinData("000001","20220121");
         stockFactorWuDiNewTwoComponent.factorTest();
         //stockFactorTestThreeComponent.factorTest();
         //indexKbarCurrentComponent.indexKbarCurrent();

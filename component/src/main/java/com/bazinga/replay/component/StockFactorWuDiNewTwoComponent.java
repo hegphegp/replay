@@ -51,6 +51,8 @@ public class StockFactorWuDiNewTwoComponent {
 
     public static Map<String,Map<String,BigDecimal>> buyPriceCacheMap = new HashMap<>();
 
+    public static String leveStockCode = "600896,600555,600385,600090,300202,000673,300312,600870,300038,300367,600146,000613,300023,002464,300325,000611,000502,002447,002684,300064,002147,002770,600093,600275,002473,600209,600856,300178,002618,600652,600890,600091,002260,000687,600291,600695,603157,000585,603996,000835,600145,002619,000780,600723,600068,300362,002359,000760,600634,600614,002711,600485,002450,600891,002071,600701,000662,600247,600978,600677,600086,600687,600317";
+    //public static String leveStockCode = "1111";
 
 
     public void factorTest(){
@@ -109,10 +111,10 @@ public class StockFactorWuDiNewTwoComponent {
         List<StockFactorLevelTestDTO> buys = Lists.newArrayList();
         int i =0;
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220901", DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20211231", DateUtil.yyyyMMdd))){
                 continue;
             }
             List<StockFactorLevelTestDTO> dayBuys = Lists.newArrayList();
@@ -318,6 +320,9 @@ public class StockFactorWuDiNewTwoComponent {
 
 
     public void  getLowAndHighRate(String stockCode,String tradeDate,ThsStockKbar preStockKbar,ThsStockKbar stockKbar,StockFactorLevelTestDTO buyDTO){
+        if(leveStockCode.contains(stockCode)){
+            return;
+        }
         List<ThirdSecondTransactionDataDTO> datas = historyTransactionDataComponent.getData(stockCode, tradeDate);
         if(CollectionUtils.isEmpty(datas)){
             return;

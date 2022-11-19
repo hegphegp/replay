@@ -792,10 +792,14 @@ public class TdxHqUtil extends TdxHqPollManager {
                     }
                     // 最后一次
                     if (i == LOOP_TIMES - 1) {
+                        System.out.println(stockCode);
                         throw new TradeException("调用l1行情服务器失败！原因是:" + error);
                     }
                 }
             } catch (TradeException tradeException) {
+                if(tradeException.getMessage().contains("接收数据包不完整")){
+                    return null;
+                }
                 logger.error(tradeException.getMessage(), tradeException);
             } catch (Exception e) {
                 logger.error("调用l1行情服务器失败！", e);

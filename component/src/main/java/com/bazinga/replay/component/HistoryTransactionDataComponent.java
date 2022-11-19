@@ -64,6 +64,25 @@ public class HistoryTransactionDataComponent {
 
     }
 
+
+    public List<ThirdSecondTransactionDataDTO> getFiveMinData(String stockCode, String kbarDate){
+        List<ThirdSecondTransactionDataDTO> resultList = Lists.newArrayList();
+        int dateAsInt = Integer.parseInt(kbarDate);
+        int loopTimes = 0;
+        int count =600;
+        while (loopTimes<30 &&(CollectionUtils.isEmpty(resultList) || !"09:25".equals(resultList.get(0).getTradeTime()))){
+            DataTable historyTransactionData = TdxHqUtil.getHistoryTransactionData(stockCode, dateAsInt, loopTimes * count, count);
+            if(historyTransactionData ==null ){
+                continue;
+            }
+            List<ThirdSecondTransactionDataDTO> list = ThirdSecondTransactionDataDTOConvert.convert(historyTransactionData);
+            resultList.addAll(0,list);
+            loopTimes++;
+        }
+        return resultList;
+
+    }
+
     public List<ThirdSecondTransactionDataDTO> getPreOneHourData(List<ThirdSecondTransactionDataDTO> list){
         if(CollectionUtils.isEmpty(list)){
             return list;
