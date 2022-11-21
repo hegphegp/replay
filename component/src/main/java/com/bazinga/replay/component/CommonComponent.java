@@ -8,6 +8,7 @@ import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateTimeUtils;
+import com.bazinga.util.DateUtil;
 import com.google.common.collect.Lists;
 import com.tradex.util.StockUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +69,22 @@ public class CommonComponent {
         query.setLimit(1);
         List<TradeDatePool> dates = tradeDatePoolService.listByCondition(query);
         return dates.get(0).getTradeDate();
+    }
+
+    public Map<String,Date> getPreTradeDateMap(){
+        Map<String,Date> map = new HashMap<>();
+        TradeDatePoolQuery query = new TradeDatePoolQuery();
+        query.setTradeDateTo(DateTimeUtils.getDate235959(new Date()));
+        query.addOrderBy("trade_date",Sort.SortType.ASC);
+        List<TradeDatePool> dates = tradeDatePoolService.listByCondition(query);
+        TradeDatePool preTradeDatePool = null;
+        for (TradeDatePool tradeDatePool:dates){
+            if(preTradeDatePool!=null){
+                map.put(DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyy_MM_dd), preTradeDatePool.getTradeDate());
+            }
+            preTradeDatePool = tradeDatePool;
+        }
+        return map;
     }
 
 

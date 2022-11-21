@@ -315,6 +315,7 @@ public class DateUtil {
 		return (sysDate.getTimeInMillis() - failDate.getTimeInMillis()) / (60 * 1000);
 	}
 
+
 	/**
 	 * 取得两个日期的间隔天数
 	 * 

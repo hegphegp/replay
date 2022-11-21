@@ -248,8 +248,10 @@ public class StockFactorWuDiNewTwoComponent {
             return;
         }
         Map<String,Integer> map = new HashMap<>();
-        List<Integer> counts = Lists.newArrayList();
         for (StockFactorLevelTestDTO dto:buys){
+            if(StringUtils.isBlank(dto.getBlockCode())){
+                continue;
+            }
             Integer count = map.get(dto.getBlockCode());
             if(count==null){
                 count = 0;
@@ -257,6 +259,7 @@ public class StockFactorWuDiNewTwoComponent {
             count = count + 1;
             map.put(dto.getBlockCode(),count);
         }
+        List<Integer> counts = Lists.newArrayList();
         for (String blockCode:map.keySet()){
             Integer count = map.get(blockCode);
             if(!counts.contains(count)) {
@@ -278,6 +281,9 @@ public class StockFactorWuDiNewTwoComponent {
             blockLevel.put(blockCode,level);
         }
         for (StockFactorLevelTestDTO dto:buys){
+            if(StringUtils.isBlank(dto.getBlockCode())) {
+                continue;
+            }
             Integer level = blockLevel.get(dto.getBlockCode());
             dto.setBlockLevel(level);
             dto.setBlockCount(map.get(dto.getBlockCode()));

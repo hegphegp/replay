@@ -103,12 +103,16 @@ public class ThsTest {
     private StockFactorTestThreeComponent stockFactorTestThreeComponent;
     @Autowired
     private StockFactorWuDiNewTwoComponent stockFactorWuDiNewTwoComponent;
+    @Autowired
+    private StockFactorDuanXianTwoComponent stockFactorDuanXianTwoComponent;
 
 
     @Test
     public void test1() {
-        //historyTransactionDataComponent.getFiveMinData("000001","20220121");
+        //stockFactorDuanXianTwoComponent.factorTest();
         stockFactorWuDiNewTwoComponent.factorTest();
+        //historyTransactionDataComponent.getFiveMinData("000001","20220121");
+
         //stockFactorTestThreeComponent.factorTest();
         //indexKbarCurrentComponent.indexKbarCurrent();
         /*thsStockIndexComponent.shMACDIndex("20221021","3993ok
