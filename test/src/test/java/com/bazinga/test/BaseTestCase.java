@@ -179,15 +179,15 @@ public class BaseTestCase {
     public void test9() {
         stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
-        //String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
-        String dateyyyyMMhh = "20221118";
+        String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
+        //String dateyyyyMMhh = "20221118";
         thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"399300","沪深300",".SZ");
         thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");
     }
 
     @Test
     public void test11() {
-        historyBlockInfoComponent.getPreBlockStocks("20221102","20221103");
+        historyBlockInfoComponent.getPreBlockStocks("20221121","20221122");
     }
     @Test
     public void test10(){

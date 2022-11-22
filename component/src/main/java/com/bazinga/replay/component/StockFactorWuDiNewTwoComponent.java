@@ -111,10 +111,10 @@ public class StockFactorWuDiNewTwoComponent {
         List<StockFactorLevelTestDTO> buys = Lists.newArrayList();
         int i =0;
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20210101", DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20211231", DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220901", DateUtil.yyyyMMdd))){
                 continue;
             }
             List<StockFactorLevelTestDTO> dayBuys = Lists.newArrayList();
