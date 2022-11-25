@@ -6,10 +6,13 @@ import com.bazinga.replay.component.*;
 import com.bazinga.replay.dto.BigExchangeTestBuyDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.StockIndex;
+import com.bazinga.replay.model.ThsQuoteInfo;
 import com.bazinga.replay.model.TradeDatePool;
+import com.bazinga.replay.query.ThsQuoteInfoQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
 import com.bazinga.replay.service.CirculateInfoService;
 import com.bazinga.replay.service.StockIndexService;
+import com.bazinga.replay.service.ThsQuoteInfoService;
 import com.bazinga.replay.service.TradeDatePoolService;
 import com.bazinga.util.DateUtil;
 import com.google.common.collect.Lists;
@@ -107,6 +110,10 @@ public class ThsTest {
     private StockFactorDuanXianTwoComponent stockFactorDuanXianTwoComponent;
     @Autowired
     private ThsQuoteSaveComponent thsQuoteSaveComponent;
+    @Autowired
+    private ThsQuoteInfoService thsQuoteInfoService;
+    @Autowired
+    private HuShen300SecondKbarComponent huShen300SecondKbarComponent;
 
 
     @Test
@@ -179,6 +186,13 @@ public class ThsTest {
     @Test
     public void test2() {
         stockKbarComponent.batchKbarDataInit();
+    }
+
+
+    @Test
+    public void test3() {
+
+        huShen300SecondKbarComponent.huShen300QuoteToKbar();
     }
 
 }

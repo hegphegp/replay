@@ -8,7 +8,7 @@ import java.util.List;
  * @date 2018/12/20
  */
 public class PagingQuery {
-    public static int DEFAULT_LIMIT = 5000;
+    public static int DEFAULT_LIMIT = 40000;
     private int offset;
     private int limit;
     private List<Sort> sorts;
