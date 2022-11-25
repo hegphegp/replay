@@ -105,12 +105,15 @@ public class ThsTest {
     private StockFactorWuDiNewTwoComponent stockFactorWuDiNewTwoComponent;
     @Autowired
     private StockFactorDuanXianTwoComponent stockFactorDuanXianTwoComponent;
+    @Autowired
+    private ThsQuoteSaveComponent thsQuoteSaveComponent;
 
 
     @Test
     public void test1() {
+        thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
         //stockFactorDuanXianTwoComponent.factorTest();
-        stockFactorWuDiNewTwoComponent.factorTest();
+        //stockFactorWuDiNewTwoComponent.factorTest();
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
 
         //stockFactorTestThreeComponent.factorTest();

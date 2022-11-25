@@ -8,7 +8,9 @@
         <result column="stock_name" jdbcType="VARCHAR" property="stockName"/>
         <result column="quote_date" jdbcType="VARCHAR" property="quoteDate"/>
         <result column="quote_time" jdbcType="VARCHAR" property="quoteTime"/>
+        <result column="time_stamp" jdbcType="BIGINT" property="timeStamp"/>
         <result column="current_price" jdbcType="DECIMAL" property="currentPrice"/>
+        <result column="pre_close_price" jdbcType="DECIMAL" property="preClosePrice"/>
         <result column="bid1" jdbcType="DECIMAL" property="bid1"/>
         <result column="bid2" jdbcType="DECIMAL" property="bid2"/>
         <result column="ask1" jdbcType="DECIMAL" property="ask1"/>
@@ -36,7 +38,9 @@
             stock_name,
             quote_date,
             quote_time,
+            time_stamp,
             current_price,
+            pre_close_price,
             bid1,
             bid2,
             ask1,
@@ -73,7 +77,9 @@
             #{stockName, jdbcType=VARCHAR},
             #{quoteDate, jdbcType=VARCHAR},
             #{quoteTime, jdbcType=VARCHAR},
+            #{timeStamp, jdbcType=BIGINT},
             #{currentPrice, jdbcType=DECIMAL},
+            #{preClosePrice, jdbcType=DECIMAL},
             #{bid1, jdbcType=DECIMAL},
             #{bid2, jdbcType=DECIMAL},
             #{ask1, jdbcType=DECIMAL},
@@ -110,8 +116,14 @@
             <if test="quoteTime != null">
                 quote_time = #{quoteTime, jdbcType=VARCHAR},
             </if>
+            <if test="timeStamp != null">
+                time_stamp = #{timeStamp, jdbcType=BIGINT},
+            </if>
             <if test="currentPrice != null">
                 current_price = #{currentPrice, jdbcType=DECIMAL},
+            </if>
+            <if test="preClosePrice != null">
+                pre_close_price = #{preClosePrice, jdbcType=DECIMAL},
             </if>
             <if test="bid1 != null">
                 bid1 = #{bid1, jdbcType=DECIMAL},
@@ -184,8 +196,14 @@
         <if test="quoteTime != null">
             and quote_time = #{quoteTime, jdbcType=VARCHAR}
         </if>
+        <if test="timeStamp != null">
+            and time_stamp = #{timeStamp, jdbcType=BIGINT}
+        </if>
         <if test="currentPrice != null">
             and current_price = #{currentPrice, jdbcType=DECIMAL}
+        </if>
+        <if test="preClosePrice != null">
+            and pre_close_price = #{preClosePrice, jdbcType=DECIMAL}
         </if>
         <if test="bid1 != null">
             and bid1 = #{bid1, jdbcType=DECIMAL}

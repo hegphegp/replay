@@ -51,10 +51,14 @@ public class ThsQuoteInfoQuery extends PagingQuery implements Serializable {
      */
     private String quoteTime;
 
+    private Long timeStamp;
+
     /**
      * 当前价格
      */
     private BigDecimal currentPrice;
+
+    private BigDecimal preClosePrice;
 
     /**
      * 买一价

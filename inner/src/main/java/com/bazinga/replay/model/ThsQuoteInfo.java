@@ -72,6 +72,9 @@ public class ThsQuoteInfo implements Serializable {
      */
     private String quoteTime;
 
+
+    private Long timeStamp;
+
     /**
      * 当前价格
      *
@@ -79,6 +82,14 @@ public class ThsQuoteInfo implements Serializable {
      * @是否索引   NO
      */
     private BigDecimal currentPrice;
+
+    /**
+     * 前一日收盘价格
+     *
+     * @允许为空   NO
+     * @是否索引   NO
+     */
+    private BigDecimal preClosePrice;
 
     /**
      * 买一价
@@ -160,6 +171,7 @@ public class ThsQuoteInfo implements Serializable {
      * @是否索引   NO
      */
     private BigDecimal amt;
+
 
     /**
      * 成交量
