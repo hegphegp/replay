@@ -39,6 +39,10 @@ public class StockIndexQuery extends PagingQuery implements Serializable {
      */
     private String kbarDate;
 
+    private String kbarDateFrom;
+
+    private String kbarDateTo;
+
     /**
      * 唯一索引
      */

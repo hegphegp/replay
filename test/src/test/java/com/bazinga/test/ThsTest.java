@@ -4,6 +4,7 @@ import com.bazinga.base.Sort;
 import com.bazinga.component.*;
 import com.bazinga.replay.component.*;
 import com.bazinga.replay.dto.BigExchangeTestBuyDTO;
+import com.bazinga.replay.dto.MacdIndexDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.StockIndex;
 import com.bazinga.replay.model.ThsQuoteInfo;
@@ -118,7 +119,7 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
+
         //stockFactorDuanXianTwoComponent.factorTest();
         //stockFactorWuDiNewTwoComponent.factorTest();
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
@@ -191,8 +192,18 @@ public class ThsTest {
 
     @Test
     public void test3() {
+        //thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
+        //huShen300SecondKbarComponent.huShen300QuoteToKbar();
+        //huShen300SecondKbarComponent.calMacdSave();
+        huShen300SecondKbarComponent.macdExcel();
+    }
 
-        huShen300SecondKbarComponent.huShen300QuoteToKbar();
+
+    @Test
+    public void test4() {
+        //thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
+        //huShen300SecondKbarComponent.huShen300QuoteToKbar();
+        //huShen300SecondKbarComponent.calMacdSave();
     }
 
 }
