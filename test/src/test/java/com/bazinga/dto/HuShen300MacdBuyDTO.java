@@ -17,7 +17,9 @@ public class HuShen300MacdBuyDTO {
     private BigDecimal macdSell;
     private BigDecimal buyPrice;
     private BigDecimal sellPrice;
+    private BigDecimal preBuyIndex;
     private String buyTime;
+    private String preBuyTime;
     private String sellTime;
     private BigDecimal profitValue;
     private BigDecimal profit;

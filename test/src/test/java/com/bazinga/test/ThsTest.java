@@ -115,6 +115,8 @@ public class ThsTest {
     private ThsQuoteInfoService thsQuoteInfoService;
     @Autowired
     private HuShen300SecondKbarComponent huShen300SecondKbarComponent;
+    @Autowired
+    private HuShen3003MinKbarComponent huShen3003MinKbarComponent;
 
 
     @Test
@@ -195,15 +197,24 @@ public class ThsTest {
         //thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
         //huShen300SecondKbarComponent.huShen300QuoteToKbar();
         //huShen300SecondKbarComponent.calMacdSave();
-        huShen300SecondKbarComponent.macdExcel();
+
     }
 
-
+    //沪深300 5sk线相关
     @Test
     public void test4() {
         //thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
-        //huShen300SecondKbarComponent.huShen300QuoteToKbar();
-        //huShen300SecondKbarComponent.calMacdSave();
+        huShen300SecondKbarComponent.huShen300QuoteToKbar();
+        huShen300SecondKbarComponent.calMacdSave();
+        huShen300SecondKbarComponent.macdExcel();
+    }
+
+    //沪深300 3mink线相关
+    @Test
+    public void test5() {
+        huShen3003MinKbarComponent.huShen300QuoteToKbar();
+       /* huShen300SecondKbarComponent.calMacdSave();
+        huShen300SecondKbarComponent.macdExcel();*/
     }
 
 }
