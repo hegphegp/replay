@@ -212,9 +212,9 @@ public class ThsTest {
     //沪深300 3mink线相关
     @Test
     public void test5() {
-        huShen3003MinKbarComponent.huShen300QuoteToKbar();
-       /* huShen300SecondKbarComponent.calMacdSave();
-        huShen300SecondKbarComponent.macdExcel();*/
+        //huShen3003MinKbarComponent.huShen300QuoteToKbar();
+       //huShen3003MinKbarComponent.calMacdSave();
+        huShen3003MinKbarComponent.macdExcel();
     }
 
 }
