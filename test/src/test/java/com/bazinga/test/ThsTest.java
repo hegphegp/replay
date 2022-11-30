@@ -147,7 +147,6 @@ public class ThsTest {
         stockBlockLevelComponent.stockFirstBlockInfo();
         //buyTwoToThreeComponent.buyTwoThree();
         //buyTwoToThreeComponent.buyTwoThree();
-        //buyGroundGatherComponent.gatherGround();
         //plankAmountSuperTestComponent.plankAmountInfo();
         //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         //strongBlockExploreComponent.highLowPlank();
@@ -186,6 +185,8 @@ public class ThsTest {
         /*List<ThirdSecondTransactionDataDTO> data = historyTransactionDataComponent.getData("999999", "20220602");
         System.out.println(data);*/
         //thsBlockKbarComponent.initHistoryBlockKbars();
+
+        buyGroundGatherComponent.gatherGround();
     }
 
     @Test
