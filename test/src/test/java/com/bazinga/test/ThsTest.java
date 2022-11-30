@@ -117,6 +117,8 @@ public class ThsTest {
     private HuShen300SecondKbarComponent huShen300SecondKbarComponent;
     @Autowired
     private HuShen3003MinKbarComponent huShen3003MinKbarComponent;
+    @Autowired
+    private HuShen3003SecondNewKbarComponent huShen3003SecondNewKbarComponent;
 
 
     @Test
@@ -204,8 +206,8 @@ public class ThsTest {
     @Test
     public void test4() {
         //thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
-        huShen300SecondKbarComponent.huShen300QuoteToKbar();
-        huShen300SecondKbarComponent.calMacdSave();
+        //huShen300SecondKbarComponent.huShen300QuoteToKbar();
+        //huShen300SecondKbarComponent.calMacdSave();
         huShen300SecondKbarComponent.macdExcel();
     }
 
