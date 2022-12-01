@@ -119,11 +119,13 @@ public class ThsTest {
     private HuShen3003MinKbarComponent huShen3003MinKbarComponent;
     @Autowired
     private HuShen3003SecondNewKbarComponent huShen3003SecondNewKbarComponent;
+    @Autowired
+    private ReplayFenBanRateComponent replayFenBanRateComponent;
 
 
     @Test
     public void test1() {
-
+         replayFenBanRateComponent.plankFenBan();
         //stockFactorDuanXianTwoComponent.factorTest();
         //stockFactorWuDiNewTwoComponent.factorTest();
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
@@ -186,7 +188,7 @@ public class ThsTest {
         System.out.println(data);*/
         //thsBlockKbarComponent.initHistoryBlockKbars();
 
-        buyGroundGatherComponent.gatherGround();
+       // buyGroundGatherComponent.gatherGround();
     }
 
     @Test

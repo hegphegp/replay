@@ -311,17 +311,19 @@ public class StockKbarComponent {
         }); }
 
     public void batchKbarDataInit() {
+        int i = 0;
         CirculateInfoQuery circulateInfoQuery = new CirculateInfoQuery();
         List<CirculateInfo> circulateInfos = circulateInfoService.listByCondition(circulateInfoQuery);
-        circulateInfos.forEach(item -> {
-            System.out.println(item.getStockCode());
+        for(CirculateInfo item:circulateInfos){
+            i++;
+            System.out.println(item.getStockCode()+"===="+i);
             StockKbarQuery query = new StockKbarQuery();
             query.setStockCode(item.getStockCode());
             int count = stockKbarService.countByCondition(query);
             if (count == 0) {
                 batchInitAndSaveKbarDate(item.getStockCode(), item.getStockName(), 900);
             }
-        });
+        };
     }
 
     public void batchKbarDataInitToStock(String stockCode,String stockName) {
