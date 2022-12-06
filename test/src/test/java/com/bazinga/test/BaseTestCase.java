@@ -180,7 +180,7 @@ public class BaseTestCase {
         stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
-        //String dateyyyyMMhh = "20221125";
+        //String dateyyyyMMhh = "20221202";
         thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"399300","沪深300",".SZ");
         thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");
     }

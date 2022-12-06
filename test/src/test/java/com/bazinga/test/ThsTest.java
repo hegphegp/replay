@@ -118,6 +118,8 @@ public class ThsTest {
     @Autowired
     private HuShen3003MinKbarComponent huShen3003MinKbarComponent;
     @Autowired
+    private HuShen3001MinKbarComponent huShen3001MinKbarComponent;
+    @Autowired
     private HuShen3003SecondNewKbarComponent huShen3003SecondNewKbarComponent;
     @Autowired
     private ReplayFenBanRateComponent replayFenBanRateComponent;
@@ -220,6 +222,15 @@ public class ThsTest {
         //huShen3003MinKbarComponent.huShen300QuoteToKbar();
        //huShen3003MinKbarComponent.calMacdSave();
         huShen3003MinKbarComponent.macdExcel();
+    }
+
+
+    //沪深300 1mink线相关
+    @Test
+    public void test6() {
+        //huShen3001MinKbarComponent.huShen300QuoteToKbar();
+        //huShen3001MinKbarComponent.calBiasSave();
+        huShen3001MinKbarComponent.biasExcel();
     }
 
 }
