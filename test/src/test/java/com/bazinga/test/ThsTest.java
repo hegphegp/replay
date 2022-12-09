@@ -131,12 +131,13 @@ public class ThsTest {
     @Test
     public void test1() {
         gatherAmountComponent.gatherAmountBuy();
-         //replayFenBanRateComponent.plankFenBan();
+        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+         replayFenBanRateComponent.plankFenBan();
         //stockFactorDuanXianTwoComponent.factorTest();
         //stockFactorWuDiNewTwoComponent.factorTest();
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
 
-        stockFactorTestThreeComponent.factorTest();
+        //stockFactorTestThreeComponent.factorTest();
         //indexKbarCurrentComponent.indexKbarCurrent();
         /*thsStockIndexComponent.shMACDIndex("20221021","3993ok
         00","沪深300",".SZ");
@@ -158,10 +159,10 @@ public class ThsTest {
         //plankAmountSuperTestComponent.plankAmountInfo();
         //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         //strongBlockExploreComponent.highLowPlank();
-        /*List<String> list = Lists.newArrayList("000950","002767","002718","600624","603669","001308","603595","002992","002813","002864","002888","002077","600336","603329","603327","000533","000545","002317","002337","002339","600259","600192","600152","000404","002225","600101","002272","000722","603122","000755","600056","000709","002514","603191","002526","603161","002589","600868","600833","603969","603963","000601","000600");
-        blockFollowTestComponent.blockFollowBuyStock(list);*/
+        List<String> list = Lists.newArrayList("000950","002767","002718","600624","603669","001308","603595","002992","002813","002864","002888","002077","600336","603329","603327","000533","000545","002317","002337","002339","600259","600192","600152","000404","002225","600101","002272","000722","603122","000755","600056","000709","002514","603191","002526","603161","002589","600868","600833","603969","603963","000601","000600");
+        blockFollowTestComponent.blockFollowBuyStock(list);
         //tianDiPlankComponent.highLowPlank();
-        //blockFollowStaticComponent.blockFollowStaticInfo();
+
         //hangYeLevelComponent.calHangYeKbarToRedis();
         //hangYeLevelComponent.hangyeAmount();
         //hangYeLevelComponent.calHangYeKbarToRedis();
