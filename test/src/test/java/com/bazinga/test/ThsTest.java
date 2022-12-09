@@ -123,16 +123,20 @@ public class ThsTest {
     private HuShen3003SecondNewKbarComponent huShen3003SecondNewKbarComponent;
     @Autowired
     private ReplayFenBanRateComponent replayFenBanRateComponent;
+    @Autowired
+    private GatherAmountComponent gatherAmountComponent;
+
 
 
     @Test
     public void test1() {
-         replayFenBanRateComponent.plankFenBan();
+        gatherAmountComponent.gatherAmountBuy();
+         //replayFenBanRateComponent.plankFenBan();
         //stockFactorDuanXianTwoComponent.factorTest();
         //stockFactorWuDiNewTwoComponent.factorTest();
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
 
-        //stockFactorTestThreeComponent.factorTest();
+        stockFactorTestThreeComponent.factorTest();
         //indexKbarCurrentComponent.indexKbarCurrent();
         /*thsStockIndexComponent.shMACDIndex("20221021","3993ok
         00","沪深300",".SZ");
