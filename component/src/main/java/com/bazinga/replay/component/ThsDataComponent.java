@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
 import com.bazinga.replay.dto.BlockStockDTO;
+import com.bazinga.replay.dto.OpenPictureDTO;
 import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.HistoryBlockStocksQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
@@ -28,6 +29,8 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static Ths.JDIBridge.THS_Snapshot;
 
 /**
  * @author yunshan
@@ -333,7 +336,7 @@ public class ThsDataComponent {
             while(true)
             {
                // System.out.print(++a);
-                ret = JDIBridge.THS_iFinDLogin("ylz203", "182883");
+                ret = JDIBridge.THS_iFinDLogin("ylz200", "620865");
                 //System.out.println("THS_iFinDLogin ==> ");
 
 
@@ -344,7 +347,8 @@ public class ThsDataComponent {
                /* String change = JDIBridge.THS_HistoryQuotes("113528.SH", "change", "PriceType:1", "2021-10-29", "2021-11-09");
                 System.out.println("quote ==>"+change);*/
 
-                String s    = JDIBridge.THS_HistoryQuotes("000001.SZ","open,high,low,close","","2022-05-18","2022-05-19");
+                String s    = THS_Snapshot("002420.SZ","tradeTime;latest;amt;vol;bid1;ask1","","2022-12-09 09:24:30","2022-12-09 09:30:04");
+
                 System.out.println(s);
 
                 JDIBridge.THS_iFinDLogout();
@@ -360,5 +364,46 @@ public class ThsDataComponent {
             System.out.println("Login failed == > " + ret);
         }
     }
+
+
+    public OpenPictureDTO getOpenPicture(String stockCode,String kbarDate){
+        thsLogin();
+        String result = THS_Snapshot(MarketUtil.generalToThsStock(stockCode), "tradeDate;tradeTime;askSize1;bidSize1", "",
+                kbarDate+ " 09:25:00", kbarDate+" 09:25:03");
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        JSONArray tables = jsonObject.getJSONArray("tables");
+        if(tables==null||tables.size()==0){
+            return null;
+        }
+        JSONObject tableJson = tables.getJSONObject(0);
+        JSONObject tableInfo = tableJson.getJSONObject("table");
+        JSONArray dateJson = tableInfo.getJSONArray("tradeDate");
+        if(dateJson==null||dateJson.size()==0){
+            return null;
+        }
+        List<String> tradeTimes = tableInfo.getJSONArray("tradeTime").toJavaList(String.class);
+        List<String> bidSize1s = tableInfo.getJSONArray("bidSize1").toJavaList(String.class);
+        List<String> tradeDates = tableInfo.getJSONArray("tradeDate").toJavaList(String.class);
+        List<String> askSize1s = tableInfo.getJSONArray("askSize1").toJavaList(String.class);
+        int index = tradeTimes.size()-1;
+        if(tradeTimes.size()==2){
+            if(tradeTimes.get(0).equals(tradeTimes.get(1))){
+                long bidqytIndex0 = Double.valueOf(bidSize1s.get(0)).longValue();
+                if(bidqytIndex0==0){
+                    index=0;
+                }
+            }
+        }
+        OpenPictureDTO openPictureDTO = new OpenPictureDTO();
+        openPictureDTO.setStockCode(stockCode);
+        openPictureDTO.setBidQty(Double.valueOf(bidSize1s.get(index)).longValue());
+        openPictureDTO.setAskQty(Double.valueOf(askSize1s.get(index)).longValue());
+        openPictureDTO.setTradeTime(tradeTimes.get(index));
+        openPictureDTO.setTradeDate(tradeDates.get(index));
+        thsLoginOut();
+        return openPictureDTO;
+    }
+
+
 
 }

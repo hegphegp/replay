@@ -241,4 +241,9 @@ public class ThsTest {
         huShen3001MinKbarComponent.biasExcel();
     }
 
+    @Test
+    public void test7(){
+        thsDataComponent.getOpenPicture("600704","2021-06-25");
+    }
+
 }

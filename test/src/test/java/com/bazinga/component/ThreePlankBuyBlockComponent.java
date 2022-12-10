@@ -332,7 +332,7 @@ public class ThreePlankBuyBlockComponent {
             }
             if(endSell==1){
                 BigDecimal chuQuanAvgPrice = stockKbar.getAdjClosePrice();
-                BigDecimal rate = PriceUtil.getPricePercentRate(chuQuanAvgPrice.subtract(stockKbar.getAdjHighPrice()), stockKbar.getAdjHighPrice());
+                BigDecimal rate = PriceUtil.getPricePercentRate(chuQuanAvgPrice.subtract(buyKbar.getAdjHighPrice()), buyKbar.getAdjHighPrice());
                 return rate;
             }
             if(stockKbar.getKbarDate().equals(buyKbar.getKbarDate())){
