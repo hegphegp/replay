@@ -125,14 +125,17 @@ public class ThsTest {
     private ReplayFenBanRateComponent replayFenBanRateComponent;
     @Autowired
     private GatherAmountComponent gatherAmountComponent;
+    @Autowired
+    private ThreePlankBuyBlockComponent threePlankBuyBlockComponent;
 
 
 
     @Test
     public void test1() {
-        gatherAmountComponent.gatherAmountBuy();
-        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
-         replayFenBanRateComponent.plankFenBan();
+        threePlankBuyBlockComponent.threePlankBuyTest();
+        //gatherAmountComponent.gatherAmountBuy();
+        /*blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        replayFenBanRateComponent.plankFenBan();*/
         //stockFactorDuanXianTwoComponent.factorTest();
         //stockFactorWuDiNewTwoComponent.factorTest();
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
