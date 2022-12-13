@@ -73,6 +73,32 @@ public class ThsStockIndexComponent {
             stockIndexService.save(stockIndex);
         }
         thsDataComponent.thsLoginOut();
+
+    }
+
+    public StockIndex shMacdIndexNoSave(String tradeDate,String stockCode,String stockName,String diff){
+        TradeDatePoolQuery query = new TradeDatePoolQuery();
+        query.setTradeDateFrom(DateUtil.parseDate(tradeDate,DateUtil.yyyyMMdd));
+        query.setTradeDateTo(new Date());
+        query.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(query);
+        List<String> list = Lists.newArrayList();
+        for (TradeDatePool tradeDatePool:tradeDatePools){
+            String tradeDateStr = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyy_MM_dd);
+            list.add(tradeDateStr);
+        }
+        List<StockIndex> szIndexs = thsDataComponent.initStockIndex(stockCode+diff, stockName, list);
+        int ret = thsDataComponent.thsLogin();
+        StockIndex tradeDateStockIndex = null;
+        for (StockIndex stockIndex:szIndexs){
+            if(stockIndex.getKbarDate().equals(tradeDate)) {
+                getStockIndex(stockCode, stockName, stockIndex.getKbarDate(), stockIndex, diff);
+                tradeDateStockIndex = stockIndex;
+                break;
+            }
+        }
+        thsDataComponent.thsLoginOut();
+        return tradeDateStockIndex;
     }
 
     /**

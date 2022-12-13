@@ -116,7 +116,7 @@ public class ThreePlankBuyBlockComponent {
             for (StockKbar stockKbar:stockKBars){
                 limitQueue.offer(stockKbar);
                 Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
-                if(date.before(DateUtil.parseDate("20221101", DateUtil.yyyyMMdd))){
+                if(date.before(DateUtil.parseDate("20201201", DateUtil.yyyyMMdd))){
                     preStockKbar = stockKbar;
                     continue;
                 }
@@ -251,6 +251,9 @@ public class ThreePlankBuyBlockComponent {
             List<PlankTUThreePlankBuyDTO> beforeDtos = beforeMap.get(blockCode);
             HistoryBlockInfo historyBlockInfo = historyBlockInfosMap.get(blockCode);
             int level = beforeDtos.size() + 1;
+            if(level>5){
+                return nameLevel;
+            }
             if(level<=5){
                 if(nameLevel==null){
                     nameLevel = historyBlockInfo.getBlockName()+"="+level;

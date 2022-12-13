@@ -15,6 +15,7 @@ public class GatherAmountLevelBuyDTO {
     private String tradeDate;
     private BigDecimal gatherAmount = BigDecimal.ZERO;
     private Integer gatherLevel;
+    private BigDecimal openRate;
     private BigDecimal buyAmount;
     private BigDecimal buyRate;
     private BigDecimal realBuyPrice;

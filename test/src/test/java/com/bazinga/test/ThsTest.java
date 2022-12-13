@@ -132,7 +132,7 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        threePlankBuyBlockComponent.threePlankBuyTest();
+        //threePlankBuyBlockComponent.threePlankBuyTest();
         //gatherAmountComponent.gatherAmountBuy();
         /*blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         replayFenBanRateComponent.plankFenBan();*/
@@ -142,6 +142,8 @@ public class ThsTest {
 
         //stockFactorTestThreeComponent.factorTest();
         //indexKbarCurrentComponent.indexKbarCurrent();
+        indexKbarCurrentComponent.indexStockKbarSend();
+        indexKbarCurrentComponent.stockIndexSend();
         /*thsStockIndexComponent.shMACDIndex("20221021","3993ok
         00","沪深300",".SZ");
         thsStockIndexComponent.shMACDIndex("20221021","000001","上证指数",".SH");*/

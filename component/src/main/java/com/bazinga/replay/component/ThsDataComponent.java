@@ -53,29 +53,34 @@ public class ThsDataComponent {
         int i = 0;
         for (HistoryBlockInfo historyBlockInfo:historyBlockInfos){
             i++;
-            //THREAD_POOL_QUOTE.execute(() ->{
+            System.out.println(i + "===========kaishil");
+            /*THREAD_POOL_QUOTE.execute(() ->{*/
                 HistoryBlockStocksQuery query = new HistoryBlockStocksQuery();
                 query.setBlockCode(historyBlockInfo.getBlockCode());
                 query.setTradeDate(DateUtil.format(new Date(),DateUtil.yyyyMMdd));
                 List<HistoryBlockStocks> blockStocks = historyBlockStocksService.listByCondition(query);
-                if(!CollectionUtils.isEmpty(blockStocks)){
-                    System.out.println(historyBlockInfo.getBlockCode()+"****已执行"+i);
-                    continue;
-
-                }
                 String blockCode = historyBlockInfo.getBlockCode();
                 String blockName = historyBlockInfo.getBlockName();
-                long time0 = new Date().getTime();
-                List<BlockStockDTO> blockStockDTOS = getBlockStocks(blockCode);
-                long time1 = new Date().getTime();
-                System.out.println(time1-time0);
-                List<HistoryBlockStocks> historys = converToHistoryBlockStocks(blockCode, blockName, blockStockDTOS);
-                long time2 = new Date().getTime();
-                System.out.println(time2-time1);
-                saveBlockStocks(blockCode,historys);
-                System.out.println(blockCode+"===========结束了"+i);
-            //});
+                if(CollectionUtils.isEmpty(blockStocks)) {
+                    //long time0 = new Date().getTime();
+                    List<BlockStockDTO> blockStockDTOS = getBlockStocks(blockCode, DateUtil.format(new Date(), DateUtil.yyyy_MM_dd));
+                    //long time1 = new Date().getTime();
+                   //System.out.println(time1 - time0);
+                    List<HistoryBlockStocks> historys = converToHistoryBlockStocks(blockCode, blockName, blockStockDTOS);
+                   // long time2 = new Date().getTime();
+                   // System.out.println(time2 - time1);
+                    saveBlockStocks(blockCode, historys);
+                    System.out.println(blockCode + "===========结束了");
+                }else{
+                    System.out.println(blockCode + "===========yizhixin");
+                }
+            /*});*/
         }
+        /*try {
+            Thread.sleep(100000000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
         thsLoginOut();
     }
     public void saveBlockStocks(String blockCode,List<HistoryBlockStocks> historyBlockStocks) {
@@ -93,7 +98,7 @@ public class ThsDataComponent {
             if(list.contains(history.getTradeDate())){
                 continue;
             }
-            System.out.println(history.getBlockCode()+"======"+history.getTradeDate());
+            //System.out.println(history.getBlockCode()+"======"+history.getTradeDate());
             historyBlockStocksService.save(history);
         }
     }
@@ -123,7 +128,7 @@ public class ThsDataComponent {
                 stocks.add(blockStockDTO.getStockCode());
             }
         }
-        Date fisrtDate = DateUtil.parseDate("20220701", DateUtil.yyyyMMdd);
+        Date fisrtDate = DateUtil.parseDate("20171201", DateUtil.yyyyMMdd);
         Date endDate = DateTimeUtils.getDate000000(new Date());
         Date date = DateUtil.parseDate("19910101", DateUtil.yyyyMMdd);
         List<String> reals = Lists.newArrayList();
@@ -174,9 +179,9 @@ public class ThsDataComponent {
         return historys;
     }
 
-    public List<BlockStockDTO> getBlockStocks(String blockCode){
+    public List<BlockStockDTO> getBlockStocks(String blockCode,String tradeDateStr){
         ArrayList<BlockStockDTO> list = Lists.newArrayList();
-        String quote_str = JDIBridge.THS_DataPool("indexConsRecord",blockCode+".TI;1990-02-01;2022-05-19;全部","date:Y,thscode:Y,securityName:Y,status:Y");
+        String quote_str = JDIBridge.THS_DataPool("indexConsRecord",blockCode+".TI;1990-02-01;"+tradeDateStr+";全部","date:Y,thscode:Y,securityName:Y,status:Y");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);
             JSONArray tables = jsonObject.getJSONArray("tables");

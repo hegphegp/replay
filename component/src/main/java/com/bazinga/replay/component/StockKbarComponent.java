@@ -203,6 +203,26 @@ public class StockKbarComponent {
         }
     }
 
+    public StockKbar initSpecialStockKbarRecentTradeDate(String stockCode, String stockName,String tradeDate) {
+        for(int i=0;i<100;i++) {
+            DataTable dataTable = TdxHqUtil.getIndexSecurityBars(KCate.DAY, stockCode, i, 1);
+            List<StockKbar> stockKbarList = StockKbarConvert.convertSpecial(dataTable, stockCode, stockName);
+            if (CollectionUtils.isEmpty(stockKbarList)) {
+                return null;
+            }
+            for (StockKbar stockKbar : stockKbarList) {
+                if(stockKbar.getKbarDate().equals(tradeDate)) {
+                    stockKbar.setAdjClosePrice(stockKbar.getClosePrice());
+                    stockKbar.setAdjOpenPrice(stockKbar.getOpenPrice());
+                    stockKbar.setAdjHighPrice(stockKbar.getHighPrice());
+                    stockKbar.setAdjLowPrice(stockKbar.getLowPrice());
+                    return stockKbar;
+                }
+            }
+        }
+        return null;
+    }
+
     public BigDecimal calCurrentIndexKbarOpenPrice(String stockCode, String stockName, int days) {
         try {
             for(int i=0;i<days;i++) {

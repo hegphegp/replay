@@ -180,7 +180,7 @@ public class BaseTestCase {
         stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
-        //String dateyyyyMMhh = "20221202";
+        //String dateyyyyMMhh = "20221209";
         thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"399300","沪深300",".SZ");
         thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");
     }
@@ -203,10 +203,11 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
+        historyBlockInfoComponent.initHistoryBlockInfo();
+        /*stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
-        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);*/
         /*stockKbarComponent.initSpecialStockAndSaveKbarData("000016","上证50",1200);
         stockKbarComponent.initSpecialStockAndSaveKbarData("000852","中证1000",1200);
         stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500",1200);

@@ -63,10 +63,10 @@ public class GatherAmountComponent {
     public static final ExecutorService THREAD_POOL_QUOTE_GATHER_AMOUNT = ThreadPoolUtils.create(4, 8, 512, "QuoteThreadPool");
 
     public void gatherAmountBuy(){
-        getGatherAmountLevel();
+        //getGatherAmountLevel();
 
 
-        /*List<GatherAmountLevelBuyDTO> buys = stockGatherAmountDate();
+        List<GatherAmountLevelBuyDTO> buys = stockGatherAmountDate();
         List<Object[]> datas = Lists.newArrayList();
 
         for (GatherAmountLevelBuyDTO dto:buys) {
@@ -79,6 +79,8 @@ public class GatherAmountComponent {
             list.add(dto.getGatherLevel());
             list.add(dto.getBuyAmount());
             list.add(dto.getBuyRate());
+            list.add(dto.isBuyIsPlank());
+            list.add(dto.getOpenRate());
             list.add(dto.getMorProfit());
             list.add(dto.getProfitEnd());
 
@@ -86,13 +88,13 @@ public class GatherAmountComponent {
             datas.add(objects);
         }
 
-        String[] rowNames = {"index","股票代码","股票名称","交易日期","集合成交额","集合成交额排名","买入时成交额","买入时候涨幅","早盘卖出利润","尾盘卖出利润"};
+        String[] rowNames = {"index","股票代码","股票名称","交易日期","集合成交额","集合成交额排名","买入时成交额","买入时候涨幅","买入是否是板","开盘涨幅","早盘卖出利润","尾盘卖出利润"};
         PoiExcelUtil poiExcelUtil = new PoiExcelUtil("集合排名买入",rowNames,datas);
         try {
             poiExcelUtil.exportExcelUseExcelTitle("集合排名买入");
         }catch (Exception e){
             log.info(e.getMessage());
-        }*/
+        }
     }
 
     public List<GatherAmountLevelBuyDTO> stockGatherAmountDate(){
@@ -101,6 +103,13 @@ public class GatherAmountComponent {
         List<RedisMonior> redisMoniors = redisMoniorService.listByCondition(redisMoniorQuery);
         for (RedisMonior redisMonior:redisMoniors){
             String redisValue = redisMonior.getRedisValue();
+            String redisKey = redisMonior.getRedisKey();
+            String substring = redisKey.substring(0, 8);
+            Date date = DateUtil.parseDate(substring, DateUtil.yyyyMMdd);
+            if(!date.before(DateUtil.parseDate("20220101",DateUtil.yyyyMMdd))){
+                continue;
+            }
+
             List<GatherAmountLevelBuyDTO> buyDays = JSONObject.parseArray(redisValue, GatherAmountLevelBuyDTO.class);
             for (GatherAmountLevelBuyDTO dto:buyDays){
                 List<GatherAmountLevelBuyDTO> stockDtos = map.get(dto.getStockCode());
@@ -138,10 +147,10 @@ public class GatherAmountComponent {
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            /*THREAD_POOL_QUOTE_GATHER_AMOUNT.execute(() ->{
+            THREAD_POOL_QUOTE_GATHER_AMOUNT.execute(() ->{
                 getGatherAmountLevelOneDay(tradeDatePool,circulateInfos);
-            });*/
-            getGatherAmountLevelOneDay(tradeDatePool,circulateInfos);
+            });
+            //getGatherAmountLevelOneDay(tradeDatePool,circulateInfos);
         }
         System.out.println("===========进入睡眠时间了=============");
         try {
@@ -152,52 +161,56 @@ public class GatherAmountComponent {
     }
 
     public void getGatherAmountLevelOneDay(TradeDatePool tradeDatePool,List<CirculateInfo> circulateInfos){
-        List<GatherAmountLevelBuyDTO> list = Lists.newArrayList();
-        String dateyyyyMMdd = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
-        System.out.println(dateyyyyMMdd);
-        RedisMonior byRedisKey = redisMoniorService.getByRedisKey(dateyyyyMMdd + "_gatherAmount");
-        if(byRedisKey!=null){
-            return;
-        }
-        Date start = new Date();
-        Map<String, StockKbar> stockKbarMap = getStockKbarMap(dateyyyyMMdd);
-        int index = 0;
-        for (CirculateInfo circulateInfo:circulateInfos){
-            index++;
-            StockKbar stockKbar = stockKbarMap.get(circulateInfo.getStockCode());
-            if(stockKbar==null||stockKbar.getTradeAmount()==null||stockKbar.getTradeAmount().compareTo(new BigDecimal("40000000"))==-1){
-                continue;
+        try {
+            List<GatherAmountLevelBuyDTO> list = Lists.newArrayList();
+            String dateyyyyMMdd = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+            System.out.println(dateyyyyMMdd);
+            RedisMonior byRedisKey = redisMoniorService.getByRedisKey(dateyyyyMMdd + "_gatherAmount");
+            if (byRedisKey != null) {
+                return;
             }
-            //System.out.println(circulateInfo.getStockCode()+"===="+index);
-            GatherAmountLevelBuyDTO buyDTO = new GatherAmountLevelBuyDTO();
-            buyDTO.setStockCode(circulateInfo.getStockCode());
-            buyDTO.setStockName(circulateInfo.getStockName());
-            buyDTO.setTradeDate(dateyyyyMMdd);
-            buyInfo(circulateInfo.getStockCode(),dateyyyyMMdd,buyDTO);
-            if(buyDTO.getGatherAmount().compareTo(BigDecimal.ZERO)==1) {
-                list.add(buyDTO);
+            Date start = new Date();
+            Map<String, StockKbar> stockKbarMap = getStockKbarMap(dateyyyyMMdd);
+            int index = 0;
+            for (CirculateInfo circulateInfo : circulateInfos) {
+                index++;
+                StockKbar stockKbar = stockKbarMap.get(circulateInfo.getStockCode());
+                if (stockKbar == null || stockKbar.getTradeAmount() == null || stockKbar.getTradeAmount().compareTo(new BigDecimal("40000000")) == -1) {
+                    continue;
+                }
+                //System.out.println(circulateInfo.getStockCode()+"===="+index);
+                GatherAmountLevelBuyDTO buyDTO = new GatherAmountLevelBuyDTO();
+                buyDTO.setStockCode(circulateInfo.getStockCode());
+                buyDTO.setStockName(circulateInfo.getStockName());
+                buyDTO.setTradeDate(dateyyyyMMdd);
+                buyInfo(circulateInfo.getStockCode(), dateyyyyMMdd, buyDTO);
+                if (buyDTO.getGatherAmount().compareTo(BigDecimal.ZERO) == 1) {
+                    list.add(buyDTO);
+                }
             }
-        }
-        long l = new Date().getTime() - start.getTime();
-        System.out.println(dateyyyyMMdd+"====="+l);
-        if(CollectionUtils.isEmpty(list)){
-            return;
-        }
-        List<GatherAmountLevelBuyDTO> alls = GatherAmountLevelBuyDTO.gatherAmountSort(list);
-        if(alls.size()>200){
-            alls = alls.subList(0,200);
-        }
-        int i=0;
-        for (GatherAmountLevelBuyDTO dto:alls){
-            i++;
-            dto.setGatherLevel(i);
+            long l = new Date().getTime() - start.getTime();
+            System.out.println(dateyyyyMMdd + "=====" + l);
+            if (CollectionUtils.isEmpty(list)) {
+                return;
+            }
+            List<GatherAmountLevelBuyDTO> alls = GatherAmountLevelBuyDTO.gatherAmountSort(list);
+            if (alls.size() > 200) {
+                alls = alls.subList(0, 200);
+            }
+            int i = 0;
+            for (GatherAmountLevelBuyDTO dto : alls) {
+                i++;
+                dto.setGatherLevel(i);
 
+            }
+            RedisMonior redisMonior = new RedisMonior();
+            redisMonior.setRedisKey(dateyyyyMMdd + "_gatherAmount");
+            redisMonior.setRedisValue(JSONObject.toJSONString(alls));
+            redisMonior.setCreateTime(new Date());
+            redisMoniorService.save(redisMonior);
+        }catch (Exception e){
+            log.error(e.getMessage(),e);
         }
-        RedisMonior redisMonior = new RedisMonior();
-        redisMonior.setRedisKey(dateyyyyMMdd+"_gatherAmount");
-        redisMonior.setRedisValue(JSONObject.toJSONString(alls));
-        redisMonior.setCreateTime(new Date());
-        redisMoniorService.save(redisMonior);
     }
 
     public Map<String,StockKbar> getStockKbarMap(String tradeDate){
@@ -253,6 +266,8 @@ public class GatherAmountComponent {
             if(stockKbar.getKbarDate().equals(dto.getTradeDate())){
                 BigDecimal chuQuanPrice = chuQuanAvgPrice(dto.getRealBuyPrice(), stockKbar);
                 if(preStockKbar!=null){
+                    BigDecimal openRate = PriceUtil.getPricePercentRate(stockKbar.getAdjOpenPrice().subtract(preStockKbar.getAdjClosePrice()), preStockKbar.getAdjClosePrice());
+                    dto.setOpenRate(openRate);
                     BigDecimal rate = PriceUtil.getPricePercentRate(chuQuanPrice.subtract(preStockKbar.getAdjClosePrice()), preStockKbar.getAdjClosePrice());
                     dto.setBuyRate(rate);
                     boolean historyUpperPrice = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), dto.getRealBuyPrice(), preStockKbar.getClosePrice(), stockKbar.getKbarDate());
@@ -281,10 +296,12 @@ public class GatherAmountComponent {
             }
             if(morSell==1){
                 BigDecimal avgPriceTen = historyTransactionDataComponent.calTenAvgPrice(stockKbar.getStockCode(), DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd));
-                BigDecimal chuQuanAvgPrice = chuQuanAvgPrice(avgPriceTen, stockKbar);
-                BigDecimal buyChuQuanPrice = chuQuanAvgPrice(dto.getRealBuyPrice(), buyStockKbar);
-                BigDecimal rate = PriceUtil.getPricePercentRate(chuQuanAvgPrice.subtract(buyChuQuanPrice), buyChuQuanPrice);
-                dto.setMorProfit(rate);
+                if(avgPriceTen!=null) {
+                    BigDecimal chuQuanAvgPrice = chuQuanAvgPrice(avgPriceTen, stockKbar);
+                    BigDecimal buyChuQuanPrice = chuQuanAvgPrice(dto.getRealBuyPrice(), buyStockKbar);
+                    BigDecimal rate = PriceUtil.getPricePercentRate(chuQuanAvgPrice.subtract(buyChuQuanPrice), buyChuQuanPrice);
+                    dto.setMorProfit(rate);
+                }
                 return;
             }
             if(stockKbar.getKbarDate().equals(dto.getTradeDate())){
