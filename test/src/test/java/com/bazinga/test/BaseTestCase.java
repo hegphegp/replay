@@ -103,6 +103,8 @@ public class BaseTestCase {
     private ThsStockIndexComponent thsStockIndexComponent;
     @Autowired
     private ThsBlockStocksComponent thsBlockStocksComponent;
+    @Autowired
+    private IndexKbarCurrentComponent indexKbarCurrentComponent;
 
 
     @Test
@@ -146,6 +148,8 @@ public class BaseTestCase {
         stockBollingComponent.calCurrentDayBoll(date);
         thsBlockStocksComponent.indexBLockDetail();
         historyBlockInfoComponent.initHistoryBlockInfo();
+        indexKbarCurrentComponent.indexStockKbarSend();
+        indexKbarCurrentComponent.stockIndexSend();
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
     }
