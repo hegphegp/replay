@@ -105,6 +105,8 @@ public class BaseTestCase {
     private ThsBlockStocksComponent thsBlockStocksComponent;
     @Autowired
     private IndexKbarCurrentComponent indexKbarCurrentComponent;
+    @Autowired
+    private ThsCurrentQuoteSaveComponent thsCurrentQuoteSaveComponent;
 
 
     @Test
@@ -150,6 +152,7 @@ public class BaseTestCase {
         historyBlockInfoComponent.initHistoryBlockInfo();
         indexKbarCurrentComponent.indexStockKbarSend();
         indexKbarCurrentComponent.stockIndexSend();
+        thsCurrentQuoteSaveComponent.saveHS300FutureQuoteIndex(DateUtil.format(new Date(),DateUtil.yyyy_MM_dd));
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
     }
@@ -207,7 +210,8 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        historyBlockInfoComponent.initHistoryBlockInfo();
+        thsCurrentQuoteSaveComponent.saveHS300FutureQuoteIndex("2022-12-15");
+        //historyBlockInfoComponent.initHistoryBlockInfo();
         /*stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);

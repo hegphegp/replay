@@ -157,6 +157,7 @@ public class FutureQuoteIndex implements Serializable {
      * @是否索引   NO
      */
     private BigDecimal avgSellPrice;
+    private BigDecimal avgPrice;
 
     /**
      * 成交额

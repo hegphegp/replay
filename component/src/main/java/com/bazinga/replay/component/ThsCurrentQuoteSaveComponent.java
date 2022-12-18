@@ -5,18 +5,17 @@ import Ths.JDIBridge;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
-import com.bazinga.replay.dto.BlockStockDTO;
-import com.bazinga.replay.model.*;
-import com.bazinga.replay.query.HistoryBlockStocksQuery;
+import com.bazinga.replay.model.FutureQuoteIndex;
+import com.bazinga.replay.model.ThsQuoteInfo;
+import com.bazinga.replay.model.TradeDatePool;
+import com.bazinga.replay.query.FutureQuoteIndexQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
+import com.bazinga.replay.service.FutureQuoteIndexService;
 import com.bazinga.replay.service.HistoryBlockStocksService;
 import com.bazinga.replay.service.ThsQuoteInfoService;
 import com.bazinga.replay.service.TradeDatePoolService;
-import com.bazinga.util.DateTimeUtils;
 import com.bazinga.util.DateUtil;
-import com.bazinga.util.MarketUtil;
 import com.bazinga.util.ThreadPoolUtils;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static Ths.JDIBridge.THS_Snapshot;
@@ -35,9 +35,9 @@ import static Ths.JDIBridge.THS_Snapshot;
  */
 @Component
 @Slf4j
-public class ThsQuoteSaveComponent {
+public class ThsCurrentQuoteSaveComponent {
     @Autowired
-    private ThsQuoteInfoService thsQuoteInfoService;
+    private FutureQuoteIndexService futureQuoteIndexService;
     @Autowired
     private TradeDatePoolService tradeDatePoolService;
     @Autowired
@@ -45,38 +45,22 @@ public class ThsQuoteSaveComponent {
 
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
-    public void saveHS300FutureQuoteIndex(){
-        int ret = thsLogin();
-        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("2021-09-10",DateUtil.yyyy_MM_dd));
-        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
-        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
-        for (TradeDatePool tradeDatePool:tradeDatePools){
-            System.out.println(DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.yyyy_MM_dd)+ "===  开始了");
-            quoteHuShen300QiHuo(DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.yyyy_MM_dd));
-            System.out.println(DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.yyyy_MM_dd)+ "=========  结束了");
+    public void saveHS300FutureQuoteIndex(String dateStr){
+        Date date = DateUtil.parseDate(dateStr, DateUtil.yyyy_MM_dd);
+        FutureQuoteIndexQuery query = new FutureQuoteIndexQuery();
+        query.setQuoteDate(DateUtil.format(date,DateUtil.yyyyMMdd));
+        List<FutureQuoteIndex> futureQuoteIndices = futureQuoteIndexService.listByCondition(query);
+        if(CollectionUtils.isEmpty(futureQuoteIndices)) {
+            int ret = thsLogin();
+            quoteCurrentDayHuShen300QiHuo(dateStr);
+            thsLoginOut();
         }
-        thsLoginOut();
 
     }
 
-    public void saveQuoteHuShen300QiHuo(){
-        int ret = thsLogin();
-        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("2021-09-10",DateUtil.yyyy_MM_dd));
-        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
-        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
-        for (TradeDatePool tradeDatePool:tradeDatePools){
-            System.out.println(DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.yyyy_MM_dd)+ "===  开始了");
-            quoteHuShen300QiHuo(DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.yyyy_MM_dd));
-            System.out.println(DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.yyyy_MM_dd)+ "=========  结束了");
-        }
-        thsLoginOut();
+    public void quoteCurrentDayHuShen300QiHuo(String tradeDate){
 
-    }
-
-    public void quoteHuShen300QiHuo(String tradeDate){
-        String quote_str = THS_Snapshot("IFZL.CFE","preClose;latest;amt;latestVolume;ms;amount","",tradeDate+" 09:15:00",tradeDate+" 15:00:00");
+        String quote_str = THS_Snapshot("IFZL.CFE","ms;preClose;latest;avgPrice;amt;vol;amount;volume;dealtype","",tradeDate+" 09:15:00",tradeDate+" 15:30:00");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);
             JSONArray tables = jsonObject.getJSONArray("tables");
@@ -92,22 +76,26 @@ public class ThsQuoteSaveComponent {
             JSONObject tableInfo = tableJson.getJSONObject("table");
             List<BigDecimal> amts = tableInfo.getJSONArray("amt").toJavaList(BigDecimal.class);
             List<BigDecimal> amounts = tableInfo.getJSONArray("amount").toJavaList(BigDecimal.class);
-            List<BigDecimal> vols = tableInfo.getJSONArray("latestVolume").toJavaList(BigDecimal.class);
+            List<BigDecimal> vols = tableInfo.getJSONArray("vol").toJavaList(BigDecimal.class);
+            List<BigDecimal> volumes = tableInfo.getJSONArray("volume").toJavaList(BigDecimal.class);
             List<BigDecimal> latests = tableInfo.getJSONArray("latest").toJavaList(BigDecimal.class);
             List<BigDecimal> preCloses = tableInfo.getJSONArray("preClose").toJavaList(BigDecimal.class);
-            List<String> miss = tableInfo.getJSONArray("ms").toJavaList(String.class);
+            List<BigDecimal> avgPrices = tableInfo.getJSONArray("avgPrice").toJavaList(BigDecimal.class);
+            List<String> dealTypes = tableInfo.getJSONArray("dealtype").toJavaList(String.class);
             int i = 0;
             for (String time:times){
                 Date date = DateUtil.parseDate(time, DateUtil.DEFAULT_FORMAT);
-                ThsQuoteInfo quote = new ThsQuoteInfo();
+                FutureQuoteIndex quote = new FutureQuoteIndex();
                 quote.setStockCode("IFZLCFE");
                 quote.setStockName("中证500股指期货");
                 quote.setQuoteDate(DateUtil.format(date,DateUtil.yyyyMMdd));
                 quote.setQuoteTime(DateUtil.format(date,DateUtil.HHmmss));
-                quote.setCurrentPrice(latests.get(i));
-                quote.setPreClosePrice(preCloses.get(i));
-                Long timeStamp = formatTimeStamp(quote.getQuoteDate(), quote.getQuoteTime(), miss.get(i));
+                Long timeStamp = formatTimeStamp(quote.getQuoteDate(), quote.getQuoteTime(), "000");
                 quote.setTimeStamp(timeStamp);
+                quote.setPreClosePrice(preCloses.get(i));
+                quote.setCurrentPrice(latests.get(i));
+                quote.setAvgPrice(avgPrices.get(i));
+                quote.setDealType(dealTypes.get(i));
                 if(amts.get(i)==null) {
                     quote.setAmt(BigDecimal.ZERO);
                 }else{
@@ -119,7 +107,8 @@ public class ThsQuoteSaveComponent {
                 }else{
                     quote.setVol(vols.get(i).longValue());
                 }
-                thsQuoteInfoService.save(quote);
+                quote.setVolume(volumes.get(i).longValue());
+                futureQuoteIndexService.save(quote);
                 i++;
             }
         }
@@ -144,7 +133,7 @@ public class ThsQuoteSaveComponent {
     public int thsLogin(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("lsyjx002", "334033");
+            int ret = JDIBridge.THS_iFinDLogin("lsyjx002", "091303");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);
@@ -155,7 +144,7 @@ public class ThsQuoteSaveComponent {
     public int thsLoginOut(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("lsyjx002", "334033");
+            int ret = JDIBridge.THS_iFinDLogin("lsyjx002", "091303");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);

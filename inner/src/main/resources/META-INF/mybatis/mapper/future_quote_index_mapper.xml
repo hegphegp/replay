@@ -19,6 +19,7 @@
         <result column="total_buy_volume" jdbcType="BIGINT" property="totalBuyVolume"/>
         <result column="avg_buy_price" jdbcType="DECIMAL" property="avgBuyPrice"/>
         <result column="avg_sell_price" jdbcType="DECIMAL" property="avgSellPrice"/>
+        <result column="avg_price" jdbcType="DECIMAL" property="avgPrice"/>
         <result column="amt" jdbcType="DECIMAL" property="amt"/>
         <result column="vol" jdbcType="BIGINT" property="vol"/>
         <result column="amount" jdbcType="DECIMAL" property="amount"/>
@@ -46,6 +47,7 @@
             total_buy_volume,
             avg_buy_price,
             avg_sell_price,
+            avg_price,
             amt,
             vol,
             amount,
@@ -83,6 +85,7 @@
             #{totalBuyVolume, jdbcType=BIGINT},
             #{avgBuyPrice, jdbcType=DECIMAL},
             #{avgSellPrice, jdbcType=DECIMAL},
+            #{avgPrice, jdbcType=DECIMAL},
             #{amt, jdbcType=DECIMAL},
             #{vol, jdbcType=BIGINT},
             #{amount, jdbcType=DECIMAL},
@@ -140,6 +143,9 @@
             </if>
             <if test="avgSellPrice != null">
                 avg_sell_price = #{avgSellPrice, jdbcType=DECIMAL},
+            </if>
+            <if test="avgPrice != null">
+                avg_price = #{avgPrice, jdbcType=DECIMAL},
             </if>
             <if test="amt != null">
                 amt = #{amt, jdbcType=DECIMAL},
@@ -211,6 +217,9 @@
         </if>
         <if test="avgSellPrice != null">
             and avg_sell_price = #{avgSellPrice, jdbcType=DECIMAL}
+        </if>
+        <if test="avgPrice != null">
+            and avg_price = #{avgPrice, jdbcType=DECIMAL}
         </if>
         <if test="amt != null">
             and amt = #{amt, jdbcType=DECIMAL}
