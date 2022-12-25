@@ -127,20 +127,24 @@ public class ThsTest {
     private GatherAmountComponent gatherAmountComponent;
     @Autowired
     private ThreePlankBuyBlockComponent threePlankBuyBlockComponent;
+    @Autowired
+    private ThreePlankBuyHotBlockComponent threePlankBuyHotBlockComponent;
 
 
 
     @Test
     public void test1() {
+        //threePlankBuyHotBlockComponent.threePlankHotBlockBuyTest();
+        //threePlankBuyHotBlockComponent.getAlLPlanks();
         //threePlankBuyBlockComponent.threePlankBuyTest();
         //gatherAmountComponent.gatherAmountBuy();
         /*blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         replayFenBanRateComponent.plankFenBan();*/
         //stockFactorDuanXianTwoComponent.factorTest();
-        //stockFactorWuDiNewTwoComponent.factorTest();
+        stockFactorWuDiNewTwoComponent.factorTest();
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
 
-        //stockFactorTestThreeComponent.factorTest();
+       // stockFactorTestThreeComponent.factorTest();
         //indexKbarCurrentComponent.indexKbarCurrent();
         /*indexKbarCurrentComponent.indexStockKbarSend();
         indexKbarCurrentComponent.stockIndexSend();*/

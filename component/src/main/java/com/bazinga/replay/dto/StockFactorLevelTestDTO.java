@@ -30,4 +30,6 @@ public class StockFactorLevelTestDTO {
     private Integer blockLevel;
     private Integer blockCount;
     private int planks;
+    private BigDecimal profitAvgPrice;
+    private BigDecimal profitEndPrice;
 }

@@ -84,13 +84,15 @@ public class StockFactorWuDiNewTwoComponent {
             list.add(dto.getNextDayHighRate());
             list.add(dto.getBlockCount());
             list.add(dto.getBlockLevel());
+            list.add(dto.getProfitAvgPrice());
+            list.add(dto.getProfitEndPrice());
             Object[] objects = list.toArray();
             datas.add(objects);
         }
 
 
         String[] rowNames = {"index","股票代码","股票名称","交易日期","市值","因子日收盘涨幅","交易日开盘涨幅","排名","市值排名","连板高度","因子日成交额","因子前一日成交额","前一日因子",
-                "当日因子","3日涨幅","5日涨幅","10日涨幅","行业代码","行业名称","买入日低点","买入日高点","板块数量","板块排名"};
+                "当日因子","3日涨幅","5日涨幅","10日涨幅","行业代码","行业名称","买入日低点","买入日高点","板块数量","板块排名","均价卖出","尾盘卖出"};
         PoiExcelUtil poiExcelUtil = new PoiExcelUtil("美国往事",rowNames,datas);
         try {
             poiExcelUtil.exportExcelUseExcelTitle("美国往事");
@@ -114,7 +116,7 @@ public class StockFactorWuDiNewTwoComponent {
             if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(tradeDatePool.getTradeDate().after(DateUtil.parseDate("20220901", DateUtil.yyyyMMdd))){
+            if(!tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220110", DateUtil.yyyyMMdd))){
                 continue;
             }
             List<StockFactorLevelTestDTO> dayBuys = Lists.newArrayList();
@@ -183,6 +185,10 @@ public class StockFactorWuDiNewTwoComponent {
                             getLowAndHighRate(circulateInfo.getStockCode(),nextKbar.getKbarDate(),stockKbar,nextKbar,buyDTO);
                             BigDecimal nextOpenRate = PriceUtil.getPricePercentRate(nextKbar.getAdjOpenPrice().subtract(stockKbar.getAdjClosePrice()), stockKbar.getAdjClosePrice());
                             buyDTO.setNextDayOpenRate(nextOpenRate);
+                            BigDecimal allProfit = calAllProfit(nextKbar, stockKbars);
+                            BigDecimal endProfit = calEndNoPlankProfit(stockKbars,nextKbar);
+                            buyDTO.setProfitAvgPrice(allProfit);
+                            buyDTO.setProfitEndPrice(endProfit);
                             getBlockInfo(circulateInfo.getStockCode(),stockKbar.getKbarDate(),buyDTO);
                             dayBuys.add(buyDTO);
                         }
@@ -195,6 +201,57 @@ public class StockFactorWuDiNewTwoComponent {
             buys.addAll(dayBuys);
         }
         return buys;
+    }
+
+    public BigDecimal  calAllProfit(ThsStockKbar buyKbar, List<ThsStockKbar> stockKbars){
+        int allSell = 0;
+        boolean flag = false;
+        for (ThsStockKbar stockKbar:stockKbars){
+            if(flag){
+                if(!stockKbar.getHighPrice().equals(stockKbar.getLowPrice())){
+                    allSell++;
+                }
+            }
+            if(allSell==1){
+                if(stockKbar.getTradeAmount()!=null&&stockKbar.getTradeQuantity()!=null&&stockKbar.getTradeQuantity()!=0) {
+                    BigDecimal avgPrice = stockKbar.getTradeAmount().divide(new BigDecimal(stockKbar.getTradeQuantity() * 100), 2, BigDecimal.ROUND_HALF_UP);
+                    BigDecimal chuQuanAvgPrice = chuQuanAvgPrice(avgPrice, stockKbar);
+                    BigDecimal rate = PriceUtil.getPricePercentRate(chuQuanAvgPrice.subtract(buyKbar.getAdjOpenPrice()), buyKbar.getAdjOpenPrice());
+                    return rate;
+                }
+                return null;
+            }
+            if(stockKbar.getKbarDate().equals(buyKbar.getKbarDate())){
+                flag = true;
+            }
+        }
+        return null;
+    }
+
+    public BigDecimal  calEndProfit(ThsStockKbar buyKbar, List<ThsStockKbar> stockKbars){
+        int endSell = 0;
+        boolean flag = false;
+        ThsStockKbar preStockKbar = null;
+        for (ThsStockKbar stockKbar:stockKbars){
+            if(flag){
+                if(!stockKbar.getHighPrice().equals(stockKbar.getLowPrice())) {
+                    boolean endUpperPrice = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getClosePrice(), preStockKbar.getClosePrice(), stockKbar.getKbarDate());
+                    if (!endUpperPrice) {
+                        endSell++;
+                    }
+                }
+            }
+            if(endSell==1){
+                BigDecimal chuQuanAvgPrice = stockKbar.getAdjClosePrice();
+                BigDecimal rate = PriceUtil.getPricePercentRate(chuQuanAvgPrice.subtract(buyKbar.getAdjOpenPrice()), buyKbar.getAdjOpenPrice());
+                return rate;
+            }
+            if(stockKbar.getKbarDate().equals(buyKbar.getKbarDate())){
+                flag = true;
+            }
+            preStockKbar = stockKbar;
+        }
+        return null;
     }
 
     public Map<String, Integer> getMarketBigStocks(Map<String, ThsCirculateInfo> circulateInfoMap, String tradeDate){
@@ -425,7 +482,7 @@ public class StockFactorWuDiNewTwoComponent {
 
 
 
-    public BigDecimal calProfit(List<ThsStockKbar> stockKbars,StockKbar buyStockKbar){
+    public BigDecimal calProfit(List<ThsStockKbar> stockKbars,ThsStockKbar buyStockKbar){
         boolean flag = false;
         int i=0;
         for (ThsStockKbar stockKbar:stockKbars){
@@ -447,11 +504,11 @@ public class StockFactorWuDiNewTwoComponent {
         return null;
     }
 
-    public BigDecimal calEndNoPlankProfit(List<StockKbar> stockKbars,StockKbar buyStockKbar){
+    public BigDecimal calEndNoPlankProfit(List<ThsStockKbar> stockKbars,ThsStockKbar buyStockKbar){
         boolean flag = false;
         int i=0;
-        StockKbar preKbar = null;
-        for (StockKbar stockKbar:stockKbars){
+        ThsStockKbar preKbar = null;
+        for (ThsStockKbar stockKbar:stockKbars){
             if(flag){
                 boolean endUpper = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getClosePrice(), preKbar.getClosePrice(), stockKbar.getKbarDate());
                 if(!endUpper){
