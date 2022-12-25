@@ -141,6 +141,7 @@ public class ThsTest {
         /*blockFollowStaticCurrentComponent.blockFollowStaticInfo();
         replayFenBanRateComponent.plankFenBan();*/
         //stockFactorDuanXianTwoComponent.factorTest();
+        //线上使用版本
         stockFactorWuDiNewTwoComponent.factorTest();
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
 
