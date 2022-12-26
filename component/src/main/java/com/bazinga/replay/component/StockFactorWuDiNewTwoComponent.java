@@ -113,10 +113,10 @@ public class StockFactorWuDiNewTwoComponent {
         List<StockFactorLevelTestDTO> buys = Lists.newArrayList();
         int i =0;
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220101", DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20221001", DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(!tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220110", DateUtil.yyyyMMdd))){
+            if(!tradeDatePool.getTradeDate().before(DateUtil.parseDate("20221222", DateUtil.yyyyMMdd))){
                 continue;
             }
             List<StockFactorLevelTestDTO> dayBuys = Lists.newArrayList();
@@ -168,11 +168,11 @@ public class StockFactorWuDiNewTwoComponent {
                         buyDTO.setPlanks(planks);
                         buyDTO.setEndRate(endRate);
                         buyDTO.setMarketValue(stockKbar.getMarketValue());
-                        buyDTO.setIndex2a(stockFactor.getIndex1());
+                        buyDTO.setIndex2a(stockFactor.getIndex2a());
                         buyDTO.setAmount(stockKbar.getTradeAmount());
                         buyDTO.setPreAmount(preKbar.getTradeAmount());
                         if(preStockFactor!=null){
-                            buyDTO.setPreIndex2a(preStockFactor.getIndex1());
+                            buyDTO.setPreIndex2a(preStockFactor.getIndex2a());
                         }
                         buyDTO.setMarketValueLevel(marketSortMap.get(circulateInfo.getStockCode()));
                         ThsStockKbar nextKbar = thsStockKbarService.getByUniqueKey(circulateInfo.getStockCode() + "_" + DateUtil.format(nextDate, DateUtil.yyyyMMdd));
@@ -587,7 +587,7 @@ public class StockFactorWuDiNewTwoComponent {
         try {
             StockFactorQuery query = new StockFactorQuery();
             query.setKbarDate(tradeDateString);
-            query.addOrderBy("index1", Sort.SortType.DESC);
+            query.addOrderBy("index2a", Sort.SortType.DESC);
             query.setLimit(200);
             List<StockFactor> stockFactors = stockFactorService.listByCondition(query);
             return stockFactors;
