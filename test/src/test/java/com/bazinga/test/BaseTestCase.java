@@ -316,7 +316,6 @@ public class BaseTestCase {
 
     @Test
     public void test3() {
-        stockKbarComponent.initSpecialStockAndSaveKbarData("883949","陆股通清仓",1300);
         //stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         //stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300",1200);
         //stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
@@ -358,6 +357,7 @@ public class BaseTestCase {
         //stockPlankDailyComponent.realPlanks(new Date());
 
         //stockKbarComponent.batchKbarDataInit();
+
 
     }
 
