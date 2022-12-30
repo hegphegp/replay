@@ -113,10 +113,10 @@ public class StockFactorWuDiNewTwoComponent {
         List<StockFactorLevelTestDTO> buys = Lists.newArrayList();
         int i =0;
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220501", DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220601", DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(!tradeDatePool.getTradeDate().before(DateUtil.parseDate("20221010", DateUtil.yyyyMMdd))){
+            if(!tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220610", DateUtil.yyyyMMdd))){
                 continue;
             }
             List<StockFactorLevelTestDTO> dayBuys = Lists.newArrayList();
@@ -168,11 +168,11 @@ public class StockFactorWuDiNewTwoComponent {
                         buyDTO.setPlanks(planks);
                         buyDTO.setEndRate(endRate);
                         buyDTO.setMarketValue(stockKbar.getMarketValue());
-                        buyDTO.setIndex2a(stockFactor.getIndex2a());
+                        buyDTO.setIndex2a(stockFactor.getIndex1());
                         buyDTO.setAmount(stockKbar.getTradeAmount());
                         buyDTO.setPreAmount(preKbar.getTradeAmount());
                         if(preStockFactor!=null){
-                            buyDTO.setPreIndex2a(preStockFactor.getIndex2a());
+                            buyDTO.setPreIndex2a(preStockFactor.getIndex1());
                         }
                         buyDTO.setMarketValueLevel(marketSortMap.get(circulateInfo.getStockCode()));
                         ThsStockKbar nextKbar = thsStockKbarService.getByUniqueKey(circulateInfo.getStockCode() + "_" + DateUtil.format(nextDate, DateUtil.yyyyMMdd));
@@ -182,7 +182,7 @@ public class StockFactorWuDiNewTwoComponent {
                             String format = DateUtil.format(nextDate, DateUtil.yyyyMMdd);
                             buyDTO.setTradeDate(format);
                             calBeforeRate(stockKbars,buyDTO);
-                            getLowAndHighRate(circulateInfo.getStockCode(),nextKbar.getKbarDate(),stockKbar,nextKbar,buyDTO);
+                            //getLowAndHighRate(circulateInfo.getStockCode(),nextKbar.getKbarDate(),stockKbar,nextKbar,buyDTO);
                             BigDecimal nextOpenRate = PriceUtil.getPricePercentRate(nextKbar.getAdjOpenPrice().subtract(stockKbar.getAdjClosePrice()), stockKbar.getAdjClosePrice());
                             buyDTO.setNextDayOpenRate(nextOpenRate);
                             BigDecimal allProfit = calAllProfit(nextKbar, stockKbars);
@@ -587,7 +587,7 @@ public class StockFactorWuDiNewTwoComponent {
         try {
             StockFactorQuery query = new StockFactorQuery();
             query.setKbarDate(tradeDateString);
-            query.addOrderBy("index2a", Sort.SortType.DESC);
+            query.addOrderBy("index1", Sort.SortType.DESC);
             query.setLimit(200);
             List<StockFactor> stockFactors = stockFactorService.listByCondition(query);
             return stockFactors;

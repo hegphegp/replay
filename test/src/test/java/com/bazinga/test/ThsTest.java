@@ -129,6 +129,8 @@ public class ThsTest {
     private ThreePlankBuyBlockComponent threePlankBuyBlockComponent;
     @Autowired
     private ThreePlankBuyHotBlockComponent threePlankBuyHotBlockComponent;
+    @Autowired
+    private BlockFollowStaticCurrent4PlankComponent blockFollowStaticCurrent4PlankComponent;
 
 
 
@@ -142,7 +144,8 @@ public class ThsTest {
         replayFenBanRateComponent.plankFenBan();*/
         //stockFactorDuanXianTwoComponent.factorTest();
         //线上使用版本
-        stockFactorWuDiNewTwoComponent.factorTest();
+        //stockFactorWuDiNewTwoComponent.factorTest();
+
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
 
        // stockFactorTestThreeComponent.factorTest();
@@ -159,8 +162,10 @@ public class ThsTest {
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
        // strongPlankDefineComponent.strongPlank();
+        blockFollowStaticCurrent4PlankComponent.blockFollowStaticInfo();
         //用于板块跟随回测 用于线上使用
-        //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+
         //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
        /* strongPlankDefineComponent.strongPlank();
         stockBlockLevelComponent.stockFirstBlockInfo();
@@ -251,6 +256,13 @@ public class ThsTest {
     @Test
     public void test7(){
         thsDataComponent.getOpenPicture("600704","2021-06-25");
+    }
+    @Test
+    public void test10(){
+        //用于4板块跟随回测 用于线上使用
+        blockFollowStaticCurrent4PlankComponent.blockFollowStaticInfo();
+        //用于3板块跟随回测 用于线上使用
+        //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
     }
 
 }

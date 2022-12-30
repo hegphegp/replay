@@ -76,6 +76,7 @@ public class ThsStockIndexComponent {
 
     }
 
+
     public StockIndex shMacdIndexNoSave(String tradeDate,String stockCode,String stockName,String diff){
         TradeDatePoolQuery query = new TradeDatePoolQuery();
         query.setTradeDateFrom(DateUtil.parseDate(tradeDate,DateUtil.yyyyMMdd));
