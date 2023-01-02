@@ -1,5 +1,6 @@
 package com.bazinga.replay.component;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.dto.MarketMoneyDTO;
@@ -12,8 +13,8 @@ import com.bazinga.replay.util.PoiExcelUtil;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.MarketUtil;
 import com.bazinga.util.PriceUtil;
+import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
-import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
-public class StockFactorWuDiNewTwoComponent {
+public class StockFactorWuDiNewOnlineComponent {
     @Autowired
     private ThsCirculateInfoService thsCirculateInfoService;
     @Autowired
@@ -48,18 +50,41 @@ public class StockFactorWuDiNewTwoComponent {
     private StockFactorService stockFactorService;
     @Autowired
     private HistoryTransactionDataComponent historyTransactionDataComponent;
+    @Autowired
+    private RedisMoniorService redisMoniorService;
 
     public static Map<String,Map<String,BigDecimal>> buyPriceCacheMap = new HashMap<>();
+    public static final ExecutorService THREAD_POOL_QUOTE_FACTOR = ThreadPoolUtils.create(4, 32, 512, "QuoteThreadPool");
 
     public static String leveStockCode = "600896,600555,600385,600090,300202,000673,300312,600870,300038,300367,600146,000613,300023,002464,300325,000611,000502,002447,002684,300064,002147,002770,600093,600275,002473,600209,600856,300178,002618,600652,600890,600091,002260,000687,600291,600695,603157,000585,603996,000835,600145,002619,000780,600723,600068,300362,002359,000760,600634,600614,002711,600485,002450,600891,002071,600701,000662,600247,600978,600677,600086,600687,600317";
     //public static String leveStockCode = "1111";
 
 
-    public void factorTest(){
+    public void factorTest(String start,String end,String factor,String excelYear){
         List<TradeDatePool> tradeDatePools = getTradeDatePools();
-        List<StockFactorLevelTestDTO> buys = getPlankTimePairs(tradeDatePools);
+        //getStockFactorLastInfo(tradeDatePools,factor,start,end);
+
+        List<StockFactorLevelTestDTO> allBuys = Lists.newArrayList();
+        for (TradeDatePool tradeDatePool:tradeDatePools){
+            /*boolean before = tradeDatePool.getTradeDate().before(DateUtil.parseDate(start, DateUtil.yyyyMMdd));
+            boolean after = tradeDatePool.getTradeDate().after(DateUtil.parseDate(end, DateUtil.yyyyMMdd));
+            if((!before)&&(!after)) {*/
+                String format = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+                String key = format + "stock_factor_"+factor;
+                RedisMonior redisMonior = redisMoniorService.getByRedisKey(key);
+                if (redisMonior != null) {
+                    String redisValue = redisMonior.getRedisValue();
+                    List<StockFactorLevelTestDTO> stockFactorLevelTestDTOS = JSONObject.parseArray(redisValue, StockFactorLevelTestDTO.class);
+                    for (StockFactorLevelTestDTO dto:stockFactorLevelTestDTOS) {
+                        if(dto.getTradeDate().startsWith(excelYear)) {
+                            allBuys.add(dto);
+                        }
+                    }
+                }
+           // }
+        }
         List<Object[]> datas = Lists.newArrayList();
-        for (StockFactorLevelTestDTO dto:buys) {
+        for (StockFactorLevelTestDTO dto:allBuys) {
             List<Object> list = new ArrayList<>();
             list.add(dto.getStockCode());
             list.add(dto.getStockCode());
@@ -78,27 +103,20 @@ public class StockFactorWuDiNewTwoComponent {
             list.add(dto.getBeforeRateDay3());
             list.add(dto.getBeforeRateDay5());
             list.add(dto.getBeforeRateDay10());
-            list.add(dto.getBlockCode());
-            list.add(dto.getBlockName());
-            list.add(dto.getNextDayLowRate());
-            list.add(dto.getNextDayHighRate());
-            list.add(dto.getBlockCount());
-            list.add(dto.getBlockLevel());
-            list.add(dto.getProfitAvgPrice());
-            list.add(dto.getProfitEndPrice());
             Object[] objects = list.toArray();
             datas.add(objects);
         }
 
 
         String[] rowNames = {"index","股票代码","股票名称","交易日期","市值","因子日收盘涨幅","交易日开盘涨幅","排名","市值排名","连板高度","因子日成交额","因子前一日成交额","前一日因子",
-                "当日因子","3日涨幅","5日涨幅","10日涨幅","行业代码","行业名称","买入日低点","买入日高点","板块数量","板块排名","均价卖出","尾盘卖出"};
+                "当日因子","3日涨幅","5日涨幅","10日涨幅"};
         PoiExcelUtil poiExcelUtil = new PoiExcelUtil("美国往事",rowNames,datas);
         try {
             poiExcelUtil.exportExcelUseExcelTitle("美国往事");
         }catch (Exception e){
             log.info(e.getMessage());
         }
+
     }
 
 
@@ -109,34 +127,52 @@ public class StockFactorWuDiNewTwoComponent {
         return tradeDatePools;
     }
 
-    public List<StockFactorLevelTestDTO> getPlankTimePairs(List<TradeDatePool> tradeDatePools){
-        List<StockFactorLevelTestDTO> buys = Lists.newArrayList();
-        int i =0;
+    public void getStockFactorLastInfo(List<TradeDatePool> tradeDatePools,String factor,String start,String end){
         for (TradeDatePool tradeDatePool:tradeDatePools){
-            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate("20220601", DateUtil.yyyyMMdd))){
+            if(tradeDatePool.getTradeDate().before(DateUtil.parseDate(start, DateUtil.yyyyMMdd))){
                 continue;
             }
-            if(!tradeDatePool.getTradeDate().before(DateUtil.parseDate("20221222", DateUtil.yyyyMMdd))){
+            if(!tradeDatePool.getTradeDate().before(DateUtil.parseDate(end, DateUtil.yyyyMMdd))){
                 continue;
             }
-            List<StockFactorLevelTestDTO> dayBuys = Lists.newArrayList();
-            i++;
+            String dateyyyyMMdd = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+            System.out.println(dateyyyyMMdd);
+            RedisMonior byRedisKey = redisMoniorService.getByRedisKey(dateyyyyMMdd + "stock_factor_" + factor);
+            if(byRedisKey!=null){
+                continue;
+            }
+            THREAD_POOL_QUOTE_FACTOR.execute(() -> {
+                getPlankTimePairs(tradeDatePool, factor);
+            });
+        }
+        try {
+            Thread.sleep(10000000000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getPlankTimePairs(TradeDatePool tradeDatePool,String factor ){
             String dateyyyyMMdd = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
             String dateStr = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyy_MM_dd);
-            System.out.println(dateyyyyMMdd+"-----"+i);
+            RedisMonior byRedisKey = redisMoniorService.getByRedisKey(dateyyyyMMdd + "stock_factor_" + factor);
+            if(byRedisKey!=null){
+                return;
+            }
+            List<StockFactorLevelTestDTO> dayBuys = Lists.newArrayList();
             ThsCirculateInfoQuery circulateInfoQuery = new ThsCirculateInfoQuery();
             circulateInfoQuery.setTradeDate(dateyyyyMMdd);
             List<ThsCirculateInfo> circulateInfos = thsCirculateInfoService.listByCondition(circulateInfoQuery);
             Map<String, ThsCirculateInfo> circulateInfoMap = circulateInfos.stream().collect(Collectors.toMap(ThsCirculateInfo::getStockCode, circulateInfo -> circulateInfo));
             if(CollectionUtils.isEmpty(circulateInfos)){
-                continue;
+                return;
             }
             Date nextDate = commonComponent.afterTradeDate(tradeDatePool.getTradeDate());
             Date preDate = commonComponent.preTradeDate(tradeDatePool.getTradeDate());
-            List<StockFactor> stockFactors200 = getStockFactors200(dateStr);
+            List<StockFactor> stockFactors200 = getStockFactors200(dateStr,factor);
             Map<String, StockFactor> preFactorMap = indexFactorMap(DateUtil.format(preDate, DateUtil.yyyy_MM_dd));
             if(CollectionUtils.isEmpty(stockFactors200)){
-                continue;
+                return;
             }
             Map<String, Integer> marketSortMap = getMarketBigStocks(circulateInfoMap, dateyyyyMMdd);
             int level = 0;
@@ -158,7 +194,7 @@ public class StockFactorWuDiNewTwoComponent {
                 for (ThsStockKbar stockKbar:stockKbars){
                     limitQueue.offer(stockKbar);
                     if(stockKbar.getKbarDate().equals(dateyyyyMMdd)&&preKbar!=null) {
-                        BigDecimal endRate = PriceUtil.getPricePercentRate(stockKbar.getAdjClosePrice().subtract(preKbar.getAdjClosePrice()),preKbar.getAdjClosePrice());
+                        BigDecimal endRate = calEndRate(stockKbar, preKbar);
                         int planks = calPlanks(limitQueue);
                         StockFactor preStockFactor = preFactorMap.get(stockKbar.getStockCode());
                         StockFactorLevelTestDTO buyDTO = new StockFactorLevelTestDTO();
@@ -168,11 +204,21 @@ public class StockFactorWuDiNewTwoComponent {
                         buyDTO.setPlanks(planks);
                         buyDTO.setEndRate(endRate);
                         buyDTO.setMarketValue(stockKbar.getMarketValue());
-                        buyDTO.setIndex2a(stockFactor.getIndex1());
+                        if(factor.equals("index1")) {
+                            buyDTO.setIndex2a(stockFactor.getIndex1());
+                        }
+                        if(factor.equals("index2a")) {
+                            buyDTO.setIndex2a(stockFactor.getIndex2a());
+                        }
                         buyDTO.setAmount(stockKbar.getTradeAmount());
                         buyDTO.setPreAmount(preKbar.getTradeAmount());
                         if(preStockFactor!=null){
-                            buyDTO.setPreIndex2a(preStockFactor.getIndex1());
+                            if(factor.equals("index1")) {
+                                buyDTO.setPreIndex2a(preStockFactor.getIndex1());
+                            }
+                            if(factor.equals("index2a")) {
+                                buyDTO.setPreIndex2a(preStockFactor.getIndex2a());
+                            }
                         }
                         buyDTO.setMarketValueLevel(marketSortMap.get(circulateInfo.getStockCode()));
                         ThsStockKbar nextKbar = thsStockKbarService.getByUniqueKey(circulateInfo.getStockCode() + "_" + DateUtil.format(nextDate, DateUtil.yyyyMMdd));
@@ -182,14 +228,14 @@ public class StockFactorWuDiNewTwoComponent {
                             String format = DateUtil.format(nextDate, DateUtil.yyyyMMdd);
                             buyDTO.setTradeDate(format);
                             calBeforeRate(stockKbars,buyDTO);
-                            //getLowAndHighRate(circulateInfo.getStockCode(),nextKbar.getKbarDate(),stockKbar,nextKbar,buyDTO);
-                            BigDecimal nextOpenRate = PriceUtil.getPricePercentRate(nextKbar.getAdjOpenPrice().subtract(stockKbar.getAdjClosePrice()), stockKbar.getAdjClosePrice());
+                            BigDecimal nextOpenRate = calOpenRate(nextKbar, stockKbar);
                             buyDTO.setNextDayOpenRate(nextOpenRate);
-                            BigDecimal allProfit = calAllProfit(nextKbar, stockKbars);
+                            //getLowAndHighRate(circulateInfo.getStockCode(),nextKbar.getKbarDate(),stockKbar,nextKbar,buyDTO);
+                            /*BigDecimal allProfit = calAllProfit(nextKbar, stockKbars);
                             BigDecimal endProfit = calEndNoPlankProfit(stockKbars,nextKbar);
                             buyDTO.setProfitAvgPrice(allProfit);
                             buyDTO.setProfitEndPrice(endProfit);
-                            getBlockInfo(circulateInfo.getStockCode(),stockKbar.getKbarDate(),buyDTO);
+                            getBlockInfo(circulateInfo.getStockCode(),stockKbar.getKbarDate(),buyDTO);*/
                             dayBuys.add(buyDTO);
                         }
                         break;
@@ -197,11 +243,47 @@ public class StockFactorWuDiNewTwoComponent {
                     preKbar = stockKbar;
                 }
             }
-            calBlockLeve(dayBuys);
-            buys.addAll(dayBuys);
-        }
-        return buys;
+            //calBlockLeve(dayBuys);
+            RedisMonior redisMonior = new RedisMonior();
+            redisMonior.setRedisKey(dateyyyyMMdd+"stock_factor_"+factor);
+            redisMonior.setRedisValue(JSONObject.toJSONString(dayBuys));
+            redisMoniorService.save(redisMonior);
     }
+    public BigDecimal calEndRate(ThsStockKbar stockKbar,ThsStockKbar preStockKbar){
+        if(stockKbar==null||preStockKbar==null){
+            return null;
+        }
+        BigDecimal endRate = null;
+        if(stockKbar.getAdjFactor()!=null&&stockKbar.getAdjFactor().equals(preStockKbar.getAdjFactor())){
+            endRate = PriceUtil.getPricePercentRate(stockKbar.getClosePrice().subtract(preStockKbar.getClosePrice()),preStockKbar.getClosePrice());
+        }else{
+            if(stockKbar.getZeroPrice()!=null && stockKbar.getZeroPrice().compareTo(new BigDecimal("0.1"))>0){
+                endRate = PriceUtil.getPricePercentRate(stockKbar.getClosePrice().subtract(stockKbar.getZeroPrice()),stockKbar.getZeroPrice());
+            }else {
+                endRate = PriceUtil.getPricePercentRate(stockKbar.getAdjClosePrice().subtract(preStockKbar.getAdjClosePrice()), preStockKbar.getAdjClosePrice());
+            }
+        }
+        return endRate;
+    }
+
+    public BigDecimal calOpenRate(ThsStockKbar stockKbar,ThsStockKbar preStockKbar){
+        if(stockKbar==null||preStockKbar==null){
+            return null;
+        }
+        BigDecimal openRate = null;
+        if(stockKbar.getAdjFactor()!=null&&stockKbar.getAdjFactor().equals(preStockKbar.getAdjFactor())){
+            openRate = PriceUtil.getPricePercentRate(stockKbar.getOpenPrice().subtract(preStockKbar.getClosePrice()),preStockKbar.getClosePrice());
+
+        }else{
+            if(stockKbar.getZeroPrice()!=null && stockKbar.getZeroPrice().compareTo(new BigDecimal("0.1"))>0){
+                openRate = PriceUtil.getPricePercentRate(stockKbar.getOpenPrice().subtract(stockKbar.getZeroPrice()), stockKbar.getZeroPrice());
+            }else {
+                openRate = PriceUtil.getPricePercentRate(stockKbar.getAdjOpenPrice().subtract(preStockKbar.getAdjClosePrice()), preStockKbar.getAdjClosePrice());
+            }
+        }
+        return openRate;
+    }
+
     public BigDecimal  calAllProfit(ThsStockKbar buyKbar, List<ThsStockKbar> stockKbars){
         int allSell = 0;
         boolean flag = false;
@@ -350,7 +432,7 @@ public class StockFactorWuDiNewTwoComponent {
 
 
 
-    public void calBeforeRate(List<ThsStockKbar> stockKbars,StockFactorLevelTestDTO buy){
+    public void     calBeforeRate(List<ThsStockKbar> stockKbars,StockFactorLevelTestDTO buy){
         List<ThsStockKbar> reverse = Lists.reverse(stockKbars);
         boolean flag = false;
         int i=0;
@@ -363,16 +445,31 @@ public class StockFactorWuDiNewTwoComponent {
                 endStockKbar = stockKbar;
             }
             if(i==4){
-                BigDecimal rate = PriceUtil.getPricePercentRate(endStockKbar.getAdjClosePrice().subtract(stockKbar.getAdjClosePrice()), stockKbar.getAdjClosePrice());
-                buy.setBeforeRateDay3(rate);
+                if(endStockKbar.getAdjFactor()!=null&&endStockKbar.getAdjFactor().equals(stockKbar.getAdjFactor())){
+                    BigDecimal rate = PriceUtil.getPricePercentRate(endStockKbar.getClosePrice().subtract(stockKbar.getClosePrice()), stockKbar.getClosePrice());
+                    buy.setBeforeRateDay3(rate);
+                }else {
+                    BigDecimal rate = PriceUtil.getPricePercentRate(endStockKbar.getAdjClosePrice().subtract(stockKbar.getAdjClosePrice()), stockKbar.getAdjClosePrice());
+                    buy.setBeforeRateDay3(rate);
+                }
             }
             if(i==6){
-                BigDecimal rate = PriceUtil.getPricePercentRate(endStockKbar.getAdjClosePrice().subtract(stockKbar.getAdjClosePrice()), stockKbar.getAdjClosePrice());
-                buy.setBeforeRateDay5(rate);
+                if(endStockKbar.getAdjFactor()!=null&&endStockKbar.getAdjFactor().equals(stockKbar.getAdjFactor())){
+                    BigDecimal rate = PriceUtil.getPricePercentRate(endStockKbar.getClosePrice().subtract(stockKbar.getClosePrice()), stockKbar.getClosePrice());
+                    buy.setBeforeRateDay5(rate);
+                }else {
+                    BigDecimal rate = PriceUtil.getPricePercentRate(endStockKbar.getAdjClosePrice().subtract(stockKbar.getAdjClosePrice()), stockKbar.getAdjClosePrice());
+                    buy.setBeforeRateDay5(rate);
+                }
             }
             if(i==11){
-                BigDecimal rate = PriceUtil.getPricePercentRate(endStockKbar.getAdjClosePrice().subtract(stockKbar.getAdjClosePrice()), stockKbar.getAdjClosePrice());
-                buy.setBeforeRateDay10(rate);
+                if(endStockKbar.getAdjFactor()!=null&&endStockKbar.getAdjFactor().equals(stockKbar.getAdjFactor())){
+                    BigDecimal rate = PriceUtil.getPricePercentRate(endStockKbar.getClosePrice().subtract(stockKbar.getClosePrice()), stockKbar.getClosePrice());
+                    buy.setBeforeRateDay10(rate);
+                }else {
+                    BigDecimal rate = PriceUtil.getPricePercentRate(endStockKbar.getAdjClosePrice().subtract(stockKbar.getAdjClosePrice()), stockKbar.getAdjClosePrice());
+                    buy.setBeforeRateDay10(rate);
+                }
             }
             if(buy.getTradeDate().equals(stockKbar.getKbarDate())){
                 flag = true;
@@ -582,11 +679,16 @@ public class StockFactorWuDiNewTwoComponent {
         return datas;
     }
 
-    public List<StockFactor> getStockFactors200(String tradeDateString){
+    public List<StockFactor> getStockFactors200(String tradeDateString,String factor){
         try {
             StockFactorQuery query = new StockFactorQuery();
             query.setKbarDate(tradeDateString);
-            query.addOrderBy("index1", Sort.SortType.DESC);
+            if(factor.equals("index1")) {
+                query.addOrderBy("index1", Sort.SortType.DESC);
+            }
+            if(factor.equals("index2a")){
+                query.addOrderBy("index2a", Sort.SortType.DESC);
+            }
             query.setLimit(200);
             List<StockFactor> stockFactors = stockFactorService.listByCondition(query);
             return stockFactors;

@@ -65,6 +65,7 @@ public class ThsBlockStocksComponent {
             String tradeDateStr = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyy_MM_dd);
             list.add(tradeDateStr);
         }
+        //List<String> list = Lists.newArrayList("2022-12-29");
         String stockCode = "000300";
         String diff = ".SH";
         String blockName = "沪深300";

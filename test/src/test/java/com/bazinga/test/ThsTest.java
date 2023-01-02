@@ -8,6 +8,7 @@ import com.bazinga.replay.dto.MacdIndexDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.StockIndex;
 import com.bazinga.replay.model.ThsQuoteInfo;
+import com.bazinga.replay.model.ThsStockKbar;
 import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.ThsQuoteInfoQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
@@ -108,6 +109,8 @@ public class ThsTest {
     @Autowired
     private StockFactorWuDiNewTwoComponent stockFactorWuDiNewTwoComponent;
     @Autowired
+    private StockFactorWuDiNewOnlineComponent stockFactorWuDiNewOnlineComponent;
+    @Autowired
     private StockFactorDuanXianTwoComponent stockFactorDuanXianTwoComponent;
     @Autowired
     private ThsQuoteSaveComponent thsQuoteSaveComponent;
@@ -144,7 +147,7 @@ public class ThsTest {
         replayFenBanRateComponent.plankFenBan();*/
         //stockFactorDuanXianTwoComponent.factorTest();
         //线上使用版本
-        //stockFactorWuDiNewTwoComponent.factorTest();
+        stockFactorWuDiNewTwoComponent.factorTest();
 
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
 
@@ -263,6 +266,10 @@ public class ThsTest {
         blockFollowStaticCurrent4PlankComponent.blockFollowStaticInfo();
         //用于3板块跟随回测 用于线上使用
         //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+    }
+    @Test
+    public void test11(){
+        stockFactorWuDiNewOnlineComponent.factorTest("20190101","20200101","index2a","2018");
     }
 
 }

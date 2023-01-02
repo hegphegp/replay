@@ -17,7 +17,7 @@ public class CacheManager implements InitializingBean {
 
         TdxHqUtil.initConnect();
         log.info("初始化L1行情连接完成>");
-        thsLoginComponent.thsLogin();
+        //thsLoginComponent.thsLogin();
         log.info("初始化ths连接完成>");
 
     }

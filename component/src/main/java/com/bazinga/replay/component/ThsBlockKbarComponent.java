@@ -300,6 +300,104 @@ public class ThsBlockKbarComponent {
         thsLoginOut();
     }
 
+    public StockKbar getBlockKbarThsDay(String blockCode,String diff,String blockName,String start,String end,String tradeDate){
+        int ret = thsLogin();
+        String quote_str = JDIBridge.THS_HistoryQuotes(blockCode+diff,"open,high,low,close,volume,amount","",start,end);
+        if(!StringUtils.isEmpty(quote_str)){
+            JSONObject jsonObject = JSONObject.parseObject(quote_str);
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return null;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONArray timeArray = tableJson.getJSONArray("time");
+            if(timeArray==null||timeArray.size()==0){
+                return null;
+            }
+            List<String> times = timeArray.toJavaList(String.class);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            List<BigDecimal> opens = tableInfo.getJSONArray("open").toJavaList(BigDecimal.class);
+            List<BigDecimal> highs = tableInfo.getJSONArray("high").toJavaList(BigDecimal.class);
+            List<BigDecimal> lows = tableInfo.getJSONArray("low").toJavaList(BigDecimal.class);
+            List<BigDecimal> closes = tableInfo.getJSONArray("close").toJavaList(BigDecimal.class);
+            List<Long> volumes = tableInfo.getJSONArray("volume").toJavaList(Long.class);
+            List<BigDecimal> amounts = tableInfo.getJSONArray("amount").toJavaList(BigDecimal.class);
+            if(blockCode.equals("000001")){
+                blockCode = "999999";
+            }
+            int i = 0;
+            for (String time:times){
+                Date timeDate = DateUtil.parseDate(time, DateUtil.yyyy_MM_dd);
+                StockKbar stockKbar = new StockKbar();
+                stockKbar.setStockCode(blockCode);
+                stockKbar.setStockName(blockName);
+                stockKbar.setKbarDate(DateUtil.format(timeDate, DateUtil.yyyyMMdd));
+                stockKbar.setUniqueKey(stockKbar.getStockCode() + "_" + stockKbar.getKbarDate());
+                stockKbar.setOpenPrice(opens.get(i));
+                stockKbar.setClosePrice(closes.get(i));
+                stockKbar.setHighPrice(highs.get(i));
+                stockKbar.setLowPrice(lows.get(i));
+                stockKbar.setAdjOpenPrice(opens.get(i));
+                stockKbar.setAdjClosePrice(closes.get(i));
+                stockKbar.setAdjHighPrice(highs.get(i));
+                stockKbar.setAdjLowPrice(lows.get(i));
+                if(amounts.get(i)!=null) {
+                    stockKbar.setTradeAmount(amounts.get(i));
+                }else{
+                    stockKbar.setTradeAmount(new BigDecimal(0));
+                }
+                if(volumes.get(i)!=null) {
+                    stockKbar.setTradeQuantity(volumes.get(i));
+                }else{
+                    stockKbar.setTradeQuantity(0L);
+                }
+                i++;
+                if(stockKbar.getKbarDate().equals(tradeDate)) {
+                    return stockKbar;
+                }
+            }
+        }
+        thsLoginOut();
+        return null;
+    }
+
+
+    public BigDecimal getBlockKbarThsCurrent(String blockCode,String diff,String blockName,String tradeDate){
+        int ret = thsLogin();
+        String quote_str = JDIBridge.THS_RealtimeQuotes("864003"+diff,"tradeDate;tradeTime;preClose;open");
+        if(!StringUtils.isEmpty(quote_str)){
+            JSONObject jsonObject = JSONObject.parseObject(quote_str);
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return null;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONArray timeArray = tableJson.getJSONArray("time");
+            if(timeArray==null||timeArray.size()==0){
+                return null;
+            }
+            List<String> times = timeArray.toJavaList(String.class);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            List<BigDecimal> opens = tableInfo.getJSONArray("open").toJavaList(BigDecimal.class);
+            if(blockCode.equals("000001")){
+                blockCode = "999999";
+            }
+            int i = 0;
+            for (String time:times){
+                Date timeDate = DateUtil.parseDate(time, DateUtil.DEFAULT_FORMAT);
+                String kbarDate = DateUtil.format(timeDate, DateUtil.yyyyMMdd);
+                BigDecimal openPrice = opens.get(i);
+                i++;
+                if(kbarDate.equals(tradeDate)) {
+                    log.info("实时行情数据 stockCode:{} stockName:{} openPrice:{}",blockCode,blockName,openPrice);
+                    return openPrice;
+                }
+            }
+        }
+        thsLoginOut();
+        return null;
+    }
+
     public void initHistoryBlockMinKbar() {
         int ret = thsLogin();
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
