@@ -364,7 +364,7 @@ public class ThsBlockKbarComponent {
 
     public BigDecimal getBlockKbarThsCurrent(String blockCode,String diff,String blockName,String tradeDate){
         int ret = thsLogin();
-        String quote_str = JDIBridge.THS_RealtimeQuotes("864003"+diff,"tradeDate;tradeTime;preClose;open");
+        String quote_str = JDIBridge.THS_RealtimeQuotes(blockCode+diff,"tradeDate;tradeTime;preClose;open");
         if(!StringUtils.isEmpty(quote_str)){
             JSONObject jsonObject = JSONObject.parseObject(quote_str);
             JSONArray tables = jsonObject.getJSONArray("tables");

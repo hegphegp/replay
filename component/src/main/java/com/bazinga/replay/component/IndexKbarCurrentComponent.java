@@ -33,7 +33,16 @@ public class IndexKbarCurrentComponent {
 
     public void indexKbarCurrentNew(){
         String yyyyMMdd = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
-        BigDecimal stockKbar883949 = thsBlockKbarComponent.getBlockKbarThsCurrent("883949", ".TI", "陆股通清仓",yyyyMMdd);
+        BigDecimal stockKbar999999 = thsBlockKbarComponent.getBlockKbarThsCurrent("000001",".SH","上证指数", yyyyMMdd);
+        BigDecimal stockKbar399300 = thsBlockKbarComponent.getBlockKbarThsCurrent("399300",".SZ","沪深300", yyyyMMdd);
+        BigDecimal stockKbar399006 = thsBlockKbarComponent.getBlockKbarThsCurrent("399006",".SZ","创业板指", yyyyMMdd);
+        BigDecimal stockKbar883904 = thsBlockKbarComponent.getBlockKbarThsCurrent("883904",".TI","增发募集指数", yyyyMMdd);
+        BigDecimal stockKbar000016 = thsBlockKbarComponent.getBlockKbarThsCurrent("000016",".SH","上证50", yyyyMMdd);
+        BigDecimal stockKbar399001 = thsBlockKbarComponent.getBlockKbarThsCurrent("399001",".SZ","深圳成指", yyyyMMdd);
+        BigDecimal stockKbar883911 = thsBlockKbarComponent.getBlockKbarThsCurrent("883911",".TI","创历史新高", yyyyMMdd);
+        BigDecimal stockKbar883906 = thsBlockKbarComponent.getBlockKbarThsCurrent("883906",".TI","昨日高振幅", yyyyMMdd);
+
+        /*BigDecimal stockKbar883949 = thsBlockKbarComponent.getBlockKbarThsCurrent("883949", ".TI", "陆股通清仓",yyyyMMdd);
         BigDecimal stockKbar399905 = thsBlockKbarComponent.getBlockKbarThsCurrent("399905", ".SZ", "中证500", yyyyMMdd);
         BigDecimal stockKbar883913 = thsBlockKbarComponent.getBlockKbarThsCurrent("883913",".TI","龙虎榜指数", yyyyMMdd);
         BigDecimal stockKbar399903 = thsBlockKbarComponent.getBlockKbarThsCurrent("399903",".SZ","中证100", yyyyMMdd);
@@ -41,7 +50,6 @@ public class IndexKbarCurrentComponent {
         BigDecimal stockKbar883905 = thsBlockKbarComponent.getBlockKbarThsCurrent("883905",".TI","昨日换手前十", yyyyMMdd);
         BigDecimal stockKbar883920 = thsBlockKbarComponent.getBlockKbarThsCurrent("883920",".TI","近期解禁",yyyyMMdd);
         BigDecimal stockKbar883963 = thsBlockKbarComponent.getBlockKbarThsCurrent("883963",".TI","国家队减持", yyyyMMdd);
-        BigDecimal stockKbar399001 = thsBlockKbarComponent.getBlockKbarThsCurrent("399001",".SZ","深圳成指", yyyyMMdd);
         BigDecimal stockKbar883917 = thsBlockKbarComponent.getBlockKbarThsCurrent("883917",".TI","行业龙头", yyyyMMdd);
         BigDecimal stockKbar883404 = thsBlockKbarComponent.getBlockKbarThsCurrent("883404",".TI","同花顺情绪指数", yyyyMMdd);
         BigDecimal stockKbar883939 = thsBlockKbarComponent.getBlockKbarThsCurrent("883939",".TI","陆股通持续净买入", yyyyMMdd);
@@ -49,25 +57,29 @@ public class IndexKbarCurrentComponent {
         BigDecimal stockKbar883901 = thsBlockKbarComponent.getBlockKbarThsCurrent("883901",".TI","昨日资金前十", yyyyMMdd);
         BigDecimal stockKbar883902 = thsBlockKbarComponent.getBlockKbarThsCurrent("883902",".TI","昨日成交前十", yyyyMMdd);
         BigDecimal stockKbar883918 = thsBlockKbarComponent.getBlockKbarThsCurrent("883918",".TI","昨日炸板股", yyyyMMdd);
-        BigDecimal stockKbar883906 = thsBlockKbarComponent.getBlockKbarThsCurrent("883906",".TI","昨日高振幅", yyyyMMdd);
         BigDecimal stockKbar883962 = thsBlockKbarComponent.getBlockKbarThsCurrent("883962",".TI","国家队增持", yyyyMMdd);
         BigDecimal stockKbar883400 = thsBlockKbarComponent.getBlockKbarThsCurrent("883400",".TI","昨日ST首板股表现", yyyyMMdd);
-        BigDecimal stockKbar883911 = thsBlockKbarComponent.getBlockKbarThsCurrent("883911",".TI","创历史新高", yyyyMMdd);
-        BigDecimal stockKbar399006 = thsBlockKbarComponent.getBlockKbarThsCurrent("399006",".SZ","创业板指", yyyyMMdd);
         BigDecimal stockKbar883979 = thsBlockKbarComponent.getBlockKbarThsCurrent("883979",".TI","昨日首板表现", yyyyMMdd);
         BigDecimal stockKbar883912 = thsBlockKbarComponent.getBlockKbarThsCurrent("883912",".TI","深股通成交前十", yyyyMMdd);
-        BigDecimal stockKbar999999 = thsBlockKbarComponent.getBlockKbarThsCurrent("000001",".SH","上证指数", yyyyMMdd);
+
         BigDecimal stockKbarUSDCNH = thsBlockKbarComponent.getBlockKbarThsCurrent("USDCNH",".FX","人民币离岸汇率", yyyyMMdd);
-        BigDecimal stockKbar000016 = thsBlockKbarComponent.getBlockKbarThsCurrent("000016",".SH","上证50", yyyyMMdd);
         BigDecimal stockKbarIXIC = thsBlockKbarComponent.getBlockKbarThsCurrent("IXIC",".GI","纳斯达克指数", yyyyMMdd);
         BigDecimal stockKbar883908 = thsBlockKbarComponent.getBlockKbarThsCurrent("883908",".TI","沪股通成交前十", yyyyMMdd);
-        BigDecimal stockKbar883904 = thsBlockKbarComponent.getBlockKbarThsCurrent("883904",".TI","增发募集指数", yyyyMMdd);
         BigDecimal stockKbar883910 = thsBlockKbarComponent.getBlockKbarThsCurrent("883910",".TI","同花顺热股", yyyyMMdd);
         BigDecimal stockKbar883958 = thsBlockKbarComponent.getBlockKbarThsCurrent("883958",".TI","昨日连板", yyyyMMdd);
-        BigDecimal stockKbarHSI = thsBlockKbarComponent.getBlockKbarThsCurrent("HSI",".HK","恒生指数", yyyyMMdd);
-        BigDecimal stockKbar399300 = thsBlockKbarComponent.getBlockKbarThsCurrent("399300",".SZ","沪深300", yyyyMMdd);
+        BigDecimal stockKbarHSI = thsBlockKbarComponent.getBlockKbarThsCurrent("HSI",".HK","恒生指数", yyyyMMdd);*/
+        System.out.println(111);
+        sendHttp("999999","上证指数", stockKbar999999);
+        sendHttp("399300","沪深300", stockKbar399300);
+        sendHttp("883906","昨日高振幅", stockKbar883906);
+        sendHttp("883911","创历史新高", stockKbar883911);
+        sendHttp("399006","创业板指", stockKbar399006);
+        sendHttp("399001","深圳成指", stockKbar399001);
+        sendHttp("000016","上证50", stockKbar000016);
+        sendHttp("883904","增发募集指数", stockKbar883904);
 
-        sendHttp("883949", "陆股通清仓",stockKbar883949);
+
+        /*sendHttp("883949", "陆股通清仓",stockKbar883949);
         sendHttp("399905", "中证500", stockKbar399905);
         sendHttp("883913","龙虎榜指数", stockKbar883913);
         sendHttp("399903","中证100", stockKbar399903);
@@ -75,7 +87,6 @@ public class IndexKbarCurrentComponent {
         sendHttp("883905","昨日换手前十", stockKbar883905);
         sendHttp("883920","近期解禁",stockKbar883920);
         sendHttp("883963","国家队减持", stockKbar883963);
-        sendHttp("399001","深圳成指", stockKbar399001);
         sendHttp("883917","行业龙头", stockKbar883917);
         sendHttp("883404","同花顺情绪指数", stockKbar883404);
         sendHttp("883939","陆股通持续净买入", stockKbar883939);
@@ -83,23 +94,16 @@ public class IndexKbarCurrentComponent {
         sendHttp("883901","昨日资金前十", stockKbar883901);
         sendHttp("883902","昨日成交前十", stockKbar883902);
         sendHttp("883918","昨日炸板股", stockKbar883918);
-        sendHttp("883906","昨日高振幅", stockKbar883906);
         sendHttp("883962","国家队增持", stockKbar883962);
         sendHttp("883400","昨日ST首板股表现", stockKbar883400);
-        sendHttp("883911","创历史新高", stockKbar883911);
-        sendHttp("399006","创业板指", stockKbar399006);
         sendHttp("883979","昨日首板表现", stockKbar883979);
         sendHttp("883912","深股通成交前十", stockKbar883912);
-        sendHttp("999999","上证指数", stockKbar999999);
         sendHttp("USDCNH","人民币离岸汇率", stockKbarUSDCNH);
-        sendHttp("000016","上证50", stockKbar000016);
         sendHttp("IXIC",  "纳斯达克指数", stockKbarIXIC);
         sendHttp("883908","沪股通成交前十", stockKbar883908);
-        sendHttp("883904","增发募集指数", stockKbar883904);
         sendHttp("883910","同花顺热股", stockKbar883910);
         sendHttp("883958","昨日连板", stockKbar883958);
-        sendHttp("HSI",   "恒生指数", stockKbarHSI);
-        sendHttp("399300","沪深300", stockKbar399300);
+        sendHttp("HSI",   "恒生指数", stockKbarHSI);*/
 
     }
 
@@ -228,8 +232,8 @@ public class IndexKbarCurrentComponent {
     }
 
     public void stockIndexSend(){
-        //String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
-        String dateyyyyMMhh = "20221230";
+        String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
+        //String dateyyyyMMhh = "20221230";
         StockIndex stockIndex399300 = thsStockIndexComponent.shMacdIndexNoSave(dateyyyyMMhh,"399300","沪深300",".SZ");
         StockIndex stockIndex000001 = thsStockIndexComponent.shMacdIndexNoSave(dateyyyyMMhh,"000001","上证指数",".SH");
         StockIndex stockIndex399006 = thsStockIndexComponent.shMacdIndexNoSave(dateyyyyMMhh,"399006","创业板指",".SZ");

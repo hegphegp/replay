@@ -415,7 +415,7 @@ public class BaseTestCase {
     }
     @Test
     public void test30(){
-        indexKbarCurrentComponent.indexStockKbarSend();
+        //indexKbarCurrentComponent.indexStockKbarSend();
         indexKbarCurrentComponent.stockIndexSend();
         indexKbarCurrentComponent.indexKbarCurrentNew();
     }

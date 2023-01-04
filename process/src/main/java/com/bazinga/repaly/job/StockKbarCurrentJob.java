@@ -17,6 +17,7 @@ public class StockKbarCurrentJob {
     public void execute(){
         log.info("<--------------上证沪深指数开始 start --------------->");
         indexKbarCurrentComponent.indexKbarCurrent();
+        indexKbarCurrentComponent.indexKbarCurrentNew();
         log.info("<--------------上证沪深指数结束 end --------------->");
     }
 }
