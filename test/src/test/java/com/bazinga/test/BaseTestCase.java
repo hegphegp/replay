@@ -367,57 +367,59 @@ public class BaseTestCase {
     }
     @Test
     public void test29() {
-        thsBlockKbarComponent.getBlockKbarThs("883949","陆股通清仓",".TI","2017-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("399905",".SZ","中证500","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883913",".TI","龙虎榜指数","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("399903",".SZ","中证100","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883900",".TI","昨日涨停表现","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883905",".TI","昨日换手前十","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883920",".TI","近期解禁","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883963",".TI","国家队减持","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("399001",".SZ","深圳成指","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883917",".TI","行业龙头","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883404",".TI","同花顺情绪指数","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883939",".TI","陆股通持续净买入","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("000852",".SH","中证1000","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883901",".TI","昨日资金前十","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883902",".TI","昨日成交前十","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883918",".TI","昨日炸板股","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883906",".TI","昨日高振幅","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883962",".TI","国家队增持","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883400",".TI","昨日ST首板股表现","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883911",".TI","创历史新高","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("399006",".SZ","创业板指","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883979",".TI","昨日首板表现","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883912",".TI","深股通成交前十","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("000001",".SH","上证指数","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("USDCNH",".FX","人民币离岸汇率","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("000016",".SH","上证50","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("IXIC",".GI","纳斯达克指数","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883908",".TI","沪股通成交前十","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883904",".TI","增发募集指数","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883910",".TI","同花顺热股","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("883958",".TI","昨日连板","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("HSI",".HK","恒生指数","2022-12-24","2022-12-31");
-        thsBlockKbarComponent.getBlockKbarThs("399300",".SZ","沪深300","2022-12-24","2022-12-31");
+        String start = "2023-01-03";
+        String end = "2023-01-04";
+        /*thsBlockKbarComponent.getBlockKbarThs("883949","陆股通清仓",".TI",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("399905",".SZ","中证500",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883913",".TI","龙虎榜指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("399903",".SZ","中证100",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883900",".TI","昨日涨停表现",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883905",".TI","昨日换手前十",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883920",".TI","近期解禁",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883963",".TI","国家队减持",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("399001",".SZ","深圳成指",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883917",".TI","行业龙头",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883404",".TI","同花顺情绪指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883939",".TI","陆股通持续净买入",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("000852",".SH","中证1000",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883901",".TI","昨日资金前十",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883902",".TI","昨日成交前十",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883918",".TI","昨日炸板股",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883906",".TI","昨日高振幅",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883962",".TI","国家队增持",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883400",".TI","昨日ST首板股表现",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883911",".TI","创历史新高",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("399006",".SZ","创业板指",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883979",".TI","昨日首板表现",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883912",".TI","深股通成交前十",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("000001",".SH","上证指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("USDCNH",".FX","人民币离岸汇率",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("000016",".SH","上证50",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("IXIC",".GI","纳斯达克指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883908",".TI","沪股通成交前十",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883904",".TI","增发募集指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883910",".TI","同花顺热股",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883958",".TI","昨日连板",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("HSI",".HK","恒生指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("399300",".SZ","沪深300",start,end);*/
 
 
 
-        thsStockIndexComponent.shMACDIndex("20221224","000001","上证指数",".SH");
-        thsStockIndexComponent.shMACDIndex("20221224","399006","创业板指",".SZ");
-        thsStockIndexComponent.shMACDIndex("20221224","399300","沪深300",".SZ");
-        thsStockIndexComponent.shMACDIndex("20221224","399905","中证500",".SZ");
-        thsStockIndexComponent.shMACDIndex("20221224","000016","上证50",".SH");
-        thsStockIndexComponent.shMACDIndex("20221224","399001","深圳成指",".SZ");
-        thsStockIndexComponent.shMACDIndex("20221224","000852","中证1000",".SH");
-        thsStockIndexComponent.shMACDIndex("20221224","399903","中证100",".SZ");
+        thsStockIndexComponent.shMACDIndex("20230103","000001","上证指数",".SH");
+        thsStockIndexComponent.shMACDIndex("20230103","399006","创业板指",".SZ");
+        thsStockIndexComponent.shMACDIndex("20230103","399300","沪深300",".SZ");
+        thsStockIndexComponent.shMACDIndex("20230103","399905","中证500",".SZ");
+        thsStockIndexComponent.shMACDIndex("20230103","000016","上证50",".SH");
+        thsStockIndexComponent.shMACDIndex("20230103","399001","深圳成指",".SZ");
+        thsStockIndexComponent.shMACDIndex("20230103","000852","中证1000",".SH");
+        thsStockIndexComponent.shMACDIndex("20230103","399903","中证100",".SZ");
 
     }
     @Test
     public void test30(){
-        //indexKbarCurrentComponent.indexStockKbarSend();
-        indexKbarCurrentComponent.stockIndexSend();
-        indexKbarCurrentComponent.indexKbarCurrentNew();
+        indexKbarCurrentComponent.indexStockKbarSend();
+        //indexKbarCurrentComponent.stockIndexSend();
+        //indexKbarCurrentComponent.indexKbarCurrentNew();
     }
 
 }

@@ -33,8 +33,8 @@ public class IndexKbarCurrentComponent {
 
     public void indexKbarCurrentNew(){
         String yyyyMMdd = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
-        BigDecimal stockKbar999999 = thsBlockKbarComponent.getBlockKbarThsCurrent("000001",".SH","上证指数", yyyyMMdd);
-        BigDecimal stockKbar399300 = thsBlockKbarComponent.getBlockKbarThsCurrent("399300",".SZ","沪深300", yyyyMMdd);
+       // BigDecimal stockKbar999999 = thsBlockKbarComponent.getBlockKbarThsCurrent("000001",".SH","上证指数", yyyyMMdd);
+        //BigDecimal stockKbar399300 = thsBlockKbarComponent.getBlockKbarThsCurrent("399300",".SZ","沪深300", yyyyMMdd);
         BigDecimal stockKbar399006 = thsBlockKbarComponent.getBlockKbarThsCurrent("399006",".SZ","创业板指", yyyyMMdd);
         BigDecimal stockKbar883904 = thsBlockKbarComponent.getBlockKbarThsCurrent("883904",".TI","增发募集指数", yyyyMMdd);
         BigDecimal stockKbar000016 = thsBlockKbarComponent.getBlockKbarThsCurrent("000016",".SH","上证50", yyyyMMdd);
@@ -69,8 +69,8 @@ public class IndexKbarCurrentComponent {
         BigDecimal stockKbar883958 = thsBlockKbarComponent.getBlockKbarThsCurrent("883958",".TI","昨日连板", yyyyMMdd);
         BigDecimal stockKbarHSI = thsBlockKbarComponent.getBlockKbarThsCurrent("HSI",".HK","恒生指数", yyyyMMdd);*/
         System.out.println(111);
-        sendHttp("999999","上证指数", stockKbar999999);
-        sendHttp("399300","沪深300", stockKbar399300);
+        //sendHttp("999999","上证指数", stockKbar999999);
+        //sendHttp("399300","沪深300", stockKbar399300);
         sendHttp("883906","昨日高振幅", stockKbar883906);
         sendHttp("883911","创历史新高", stockKbar883911);
         sendHttp("399006","创业板指", stockKbar399006);
