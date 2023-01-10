@@ -156,6 +156,7 @@ public class BaseTestCase {
         indexKbarCurrentComponent.indexStockKbarSend();
         indexKbarCurrentComponent.stockIndexSend();
         thsCurrentQuoteSaveComponent.saveHS300FutureQuoteIndex(DateUtil.format(new Date(),DateUtil.yyyy_MM_dd));
+
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
     }
