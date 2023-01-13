@@ -139,6 +139,7 @@ public class ThsTest {
 
     @Test
     public void test1() {
+        System.out.println(1111);
         //threePlankBuyHotBlockComponent.threePlankHotBlockBuyTest();
         //threePlankBuyHotBlockComponent.getAlLPlanks();
         //threePlankBuyBlockComponent.threePlankBuyTest();
