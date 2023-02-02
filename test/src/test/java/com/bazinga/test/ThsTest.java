@@ -134,6 +134,8 @@ public class ThsTest {
     private ThreePlankBuyHotBlockComponent threePlankBuyHotBlockComponent;
     @Autowired
     private BlockFollowStaticCurrent4PlankComponent blockFollowStaticCurrent4PlankComponent;
+    @Autowired
+    private SendReplayInfoAutoComponent sendReplayInfoAutoComponent;
 
 
 
@@ -272,4 +274,9 @@ public class ThsTest {
         stockFactorWuDiNewOnlineComponent.factorTest("20190101","20200101","index2a","2018");
     }
 
+    @Test
+    public void test12(){
+        //sendReplayInfoAutoComponent.sendStockKbarReplay("20230111");
+        sendReplayInfoAutoComponent.sendStockCommonReplay("20230202");
+    }
 }

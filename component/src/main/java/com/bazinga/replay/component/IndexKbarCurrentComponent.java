@@ -134,8 +134,7 @@ public class IndexKbarCurrentComponent {
         sendHttpStockKbar(stockKbarHS);
     }*/
 
-    public void indexStockKbarSend(){
-        Date date = new Date();
+    public void indexStockKbarSend(Date date){
         //Date date = DateUtil.parseDate("20221230",DateUtil.yyyyMMdd);
         String yyyyMMdd = DateUtil.format(date, DateUtil.yyyyMMdd);
         String yyyy_MM_dd = DateUtil.format(date, DateUtil.yyyy_MM_dd);

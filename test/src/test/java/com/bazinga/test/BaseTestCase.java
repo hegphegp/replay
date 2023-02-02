@@ -153,7 +153,7 @@ public class BaseTestCase {
         stockBollingComponent.calCurrentDayBoll(date);
         thsBlockStocksComponent.indexBLockDetail();
         historyBlockInfoComponent.initHistoryBlockInfo();
-        indexKbarCurrentComponent.indexStockKbarSend();
+        indexKbarCurrentComponent.indexStockKbarSend(date);
         indexKbarCurrentComponent.stockIndexSend();
         thsCurrentQuoteSaveComponent.saveHS300FutureQuoteIndex(DateUtil.format(new Date(),DateUtil.yyyy_MM_dd));
 
@@ -188,7 +188,8 @@ public class BaseTestCase {
 
     @Test
     public void test9() {
-        thsBlockStocksComponent.indexBLockDetail();
+        indexKbarCurrentComponent.indexStockKbarSend(DateUtil.parseDate("20230109",DateUtil.yyyyMMdd));
+        //thsBlockStocksComponent.indexBLockDetail();
         /*stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
@@ -199,7 +200,7 @@ public class BaseTestCase {
 
     @Test
     public void test11() {
-        historyBlockInfoComponent.getPreBlockStocks("20221228","20221229");
+        historyBlockInfoComponent.getPreBlockStocks("20230110","20230111");
     }
     @Test
     public void test10(){
@@ -424,7 +425,7 @@ public class BaseTestCase {
     }
     @Test
     public void test30(){
-        indexKbarCurrentComponent.indexStockKbarSend();
+        indexKbarCurrentComponent.indexStockKbarSend(DateUtil.parseDate("20230201",DateUtil.yyyyMMdd));
         //indexKbarCurrentComponent.stockIndexSend();
         //indexKbarCurrentComponent.indexKbarCurrentNew();
     }

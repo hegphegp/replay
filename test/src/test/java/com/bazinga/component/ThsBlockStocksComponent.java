@@ -57,7 +57,7 @@ public class ThsBlockStocksComponent {
     public void indexBLockDetail(){
         TradeDatePoolQuery query = new TradeDatePoolQuery();
         query.setTradeDateFrom(DateTimeUtils.getDate000000(new Date()));
-        query.setTradeDateTo(new Date());
+        query.setTradeDateTo(DateTimeUtils.getDate235959(new Date()));
         query.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(query);
         List<String> list = Lists.newArrayList();
