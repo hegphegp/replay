@@ -425,7 +425,7 @@ public class BaseTestCase {
     }
     @Test
     public void test30(){
-        indexKbarCurrentComponent.indexStockKbarSend(DateUtil.parseDate("20230201",DateUtil.yyyyMMdd));
+        indexKbarCurrentComponent.indexStockKbarSend(DateUtil.parseDate("20230202",DateUtil.yyyyMMdd));
         //indexKbarCurrentComponent.stockIndexSend();
         //indexKbarCurrentComponent.indexKbarCurrentNew();
     }
