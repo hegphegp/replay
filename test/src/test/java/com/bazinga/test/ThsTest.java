@@ -141,13 +141,13 @@ public class ThsTest {
 
     @Test
     public void test1() {
-        System.out.println(1111);
+        //System.out.println(1111);
         //threePlankBuyHotBlockComponent.threePlankHotBlockBuyTest();
         //threePlankBuyHotBlockComponent.getAlLPlanks();
         //threePlankBuyBlockComponent.threePlankBuyTest();
         //gatherAmountComponent.gatherAmountBuy();
-        /*blockFollowStaticCurrentComponent.blockFollowStaticInfo();
-        replayFenBanRateComponent.plankFenBan();*/
+        //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        replayFenBanRateComponent.plankFenBan();
         //stockFactorDuanXianTwoComponent.factorTest();
         //线上使用版本
         stockFactorWuDiNewTwoComponent.factorTest();
