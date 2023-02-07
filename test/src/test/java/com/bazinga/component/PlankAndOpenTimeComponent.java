@@ -16,6 +16,7 @@ import com.bazinga.replay.model.StockKbar;
 import com.bazinga.replay.query.StockKbarQuery;
 import com.bazinga.replay.service.*;
 import com.bazinga.replay.util.PoiExcelUtil;
+import com.bazinga.util.DateUtil;
 import com.bazinga.util.PriceUtil;
 import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
@@ -90,7 +91,7 @@ public class PlankAndOpenTimeComponent {
             count++;
             String stockCode = circulateInfo.getStockCode();
             String stockName = circulateInfo.getStockName();
-            /*if(!stockCode.equals("002795")){
+            /*if(!stockCode.equals("002877")){
                 continue;
             }*/
             System.out.println(stockCode+"------"+count);
@@ -101,18 +102,23 @@ public class PlankAndOpenTimeComponent {
             }
             StockKbar preStockKbar = null;
             for (StockKbar stockKbar:stockKBars){
-                boolean highPlank = PriceUtil.isHistoryUpperPrice(circulateInfo.getStockCode(), stockKbar.getHighPrice(),preStockKbar.getClosePrice(),preStockKbar.getKbarDate());
-                if(highPlank){
-                    Integer openTime = thirdSecondTransactionDataPlank(preStockKbar.getClosePrice(), stockKbar.getStockCode(), stockKbar.getKbarDate());
-                    if(openTime!=null){
-                        DayPlankAndOpenDTO dayPlankAndOpenDTO = map.get(stockKbar.getKbarDate());
-                        if (dayPlankAndOpenDTO==null){
-                            dayPlankAndOpenDTO = new DayPlankAndOpenDTO();
-                            dayPlankAndOpenDTO.setTradeDate(stockKbar.getKbarDate());
-                            map.put(stockKbar.getKbarDate(),dayPlankAndOpenDTO);
+                Date date = DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd);
+                if(!date.before(DateUtil.parseDate("20210501",DateUtil.yyyyMMdd))) {
+                    if (preStockKbar != null) {
+                        boolean highPlank = PriceUtil.isHistoryUpperPrice(circulateInfo.getStockCode(), stockKbar.getHighPrice(), preStockKbar.getClosePrice(), preStockKbar.getKbarDate());
+                        if (highPlank) {
+                            Integer openTime = thirdSecondTransactionDataPlank(preStockKbar.getClosePrice(), stockKbar.getStockCode(), stockKbar.getKbarDate());
+                            if (openTime != null) {
+                                DayPlankAndOpenDTO dayPlankAndOpenDTO = map.get(stockKbar.getKbarDate());
+                                if (dayPlankAndOpenDTO == null) {
+                                    dayPlankAndOpenDTO = new DayPlankAndOpenDTO();
+                                    dayPlankAndOpenDTO.setTradeDate(stockKbar.getKbarDate());
+                                    map.put(stockKbar.getKbarDate(), dayPlankAndOpenDTO);
+                                }
+                                dayPlankAndOpenDTO.setOpenTimes(dayPlankAndOpenDTO.getOpenTimes() + openTime);
+                                dayPlankAndOpenDTO.setPlankStocks(dayPlankAndOpenDTO.getPlankStocks() + 1);
+                            }
                         }
-                        dayPlankAndOpenDTO.setOpenTimes(dayPlankAndOpenDTO.getOpenTimes() + openTime);
-                        dayPlankAndOpenDTO.setPlankStocks(dayPlankAndOpenDTO.getPlankStocks()+1);
                     }
                 }
                 preStockKbar = stockKbar;

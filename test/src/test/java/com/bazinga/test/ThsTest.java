@@ -136,21 +136,24 @@ public class ThsTest {
     private BlockFollowStaticCurrent4PlankComponent blockFollowStaticCurrent4PlankComponent;
     @Autowired
     private SendReplayInfoAutoComponent sendReplayInfoAutoComponent;
+    @Autowired
+    private PlankAndOpenTimeComponent plankAndOpenTimeComponent;
 
 
 
     @Test
     public void test1() {
+        plankAndOpenTimeComponent.plankAndOpenTime();
         //System.out.println(1111);
         //threePlankBuyHotBlockComponent.threePlankHotBlockBuyTest();
         //threePlankBuyHotBlockComponent.getAlLPlanks();
         //threePlankBuyBlockComponent.threePlankBuyTest();
         //gatherAmountComponent.gatherAmountBuy();
         //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
-        replayFenBanRateComponent.plankFenBan();
+        //replayFenBanRateComponent.plankFenBan();
         //stockFactorDuanXianTwoComponent.factorTest();
         //线上使用版本
-        stockFactorWuDiNewTwoComponent.factorTest();
+        //tockFactorWuDiNewTwoComponent.factorTest();
 
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
 
@@ -168,9 +171,9 @@ public class ThsTest {
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
        // strongPlankDefineComponent.strongPlank();
-        blockFollowStaticCurrent4PlankComponent.blockFollowStaticInfo();
+        //blockFollowStaticCurrent4PlankComponent.blockFollowStaticInfo();
         //用于板块跟随回测 用于线上使用
-        blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
 
         //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
        /* strongPlankDefineComponent.strongPlank();
@@ -277,7 +280,7 @@ public class ThsTest {
 
     @Test
     public void test12(){
-        //sendReplayInfoAutoComponent.sendStockKbarReplay("20230111");
-        sendReplayInfoAutoComponent.sendStockCommonReplay("20230202");
+        sendReplayInfoAutoComponent.sendStockKbarReplay("20230207");
+        sendReplayInfoAutoComponent.sendStockCommonReplay("20230207");
     }
 }
