@@ -280,7 +280,7 @@ public class ThsTest {
 
     @Test
     public void test12(){
-        sendReplayInfoAutoComponent.sendStockKbarReplay("20230207");
-        sendReplayInfoAutoComponent.sendStockCommonReplay("20230207");
+        sendReplayInfoAutoComponent.sendStockKbarReplay("20230209");
+        sendReplayInfoAutoComponent.sendStockCommonReplay("20230209");
     }
 }
