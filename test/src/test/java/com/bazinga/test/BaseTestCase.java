@@ -430,6 +430,8 @@ public class BaseTestCase {
     public void test30(){
         Date preTradeDate = commonComponent.preTradeDate(new Date());
         indexKbarCurrentComponent.indexStockKbarSend(preTradeDate);
+
+
         //indexKbarCurrentComponent.stockIndexSend();
         //indexKbarCurrentComponent.indexKbarCurrentNew();
     }
