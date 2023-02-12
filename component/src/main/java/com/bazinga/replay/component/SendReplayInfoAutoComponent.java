@@ -1,9 +1,12 @@
 package com.bazinga.replay.component;
+import com.bazinga.replay.model.IndexDetail;
 import com.bazinga.replay.model.StockCommonReplay;
 import com.bazinga.replay.model.StockIndex;
 import com.bazinga.replay.model.StockKbar;
+import com.bazinga.replay.query.IndexDetailQuery;
 import com.bazinga.replay.query.StockCommonReplayQuery;
 import com.bazinga.replay.query.StockKbarQuery;
+import com.bazinga.replay.service.IndexDetailService;
 import com.bazinga.replay.service.StockCommonReplayService;
 import com.bazinga.replay.service.StockKbarService;
 import com.bazinga.util.DateUtil;
@@ -29,6 +32,8 @@ public class SendReplayInfoAutoComponent {
     @Autowired
     private StockKbarService stockKbarService ;
     @Autowired
+    private IndexDetailService indexDetailService;
+    @Autowired
     private StockCommonReplayService stockCommonReplayService;
     List<String> addresses = Lists.newArrayList("125.93.72.195:5368","125.93.72.195:5379","125.93.72.195:5366","125.93.72.195:5367"
             ,"125.93.72.194:5288","125.93.72.194:5011","125.93.72.194:5277","125.93.72.197:5999");
@@ -39,7 +44,7 @@ public class SendReplayInfoAutoComponent {
         List<StockKbar> stockKbars = stockKbarService.listByCondition(query);
         int i = 0;
         for (StockKbar stockKbar:stockKbars){
-            System.out.println(i++);
+            System.out.println("stockKbar===="+i++);
             sendReplayStockKbarHttp(stockKbar);
         }
     }
@@ -49,8 +54,19 @@ public class SendReplayInfoAutoComponent {
         query.setKbarDate(tradeDate);
         List<StockCommonReplay> stockCommonReplays = stockCommonReplayService.listByCondition(query);
         for (StockCommonReplay stockCommonReplay:stockCommonReplays){
-            System.out.println(i++);
+            System.out.println("stockCommonReplay==="+i++);
             sendStockCommonReplayHttp(stockCommonReplay);
+        }
+    }
+
+    public void sendIndexDetail(String tradeDate){
+        int i = 0;
+        IndexDetailQuery query = new IndexDetailQuery();
+        query.setKbarDate(tradeDate);
+        List<IndexDetail> indexDetails = indexDetailService.listByCondition(query);
+        for (IndexDetail indexDetail:indexDetails){
+            System.out.println("indexDetail====="+i++);
+            sendIndexDetailHttp(indexDetail);
         }
     }
 
@@ -146,6 +162,33 @@ public class SendReplayInfoAutoComponent {
         if(stockCommonReplay.getPlanksDay10()!=null) {
             map.put("planksDay10", stockCommonReplay.getPlanksDay10().toString());
         }
+        String result = null;
+        for(String url:urls) {
+            try {
+                result = HttpUtil.sendHttpGet(url, map);
+            } catch (Exception e) {
+                log.info(e.getMessage(), e);
+            }
+        }
+    }
+
+
+
+    public void sendIndexDetailHttp(IndexDetail indexDetail){
+        if(indexDetail==null){
+            return;
+        }
+        List<String> urls = Lists.newArrayList();
+        for (String address:addresses){
+            String url = "http://"+address+"/dragon/basicInfo/saveIndexDetail";
+            urls.add(url);
+        }
+        Map<String, String> map = new HashMap<>();
+        map.put("stockCode",indexDetail.getStockCode());
+        map.put("stockName",indexDetail.getStockName());
+        map.put("kbarDate",indexDetail.getKbarDate());
+        map.put("indexCode",indexDetail.getIndexCode());
+        map.put("blockName",indexDetail.getBlockName());
         String result = null;
         for(String url:urls) {
             try {
