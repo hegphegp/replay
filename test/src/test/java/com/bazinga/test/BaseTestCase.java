@@ -111,6 +111,8 @@ public class BaseTestCase {
     private ThsBlockKbarComponent thsBlockKbarComponent;
     @Autowired
     private SendReplayInfoAutoComponent sendReplayInfoAutoComponent;
+    @Autowired
+    private CommonComponent commonComponent;
 
 
     @Test
@@ -223,6 +225,7 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
+        thsBlockStocksComponent.indexBLockDetail();
         //thsBlockStocksComponent.indexBLockDetail();
         //historyBlockInfoComponent.initHistoryBlockInfo();
         //thsBlockStocksComponent.indexBLockDetail();
@@ -325,10 +328,10 @@ public class BaseTestCase {
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);*/
 
-        stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
+        /*stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
-        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);*/
 
 
 
@@ -432,7 +435,10 @@ public class BaseTestCase {
     }
     @Test
     public void test30(){
-        indexKbarCurrentComponent.indexStockKbarSend(DateUtil.parseDate("20230207",DateUtil.yyyyMMdd));
+        Date preTradeDate = commonComponent.preTradeDate(new Date());
+        indexKbarCurrentComponent.indexStockKbarSend(preTradeDate);
+
+
         //indexKbarCurrentComponent.stockIndexSend();
         //indexKbarCurrentComponent.indexKbarCurrentNew();
     }
