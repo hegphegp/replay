@@ -165,7 +165,11 @@ public class BaseTestCase {
         sendReplayInfoAutoComponent.sendStockKbarReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
         sendReplayInfoAutoComponent.sendStockCommonReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
         sendReplayInfoAutoComponent.sendIndexDetail(DateUtil.format(date,DateUtil.yyyy_MM_dd));
+        sendReplayInfoAutoComponent.sendPlankExchangeDaily(DateUtil.format(date,DateUtil.yyyy_MM_dd));
 
+        sendReplayInfoAutoComponent.sendHistoryBlockStocks(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockBolling(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockAttributeReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
     }

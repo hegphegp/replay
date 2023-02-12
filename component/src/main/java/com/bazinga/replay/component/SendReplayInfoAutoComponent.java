@@ -1,14 +1,7 @@
 package com.bazinga.replay.component;
-import com.bazinga.replay.model.IndexDetail;
-import com.bazinga.replay.model.StockCommonReplay;
-import com.bazinga.replay.model.StockIndex;
-import com.bazinga.replay.model.StockKbar;
-import com.bazinga.replay.query.IndexDetailQuery;
-import com.bazinga.replay.query.StockCommonReplayQuery;
-import com.bazinga.replay.query.StockKbarQuery;
-import com.bazinga.replay.service.IndexDetailService;
-import com.bazinga.replay.service.StockCommonReplayService;
-import com.bazinga.replay.service.StockKbarService;
+import com.bazinga.replay.model.*;
+import com.bazinga.replay.query.*;
+import com.bazinga.replay.service.*;
 import com.bazinga.util.DateUtil;
 import com.bazinga.util.HttpUtil;
 import com.google.common.collect.Lists;
@@ -35,8 +28,18 @@ public class SendReplayInfoAutoComponent {
     private IndexDetailService indexDetailService;
     @Autowired
     private StockCommonReplayService stockCommonReplayService;
-    List<String> addresses = Lists.newArrayList("125.93.72.195:5368","125.93.72.195:5379","125.93.72.195:5366","125.93.72.195:5367"
+    @Autowired
+    private PlankExchangeDailyService plankExchangeDailyService;
+    @Autowired
+    private HistoryBlockStocksService historyBlockStocksService;
+    @Autowired
+    private StockBollingService stockBollingService;
+    @Autowired
+    private StockAttributeReplayService stockAttributeReplayService;
+    List<String> addresses = Lists.newArrayList("125.93.72.195:5368","125.93.72.195:5377","125.93.72.195:5379","125.93.72.195:5366","125.93.72.195:5367"
             ,"125.93.72.194:5288","125.93.72.194:5011","125.93.72.194:5277","125.93.72.197:5999");
+
+    List<String> tigerAddress = Lists.newArrayList("117.186.20.117:6602");
 
     public void sendStockKbarReplay(String tradeDate){
         StockKbarQuery query = new StockKbarQuery();
@@ -69,6 +72,50 @@ public class SendReplayInfoAutoComponent {
             sendIndexDetailHttp(indexDetail);
         }
     }
+    public void sendPlankExchangeDaily(String tradeDate){
+        int i = 0;
+        PlankExchangeDailyQuery query = new PlankExchangeDailyQuery();
+        query.setTradeDate(tradeDate);
+        List<PlankExchangeDaily> plankExchangeDailies = plankExchangeDailyService.listByCondition(query);
+        for (PlankExchangeDaily plankExchangeDaily:plankExchangeDailies){
+            System.out.println("plankExchangeDaily====="+i++);
+            sendPlankExchangeDailyHttp(plankExchangeDaily);
+        }
+    }
+
+
+    public void sendHistoryBlockStocks(String tradeDate){
+        int i = 0;
+        HistoryBlockStocksQuery query = new HistoryBlockStocksQuery();
+        query.setTradeDate(tradeDate);
+        List<HistoryBlockStocks> stocksList = historyBlockStocksService.listByCondition(query);
+        for (HistoryBlockStocks historyBlockStocks:stocksList){
+            System.out.println("historyBlockStocks====="+i++);
+            sendHistoryBLockStocksHttp(historyBlockStocks);
+        }
+    }
+
+    public void sendStockBolling(String tradeDate){
+        int i = 0;
+        StockBollingQuery query = new StockBollingQuery();
+        query.setKbarDate(tradeDate);
+        List<StockBolling> stockBollings = stockBollingService.listByCondition(query);
+        for (StockBolling stockBolling:stockBollings){
+            System.out.println("stockBolling====="+i++);
+            sendStockBollingHttp(stockBolling);
+        }
+    }
+
+    public void sendStockAttributeReplay(String tradeDate){
+        int i = 0;
+        StockAttributeReplayQuery query = new StockAttributeReplayQuery();
+        query.setKbarDate(tradeDate);
+        List<StockAttributeReplay> stockAttributeReplays = stockAttributeReplayService.listByCondition(query);
+        for (StockAttributeReplay stockAttributeReplay:stockAttributeReplays){
+            System.out.println("stockAttributeReplay====="+i++);
+            sendStockAttributeReplayHttp(stockAttributeReplay);
+        }
+    }
 
 
 
@@ -81,6 +128,10 @@ public class SendReplayInfoAutoComponent {
         List<String> urls = Lists.newArrayList();
         for (String address:addresses){
             String url = "http://"+address+"/dragon/basicInfo/saveStockKbar";
+            urls.add(url);
+        }
+        for (String address:tigerAddress){
+            String url = "http://"+address+"/tiger/basicInfo/saveStockKbar";
             urls.add(url);
         }
         Map<String, String> map = new HashMap<>();
@@ -183,12 +234,165 @@ public class SendReplayInfoAutoComponent {
             String url = "http://"+address+"/dragon/basicInfo/saveIndexDetail";
             urls.add(url);
         }
+        for (String address:tigerAddress){
+            String url = "http://"+address+"/tiger/basicInfo/saveIndexDetail";
+            urls.add(url);
+        }
         Map<String, String> map = new HashMap<>();
         map.put("stockCode",indexDetail.getStockCode());
         map.put("stockName",indexDetail.getStockName());
         map.put("kbarDate",indexDetail.getKbarDate());
         map.put("indexCode",indexDetail.getIndexCode());
         map.put("blockName",indexDetail.getBlockName());
+        String result = null;
+        for(String url:urls) {
+            try {
+                result = HttpUtil.sendHttpGet(url, map);
+            } catch (Exception e) {
+                log.info(e.getMessage(), e);
+            }
+        }
+    }
+
+    public void sendPlankExchangeDailyHttp(PlankExchangeDaily plankExchangeDaily){
+        if(plankExchangeDaily==null){
+            return;
+        }
+        List<String> urls = Lists.newArrayList();
+        for (String address:addresses){
+            String url = "http://"+address+"/dragon/basicInfo/savePlankExchangeDaily";
+            urls.add(url);
+        }
+        Map<String, String> map = new HashMap<>();
+        map.put("stockCode",plankExchangeDaily.getStockCode());
+        map.put("stockName",plankExchangeDaily.getStockName());
+        map.put("tradeDate",plankExchangeDaily.getTradeDate());
+        map.put("maxExchangeMoneyDate",plankExchangeDaily.getMaxExchangeMoneyDate());
+        if(plankExchangeDaily.getPlankType()!=null) {
+            map.put("plankType", plankExchangeDaily.getPlankType().toString());
+        }
+        if(plankExchangeDaily.getExchangeMoney()!=null) {
+            map.put("", plankExchangeDaily.getExchangeMoney().toString());
+        }
+        String result = null;
+        for(String url:urls) {
+            try {
+                result = HttpUtil.sendHttpGet(url, map);
+            } catch (Exception e) {
+                log.info(e.getMessage(), e);
+            }
+        }
+    }
+
+    public void sendHistoryBLockStocksHttp(HistoryBlockStocks historyBlockStocks){
+        if(historyBlockStocks==null){
+            return;
+        }
+        List<String> urls = Lists.newArrayList();
+        for (String address:tigerAddress){
+            String url = "http://"+address+"/tiger/basicInfo/saveHistoryBlockStocks";
+            urls.add(url);
+        }
+        Map<String, String> map = new HashMap<>();
+        map.put("stockCode",historyBlockStocks.getBlockCode());
+        map.put("stockName",historyBlockStocks.getBlockName());
+        map.put("tradeDate",historyBlockStocks.getTradeDate());
+        map.put("stocks",historyBlockStocks.getStocks());
+
+        String result = null;
+        for(String url:urls) {
+            try {
+                result = HttpUtil.sendHttpGet(url, map);
+            } catch (Exception e) {
+                log.info(e.getMessage(), e);
+            }
+        }
+    }
+
+    public void sendStockBollingHttp(StockBolling stockBolling){
+        if(stockBolling==null){
+            return;
+        }
+        List<String> urls = Lists.newArrayList();
+        for (String address:tigerAddress){
+            String url = "http://"+address+"/tiger/basicInfo/saveStockBolling";
+            urls.add(url);
+        }
+        Map<String, String> map = new HashMap<>();
+        map.put("stockCode",stockBolling.getStockCode());
+        map.put("stockName",stockBolling.getStockName());
+        map.put("kbarDate",stockBolling.getKbarDate());
+        if(stockBolling.getDayType()!=null) {
+            map.put("dayType", stockBolling.getDayType().toString());
+        }
+        if(stockBolling.getUpPrice()!=null){
+            map.put("upPrice",stockBolling.getUpPrice().toString());
+        }
+        if(stockBolling.getMiddlePrice()!=null){
+            map.put("middlePrice",stockBolling.getMiddlePrice().toString());
+        }
+        if(stockBolling.getLowPrice()!=null){
+            map.put("lowPrice",stockBolling.getLowPrice().toString());
+        }
+
+        String result = null;
+        for(String url:urls) {
+            try {
+                result = HttpUtil.sendHttpGet(url, map);
+            } catch (Exception e) {
+                log.info(e.getMessage(), e);
+            }
+        }
+    }
+
+
+    public void sendStockAttributeReplayHttp(StockAttributeReplay stockAttributeReplay){
+        if(stockAttributeReplay==null){
+            return;
+        }
+        List<String> urls = Lists.newArrayList();
+        for (String address:tigerAddress){
+            String url = "http://"+address+"/tiger/basicInfo/saveStockAttributeReplay";
+            urls.add(url);
+        }
+        Map<String, String> map = new HashMap<>();
+        map.put("stockCode",stockAttributeReplay.getStockCode());
+        map.put("stockName",stockAttributeReplay.getStockName());
+        map.put("kbarDate",stockAttributeReplay.getKbarDate());
+        if(stockAttributeReplay.getAvgRangeDay10()!=null) {
+            map.put("avgRangeDay10", stockAttributeReplay.getAvgRangeDay10().toString());
+        }
+        if(stockAttributeReplay.getAvgAmountDay5()!=null){
+            map.put("avgAmountDay5",stockAttributeReplay.getAvgAmountDay5().toString());
+        }
+        if(stockAttributeReplay.getRateDay5()!=null){
+            map.put("rateDay5",stockAttributeReplay.getRateDay5().toString());
+        }
+        if(stockAttributeReplay.getRateDay3()!=null){
+            map.put("rateDay3",stockAttributeReplay.getRateDay3().toString());
+        }
+        if(stockAttributeReplay.getMarketNew()!=null){
+            map.put("marketNew",stockAttributeReplay.getMarketNew().toString());
+        }
+        if(stockAttributeReplay.getMarketValue()!=null){
+            map.put("marketValue",stockAttributeReplay.getMarketValue().toString());
+        }
+        if(stockAttributeReplay.getPlanksDay10()!=null){
+            map.put("planksDay10",stockAttributeReplay.getPlanksDay10().toString());
+        }
+        if(stockAttributeReplay.getClosePlanksDay10()!=null){
+            map.put("closePlanksDay10",stockAttributeReplay.getClosePlanksDay10().toString());
+        }
+        if(stockAttributeReplay.getUpperShadowRate()!=null){
+            map.put("upperShadowRate",stockAttributeReplay.getUpperShadowRate().toString());
+        }
+        if(stockAttributeReplay.getHighRate()!=null){
+            map.put("highRate",stockAttributeReplay.getHighRate().toString());
+        }
+        if(stockAttributeReplay.getHighTime()!=null){
+            map.put("highTime",stockAttributeReplay.getHighTime());
+        }
+
         String result = null;
         for(String url:urls) {
             try {
