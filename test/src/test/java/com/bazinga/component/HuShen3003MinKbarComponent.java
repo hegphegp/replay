@@ -59,7 +59,7 @@ public class HuShen3003MinKbarComponent {
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
     public void macdExcel(){
-        List<HuShen300MacdBuyDTO> buys = getMacdBuyDTO();
+        List<HuShen300MacdBuyDTO> buys = getMacdBuyDTOFour();
         List<Object[]> datas = Lists.newArrayList();
 
         for (HuShen300MacdBuyDTO dto:buys) {
@@ -89,6 +89,121 @@ public class HuShen3003MinKbarComponent {
         }catch (Exception e){
             log.info(e.getMessage());
         }
+    }
+
+    public List<HuShen300MacdBuyDTO> getMacdBuyDTOFour(){
+        List<HuShen300MacdBuyDTO> buys = Lists.newArrayList();
+        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20230212",DateUtil.yyyyMMdd));
+        tradeDatePoolQuery.setTradeDateTo(DateUtil.parseDate("20230213",DateUtil.yyyyMMdd));
+        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
+        List<Date> kbarSeconds = getKbarSeconds(5);
+        List<Long> preTradeDatePoints = Lists.newArrayList();
+        for (TradeDatePool tradeDatePool:tradeDatePools){
+            String yyyyMMdd = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+            List<Long> tradePoints = getTradeDateSecondPoint(yyyyMMdd,kbarSeconds);
+            List<Long> alls = Lists.newArrayList();
+            alls.addAll(preTradeDatePoints);
+            alls.addAll(tradePoints);
+            List<StockIndex> stockIndices = getCalStockIndex(alls.get(0), alls.get(alls.size() - 1));
+            if(CollectionUtils.isEmpty(stockIndices)){
+                continue;
+            }
+            System.out.println(yyyyMMdd);
+            StockIndex preIndex = null;
+            for (StockIndex stockIndex:stockIndices){
+                if(stockIndex.getMacd().compareTo(BigDecimal.ZERO)==0){
+                    continue;
+                }
+                if(preIndex!=null&&preIndex.getMacd()!=null&&stockIndex.getKbarDate().startsWith(yyyyMMdd)){
+                    BigDecimal macd = stockIndex.getMacd();
+                    int redirect = stockIndex.getMacd().compareTo(BigDecimal.ZERO);
+                    int preRedirect = preIndex.getMacd().compareTo(BigDecimal.ZERO);
+                    if(redirect!=preRedirect) {
+                        HuShen300MacdBuyDTO buyDTO = new HuShen300MacdBuyDTO();
+                        buyDTO.setRedirect(redirect);
+                        buyDTO.setBuyStockIndex(stockIndex);
+                        buyDTO.setPreBuyStockIndex(preIndex);
+                        buyDTO.setMacdBuy(macd);
+                        buyDTO.setBuyTime(stockIndex.getKbarDate());
+                        buys.add(buyDTO);
+                    }
+                }
+                preIndex = stockIndex;
+            }
+            preTradeDatePoints = tradePoints;
+        }
+        for (HuShen300MacdBuyDTO buy:buys){
+            List<StockIndex> afterStockIndexes = getAfterStockIndex(Long.valueOf(buy.getBuyStockIndex().getKbarDate()));
+            List<StockIndex> preIndexes = getPreStockIndex(Long.valueOf(buy.getPreBuyStockIndex().getKbarDate()));
+            BigDecimal preArea = calArea(preIndexes);
+            buy.setPreArea(preArea);
+            calSellTime(afterStockIndexes,buy);
+        }
+        for (HuShen300MacdBuyDTO buy:buys){
+            if(buy.getSellTime()==null){
+                continue;
+            }
+            StockKbar buyKbar = stockKbarService.getByUniqueKey("IFZLCFE" + "_" + buy.getBuyTime());
+            StockKbar sellKbar = stockKbarService.getByUniqueKey("IFZLCFE" + "_" + buy.getSellTime());
+            if(buyKbar==null){
+                continue;
+            }
+            buy.setBuyPrice(buyKbar.getClosePrice());
+            if(sellKbar!=null){
+                buy.setSellPrice(sellKbar.getClosePrice());
+                BigDecimal profitValue = buy.getSellPrice().subtract(buy.getBuyPrice());
+                BigDecimal rate = PriceUtil.getPricePercentRate(buy.getSellPrice().subtract(buy.getBuyPrice()), buy.getBuyPrice());
+                BigDecimal profit = rate.multiply(new BigDecimal(buy.getRedirect())).setScale(4,BigDecimal.ROUND_HALF_UP);
+                profitValue = profitValue.multiply(new BigDecimal(buy.getRedirect())).setScale(4,BigDecimal.ROUND_HALF_UP);
+                buy.setProfit(profit);
+                buy.setProfitValue(profitValue);
+            }
+
+        }
+        return buys;
+    }
+
+    public BigDecimal calArea(List<StockIndex> stockIndices){
+        if(CollectionUtils.isEmpty(stockIndices)){
+            return null;
+        }
+        BigDecimal area = BigDecimal.ZERO;
+        StockIndex first = stockIndices.get(0);
+        int firstRedirect = first.getMacd().compareTo(BigDecimal.ZERO);
+        for (StockIndex stockIndex:stockIndices){
+            int curRedirect = stockIndex.getMacd().compareTo(BigDecimal.ZERO);
+            if(curRedirect==0||curRedirect==firstRedirect) {
+                area = area.add(stockIndex.getMacd());
+            }else {
+                return area.abs();
+            }
+        }
+        return area.abs();
+    }
+
+    public void calSellTime(List<StockIndex> stockIndices,HuShen300MacdBuyDTO buyDTO){
+        if(CollectionUtils.isEmpty(stockIndices)||buyDTO.getPreArea()==null){
+            return ;
+        }
+        BigDecimal area = BigDecimal.ZERO;
+        StockIndex first = stockIndices.get(0);
+        int firstRedirect = first.getMacd().compareTo(BigDecimal.ZERO);
+        for (StockIndex stockIndex:stockIndices){
+            int curRedirect = stockIndex.getMacd().compareTo(BigDecimal.ZERO);
+            buyDTO.setSellStockIndex(stockIndex);
+            buyDTO.setSellTime(stockIndex.getKbarDate());
+            if(curRedirect==0||curRedirect==firstRedirect) {
+                area = area.add(stockIndex.getMacd());
+                if(area.abs().compareTo(buyDTO.getPreArea())>=0){
+                    break;
+                }
+            }else {
+                break;
+            }
+        }
+        buyDTO.setArea(area.abs());
     }
 
 
@@ -273,6 +388,26 @@ public class HuShen3003MinKbarComponent {
         return stockKbars;
     }
 
+    public  List<StockIndex> getAfterStockIndex(Long start){
+        Long startBefore = start - 1000l;
+        StockIndexQuery indexQuery = new StockIndexQuery();
+        indexQuery.setKbarDateFrom(startBefore.toString());
+        indexQuery.setLimit(2000);
+        indexQuery.addOrderBy("kbar_date", Sort.SortType.ASC);
+        List<StockIndex> stockIndices = stockIndexService.listByCondition(indexQuery);
+        return stockIndices;
+    }
+
+    public  List<StockIndex> getPreStockIndex(Long end){
+        Long endDelay = end + 1000l;
+        StockIndexQuery indexQuery = new StockIndexQuery();
+        indexQuery.setKbarDateTo(endDelay.toString());
+        indexQuery.setLimit(2000);
+        indexQuery.addOrderBy("kbar_date", Sort.SortType.DESC);
+        List<StockIndex> stockIndices = stockIndexService.listByCondition(indexQuery);
+        return stockIndices;
+    }
+
     public  List<StockIndex> getCalStockIndex(Long start,Long end){
         Long startBefore = start - 1000l;
         Long startDelay = end + 1000l;
@@ -358,6 +493,7 @@ public class HuShen3003MinKbarComponent {
         }
         return buys;
     }
+
 
     public boolean calSellInfo(LimitQueue<MacdIndexDTO> limitQueue,MacdBuyDTO buyDTO,StockKbar stockKbar){
         Iterator<MacdIndexDTO> iterator = limitQueue.iterator();
@@ -653,7 +789,7 @@ public class HuShen3003MinKbarComponent {
             macdIndexDTO.setBar(bar);
             return macdIndexDTO;
         }else{
-            BigDecimal ema12 = ((preMacdIndexDTO.getEma12().multiply(new BigDecimal(14))).add((stockKbar.getClosePrice().multiply(new BigDecimal(2))))).divide(new BigDecimal(13),4,BigDecimal.ROUND_HALF_UP);
+            BigDecimal ema12 = ((preMacdIndexDTO.getEma12().multiply(new BigDecimal(14))).add((stockKbar.getClosePrice().multiply(new BigDecimal(2))))).divide(new BigDecimal(16),4,BigDecimal.ROUND_HALF_UP);
             BigDecimal ema26 = ((preMacdIndexDTO.getEma26().multiply(new BigDecimal(19))).add((stockKbar.getClosePrice().multiply(new BigDecimal(2))))).divide(new BigDecimal(21),4,BigDecimal.ROUND_HALF_UP);
             BigDecimal diff = ema12.subtract(ema26).setScale(4,BigDecimal.ROUND_HALF_UP);
             BigDecimal dea = ((preMacdIndexDTO.getDea().multiply(new BigDecimal(29))).add(diff.multiply(new BigDecimal(2)))).divide(new BigDecimal(31), 4, BigDecimal.ROUND_HALF_UP);
