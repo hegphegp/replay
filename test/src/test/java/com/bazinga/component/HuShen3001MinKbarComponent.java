@@ -452,7 +452,7 @@ public class HuShen3001MinKbarComponent {
             if (CollectionUtils.isEmpty(thsQuoteInfos)) {
                 continue;
             }
-            calSecondKbar(thsQuoteInfos, 60, yyyyMMdd);
+            calSecondKbar(thsQuoteInfos, 15, yyyyMMdd);
 
         }
     }

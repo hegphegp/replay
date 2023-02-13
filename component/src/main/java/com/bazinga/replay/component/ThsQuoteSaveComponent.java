@@ -63,7 +63,7 @@ public class ThsQuoteSaveComponent {
     public void saveQuoteHuShen300QiHuo(){
         int ret = thsLogin();
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("2021-09-10",DateUtil.yyyy_MM_dd));
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("2022-11-26",DateUtil.yyyy_MM_dd));
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
         for (TradeDatePool tradeDatePool:tradeDatePools){
@@ -144,7 +144,7 @@ public class ThsQuoteSaveComponent {
     public int thsLogin(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("lsyjx002", "334033");
+            int ret = JDIBridge.THS_iFinDLogin("lsyjx002", "091303");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);
@@ -155,7 +155,7 @@ public class ThsQuoteSaveComponent {
     public int thsLoginOut(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("lsyjx002", "334033");
+            int ret = JDIBridge.THS_iFinDLogin("lsyjx002", "091303");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);

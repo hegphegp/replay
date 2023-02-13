@@ -242,24 +242,24 @@ public class ThsTest {
         thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
         //huShen300SecondKbarComponent.huShen300QuoteToKbar();
         //huShen300SecondKbarComponent.calMacdSave();
-        huShen300SecondKbarComponent.macdExcel();
+        //huShen300SecondKbarComponent.macdExcel();
     }
 
     //沪深300 3mink线相关
     @Test
     public void test5() {
         //huShen3003MinKbarComponent.huShen300QuoteToKbar();
-       //huShen3003MinKbarComponent.calMacdSave();
-        huShen3003MinKbarComponent.macdExcel();
+       huShen3003MinKbarComponent.calBiasSave();
+        //huShen3003MinKbarComponent.macdExcel();
     }
 
 
     //沪深300 1mink线相关
     @Test
     public void test6() {
-        //huShen3001MinKbarComponent.huShen300QuoteToKbar();
+        huShen3001MinKbarComponent.huShen300QuoteToKbar();
         //huShen3001MinKbarComponent.calBiasSave();
-        huShen3001MinKbarComponent.biasExcel();
+        //huShen3001MinKbarComponent.biasExcel();
     }
 
     @Test
@@ -280,7 +280,7 @@ public class ThsTest {
 
     @Test
     public void test12(){
-        sendReplayInfoAutoComponent.sendStockKbarReplay("20230209");
-        sendReplayInfoAutoComponent.sendStockCommonReplay("20230209");
+        sendReplayInfoAutoComponent.sendStockKbarReplay("20230213");
+        sendReplayInfoAutoComponent.sendStockCommonReplay("20230213");
     }
 }
