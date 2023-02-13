@@ -110,6 +110,8 @@ public class BaseTestCase {
     @Autowired
     private ThsBlockKbarComponent thsBlockKbarComponent;
     @Autowired
+    private SendReplayInfoAutoComponent sendReplayInfoAutoComponent;
+    @Autowired
     private CommonComponent commonComponent;
 
 
@@ -159,6 +161,15 @@ public class BaseTestCase {
         indexKbarCurrentComponent.stockIndexSend();
         thsCurrentQuoteSaveComponent.saveHS300FutureQuoteIndex(DateUtil.format(new Date(),DateUtil.yyyy_MM_dd));
 
+        //复盘数据发到线上
+        sendReplayInfoAutoComponent.sendStockKbarReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockCommonReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendIndexDetail(DateUtil.format(date,DateUtil.yyyy_MM_dd));
+        sendReplayInfoAutoComponent.sendPlankExchangeDaily(DateUtil.format(date,DateUtil.yyyy_MM_dd));
+
+        sendReplayInfoAutoComponent.sendHistoryBlockStocks(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockBolling(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockAttributeReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
     }

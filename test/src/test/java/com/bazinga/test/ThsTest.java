@@ -282,5 +282,10 @@ public class ThsTest {
     public void test12(){
         sendReplayInfoAutoComponent.sendStockKbarReplay("20230213");
         sendReplayInfoAutoComponent.sendStockCommonReplay("20230213");
+        Date date = DateUtil.parseDate("20230210", DateUtil.yyyyMMdd);
+        sendReplayInfoAutoComponent.sendStockKbarReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockCommonReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendIndexDetail(DateUtil.format(date,DateUtil.yyyy_MM_dd));
+        sendReplayInfoAutoComponent.sendPlankExchangeDaily(DateUtil.format(date,DateUtil.yyyy_MM_dd));
     }
 }
