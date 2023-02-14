@@ -75,6 +75,8 @@ public class HuShen3003MinKbarComponent {
             list.add(dto.getMacdBuy());
             list.add(dto.getBuyPrice());
             list.add(dto.getSellPrice());
+            list.add(dto.getPreArea());
+            list.add(dto.getArea());
             list.add(dto.getProfit());
             list.add(dto.getProfitValue());
 
@@ -82,7 +84,7 @@ public class HuShen3003MinKbarComponent {
             datas.add(objects);
         }
 
-        String[] rowNames = {"index","方向（1多 -1空）","买入日期","买入时间点","卖出日期","卖出时间点","买入macd","买入价格","卖出价格","利润","利润值"};
+        String[] rowNames = {"index","方向（1多 -1空）","买入日期","买入时间点","卖出日期","卖出时间点","买入macd","买入价格","卖出价格","买入前面积","卖出面积","利润","利润值"};
         PoiExcelUtil poiExcelUtil = new PoiExcelUtil("macd买入",rowNames,datas);
         try {
             poiExcelUtil.exportExcelUseExcelTitle("macd买入");
@@ -94,11 +96,11 @@ public class HuShen3003MinKbarComponent {
     public List<HuShen300MacdBuyDTO> getMacdBuyDTOFour(){
         List<HuShen300MacdBuyDTO> buys = Lists.newArrayList();
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20230212",DateUtil.yyyyMMdd));
-        tradeDatePoolQuery.setTradeDateTo(DateUtil.parseDate("20230213",DateUtil.yyyyMMdd));
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20220101",DateUtil.yyyyMMdd));
+        tradeDatePoolQuery.setTradeDateTo(DateUtil.parseDate("20230214",DateUtil.yyyyMMdd));
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
-        List<Date> kbarSeconds = getKbarSeconds(5);
+        List<Date> kbarSeconds = getKbarSeconds(15);
         List<Long> preTradeDatePoints = Lists.newArrayList();
         for (TradeDatePool tradeDatePool:tradeDatePools){
             String yyyyMMdd = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
@@ -135,6 +137,7 @@ public class HuShen3003MinKbarComponent {
             preTradeDatePoints = tradePoints;
         }
         for (HuShen300MacdBuyDTO buy:buys){
+            System.out.println(buy.getBuyTime());
             List<StockIndex> afterStockIndexes = getAfterStockIndex(Long.valueOf(buy.getBuyStockIndex().getKbarDate()));
             List<StockIndex> preIndexes = getPreStockIndex(Long.valueOf(buy.getPreBuyStockIndex().getKbarDate()));
             BigDecimal preArea = calArea(preIndexes);
@@ -196,7 +199,8 @@ public class HuShen3003MinKbarComponent {
             buyDTO.setSellTime(stockIndex.getKbarDate());
             if(curRedirect==0||curRedirect==firstRedirect) {
                 area = area.add(stockIndex.getMacd());
-                if(area.abs().compareTo(buyDTO.getPreArea())>=0){
+                BigDecimal preAreaRate = buyDTO.getPreArea().multiply(new BigDecimal("0.8")).setScale(4, BigDecimal.ROUND_HALF_UP);
+                if(area.abs().compareTo(preAreaRate)>=0){
                     break;
                 }
             }else {
@@ -319,7 +323,7 @@ public class HuShen3003MinKbarComponent {
 
     public List<MacdBuyDTO> calBiasSave(){
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20180101",DateUtil.yyyyMMdd));
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20211220",DateUtil.yyyyMMdd));
         //tradeDatePoolQuery.setTradeDateTo(DateUtil.parseDate("20200909",DateUtil.yyyyMMdd));
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
@@ -389,7 +393,7 @@ public class HuShen3003MinKbarComponent {
     }
 
     public  List<StockIndex> getAfterStockIndex(Long start){
-        Long startBefore = start - 1000l;
+        Long startBefore = start - 1l;
         StockIndexQuery indexQuery = new StockIndexQuery();
         indexQuery.setKbarDateFrom(startBefore.toString());
         indexQuery.setLimit(2000);
@@ -399,7 +403,7 @@ public class HuShen3003MinKbarComponent {
     }
 
     public  List<StockIndex> getPreStockIndex(Long end){
-        Long endDelay = end + 1000l;
+        Long endDelay = end + 1l;
         StockIndexQuery indexQuery = new StockIndexQuery();
         indexQuery.setKbarDateTo(endDelay.toString());
         indexQuery.setLimit(2000);

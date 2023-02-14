@@ -249,8 +249,8 @@ public class ThsTest {
     @Test
     public void test5() {
         //huShen3003MinKbarComponent.huShen300QuoteToKbar();
-       huShen3003MinKbarComponent.calBiasSave();
-        //huShen3003MinKbarComponent.macdExcel();
+       //huShen3003MinKbarComponent.calBiasSave();
+        huShen3003MinKbarComponent.macdExcel();
     }
 
 
