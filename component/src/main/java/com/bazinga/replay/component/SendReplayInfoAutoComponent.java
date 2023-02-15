@@ -36,10 +36,15 @@ public class SendReplayInfoAutoComponent {
     private StockBollingService stockBollingService;
     @Autowired
     private StockAttributeReplayService stockAttributeReplayService;
-    List<String> addresses = Lists.newArrayList("125.93.72.195:5368","125.93.72.195:5377","125.93.72.195:5379","125.93.72.195:5366","125.93.72.195:5367"
+    /*List<String> addresses = Lists.newArrayList("125.93.72.195:5368","125.93.72.195:5377","125.93.72.195:5379","125.93.72.195:5366","125.93.72.195:5367"
             ,"125.93.72.194:5288","125.93.72.194:5011","125.93.72.194:5277","125.93.72.197:5999");
 
-    List<String> tigerAddress = Lists.newArrayList("117.186.20.117:6602");
+    List<String> tigerAddress = Lists.newArrayList("117.186.20.117:6602");*/
+
+
+    List<String> addresses = Lists.newArrayList();
+
+    List<String> tigerAddress = Lists.newArrayList("117.186.20.117:6601");
 
     public void sendStockKbarReplay(String tradeDate){
         StockKbarQuery query = new StockKbarQuery();
@@ -272,7 +277,7 @@ public class SendReplayInfoAutoComponent {
             map.put("plankType", plankExchangeDaily.getPlankType().toString());
         }
         if(plankExchangeDaily.getExchangeMoney()!=null) {
-            map.put("", plankExchangeDaily.getExchangeMoney().toString());
+            map.put("exchangeMoney", plankExchangeDaily.getExchangeMoney().toString());
         }
         String result = null;
         for(String url:urls) {

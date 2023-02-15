@@ -201,7 +201,9 @@ public class BaseTestCase {
 
     @Test
     public void test9() {
-        indexKbarCurrentComponent.indexStockKbarSend(DateUtil.parseDate("20230109",DateUtil.yyyyMMdd));
+        //historyBlockInfoComponent.initHistoryBlockInfo();
+        historyBlockInfoComponent.compareHistoryBlockStocks();
+        //indexKbarCurrentComponent.indexStockKbarSend(DateUtil.parseDate("20230109",DateUtil.yyyyMMdd));
         //thsBlockStocksComponent.indexBLockDetail();
         /*stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
