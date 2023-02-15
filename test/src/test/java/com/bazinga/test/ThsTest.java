@@ -138,6 +138,8 @@ public class ThsTest {
     private SendReplayInfoAutoComponent sendReplayInfoAutoComponent;
     @Autowired
     private PlankAndOpenTimeComponent plankAndOpenTimeComponent;
+    @Autowired
+    private StrongerStockThanSzInfoComponent strongerStockThanSzInfoComponent;
 
 
 
@@ -289,5 +291,9 @@ public class ThsTest {
         sendReplayInfoAutoComponent.sendHistoryBlockStocks(DateUtil.format(date,DateUtil.yyyyMMdd));
         sendReplayInfoAutoComponent.sendStockBolling(DateUtil.format(date,DateUtil.yyyyMMdd));
         sendReplayInfoAutoComponent.sendStockAttributeReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
+    }
+    @Test
+    public void test13(){
+        strongerStockThanSzInfoComponent.strongerStockTest();
     }
 }
