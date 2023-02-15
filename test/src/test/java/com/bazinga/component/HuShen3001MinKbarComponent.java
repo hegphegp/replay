@@ -434,7 +434,7 @@ public class HuShen3001MinKbarComponent {
 
     public void huShen300QuoteToKbar(){
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20180101",DateUtil.yyyyMMdd));
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20211220",DateUtil.yyyyMMdd));
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
         for (TradeDatePool tradeDatePool:tradeDatePools){
@@ -452,7 +452,7 @@ public class HuShen3001MinKbarComponent {
             if (CollectionUtils.isEmpty(thsQuoteInfos)) {
                 continue;
             }
-            calSecondKbar(thsQuoteInfos, 15, yyyyMMdd);
+            calSecondKbar(thsQuoteInfos, 5, yyyyMMdd);
 
         }
     }

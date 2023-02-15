@@ -78,6 +78,7 @@ public class ThsStockKbarInitComponent {
     }
 
     public void circulateCheckStockAndUpdate(String tradeDateStr){
+        thsLoginComponent.thsLogin();
         List<ThsCirculateInfo> circulateInfos = thsCirculateInfoComponent.getMarketACirculate(tradeDateStr);
         List<ThsStockKbar> stockKbars = thsStockKbarComponent.getDayStockKbars(tradeDateStr);
         Map<String, ThsStockKbar> stockKbarMap = stockKbars.stream().collect(Collectors.toMap(ThsStockKbar::getStockCode, stockKbar -> stockKbar));
@@ -86,9 +87,10 @@ public class ThsStockKbarInitComponent {
             if(thsStockKbar==null){
                 System.out.println(circulateInfo.getStockCode()+"===="+circulateInfo.getStockName()+"===="+tradeDateStr+"====遗漏数据日期");
                 String dateyyyy_MM_dd = DateUtil.dateStringFormat(tradeDateStr, DateUtil.yyyyMMdd, DateUtil.yyyy_MM_dd);
-                initCurrentStockKbar(circulateInfo.getStockCode(),circulateInfo.getStockName(),dateyyyy_MM_dd,dateyyyy_MM_dd);
+                initCurrentStockKbar(circulateInfo.getStockCode(),circulateInfo.getStockName(),dateyyyy_MM_dd,"2023-02-15");
             }
         }
+        thsLoginComponent.thsLoginOut();
 
     }
 
