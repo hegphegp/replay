@@ -86,14 +86,15 @@ public class StrongerStockThanSzInfoComponent {
             list.add(dto.getSzEndRates().get(0));
             list.add(dto.getSzEndRates().get(1));
             list.add(dto.getSzEndRates().get(2));
+            list.add(dto.getLevels());
             list.add(dto.getProfit());
             Object[] objects = list.toArray();
             datas.add(objects);
         }
 
 
-        String[] rowNames = {"index","股票代码","股票名称","交易日期","市值","买入时涨幅","卖出日期","股票1日收盘涨幅","股票2日收盘涨幅","股票3日收盘涨幅","上证1日收盘涨幅","上证2日收盘涨幅","上证3日收盘涨幅","盈利"};
-        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("美国往事",rowNames,datas);
+        String[] rowNames = {"index","股票代码","股票名称","交易日期","市值","买入时涨幅","卖出日期","股票1日收盘涨幅","股票2日收盘涨幅","股票3日收盘涨幅","上证1日收盘涨幅","上证2日收盘涨幅","上证3日收盘涨幅","买入排名","盈利"};
+        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("强势股票数据",rowNames,datas);
         try {
             poiExcelUtil.exportExcelUseExcelTitle("强势股票数据");
         }catch (Exception e){
@@ -116,11 +117,12 @@ public class StrongerStockThanSzInfoComponent {
                     continue;
                 }
                 usemap.put(circulateInfo.getStockCode(),circulateInfo.getStockCode());
+                System.out.println(dateyyyyMMdd+"============="+usemap.size());
                 List<ThsStockKbar> stockKbars = thsStockKbarComponent.getStockKBarsDeleteNewDays(circulateInfo.getStockCode());
                 if(CollectionUtils.isEmpty(stockKbars)){
                     continue;
                 }
-                List<StrongerStockTestDTO> buys = calStrongerInfos(circulateInfo, stockKbars, szEndRateMap, "000300");
+                List<StrongerStockTestDTO> buys = calStrongerInfos(circulateInfo, stockKbars, szEndRateMap, "000905");
                 if(CollectionUtils.isEmpty(buys)){
                     continue;
                 }
@@ -135,7 +137,7 @@ public class StrongerStockThanSzInfoComponent {
         LimitQueue<ThsStockKbar> limitQueue = new LimitQueue<>(4);
         for (ThsStockKbar stockKbar:stockKbars){
             limitQueue.offer(stockKbar);
-            if(DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd).before(DateUtil.parseDate("20230101", DateUtil.yyyyMMdd))){
+            if(DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd).before(DateUtil.parseDate("20180101", DateUtil.yyyyMMdd))){
                 continue;
             }
             if(!DateUtil.parseDate(stockKbar.getKbarDate(), DateUtil.yyyyMMdd).before(DateUtil.parseDate("20230215", DateUtil.yyyyMMdd))){
@@ -154,13 +156,48 @@ public class StrongerStockThanSzInfoComponent {
             boolean buyFlag = judgeStrongerStock(limitQueue, 4, buyDto, szEndRateMap);
             if(buyFlag){
                 BigDecimal openRate = PriceUtil.getPricePercentRate(stockKbar.getOpenPrice().subtract(stockKbar.getZeroPrice()), stockKbar.getZeroPrice());
-                buyDto.setBuyRate(openRate);
-                BigDecimal profit = calProfit(buyDto, stockKbars, szEndRateMap);
-                buyDto.setProfit(profit);
-                list.add(buyDto);
+                boolean upperFlag = PriceUtil.isHistoryUpperPrice(stockKbar.getStockCode(), stockKbar.getOpenPrice(), stockKbar.getZeroPrice(), stockKbar.getKbarDate());
+                if(!upperFlag) {
+                    buyDto.setBuyRate(openRate);
+                    BigDecimal profit = calProfit(buyDto, stockKbars, szEndRateMap);
+                    buyDto.setProfit(profit);
+                    list.add(buyDto);
+                }
             }
         }
+        calBuyTimeLevel(list);
         return list;
+    }
+
+
+    public void calBuyTimeLevel(List<StrongerStockTestDTO> buys){
+        Map<String, List<StrongerStockTestDTO>> map = new HashMap<>();
+        for (StrongerStockTestDTO buy:buys){
+            String sellDate = buy.getSellDate();
+            if(sellDate==null){
+                sellDate = "noSell";
+            }
+            List<StrongerStockTestDTO> strongerStockTestDTOS = map.get(sellDate);
+            if(strongerStockTestDTOS==null){
+                strongerStockTestDTOS  = Lists.newArrayList();
+                map.put(sellDate,strongerStockTestDTOS);
+            }
+            strongerStockTestDTOS.add(buy);
+        }
+        for (StrongerStockTestDTO buy:buys){
+            String sellDate = buy.getSellDate();
+            if(sellDate==null){
+                sellDate = "noSell";
+            }
+            List<StrongerStockTestDTO> strongerStockTestDTOS = map.get(sellDate);
+            int i = 0;
+            for (StrongerStockTestDTO dto:strongerStockTestDTOS){
+                i++;
+                if(dto.getTradeDate().equals(buy.getTradeDate())){
+                    buy.setLevels(i);
+                }
+            }
+        }
     }
 
     public boolean judgeStrongerStock(LimitQueue<ThsStockKbar> limitQueue,int limitQueueSize,StrongerStockTestDTO buyDto,Map<String,BigDecimal> szEndRateMap){
@@ -223,7 +260,7 @@ public class StrongerStockThanSzInfoComponent {
     public Map<String,BigDecimal> getSzEndRateMap(){
         Map<String, BigDecimal> map = new HashMap<>();
         StockKbarQuery query = new StockKbarQuery();
-        query.setKbarDate("999999");
+        query.setStockCode("999999");
         query.addOrderBy("kbar_date", Sort.SortType.ASC);
         List<StockKbar> stockKbars = stockKbarService.listByCondition(query);
         StockKbar preStockKbar = null;

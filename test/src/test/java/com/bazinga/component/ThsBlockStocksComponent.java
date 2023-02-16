@@ -54,7 +54,7 @@ public class ThsBlockStocksComponent {
     /**
      * 指数股票明细
      */
-    public void indexBLockDetail(){
+    public void indexBLockDetail(String stockCode,String diff,String blockName){
         TradeDatePoolQuery query = new TradeDatePoolQuery();
         query.setTradeDateFrom(DateTimeUtils.getDate000000(new Date()));
         query.setTradeDateTo(DateTimeUtils.getDate235959(new Date()));
@@ -66,9 +66,22 @@ public class ThsBlockStocksComponent {
             list.add(tradeDateStr);
         }
         //List<String> list = Lists.newArrayList("2022-12-29");
-        String stockCode = "000300";
-        String diff = ".SH";
-        String blockName = "沪深300";
+        getBlockDetail(stockCode,diff,blockName,list);
+        thsDataComponent.thsLoginOut();
+    }
+
+    public void initIndexBLockDetail(String stockCode,String diff,String blockName){
+        TradeDatePoolQuery query = new TradeDatePoolQuery();
+        query.setTradeDateFrom(DateUtil.parseDate("20220526",DateUtil.yyyyMMdd));
+        query.setTradeDateTo(DateTimeUtils.getDate235959(new Date()));
+        query.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(query);
+        List<String> list = Lists.newArrayList();
+        for (TradeDatePool tradeDatePool:tradeDatePools){
+            String tradeDateStr = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyy_MM_dd);
+            list.add(tradeDateStr);
+        }
+        //List<String> list = Lists.newArrayList("2022-12-29");
         getBlockDetail(stockCode,diff,blockName,list);
         thsDataComponent.thsLoginOut();
     }

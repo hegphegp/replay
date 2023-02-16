@@ -17,5 +17,6 @@ public class StrongerStockTestDTO {
     private List<BigDecimal> szEndRates = Lists.newArrayList();
     private List<BigDecimal> stockEndRates = Lists.newArrayList();
     private String sellDate;
+    private int levels = 1;
     private BigDecimal profit;
 }

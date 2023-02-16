@@ -155,7 +155,7 @@ public class BaseTestCase {
         stockAttributeReplayComponent.saveStockAttributeReplay(date);
         stockPlankDailyComponent.handleStopTradeStock(date);
         stockBollingComponent.calCurrentDayBoll(date);
-        thsBlockStocksComponent.indexBLockDetail();
+        thsBlockStocksComponent.indexBLockDetail("000300",".SH","沪深300");
         //historyBlockInfoComponent.initHistoryBlockInfo();
         indexKbarCurrentComponent.indexStockKbarSend(date);
         indexKbarCurrentComponent.stockIndexSend();
@@ -201,8 +201,8 @@ public class BaseTestCase {
 
     @Test
     public void test9() {
-        //historyBlockInfoComponent.initHistoryBlockInfo();
-        historyBlockInfoComponent.compareHistoryBlockStocks();
+        historyBlockInfoComponent.initHistoryBlockInfo();
+        //historyBlockInfoComponent.compareHistoryBlockStocks();
         //indexKbarCurrentComponent.indexStockKbarSend(DateUtil.parseDate("20230109",DateUtil.yyyyMMdd));
         //thsBlockStocksComponent.indexBLockDetail();
         /*stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
@@ -231,7 +231,7 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
-        thsBlockStocksComponent.indexBLockDetail();
+        thsBlockStocksComponent.initIndexBLockDetail("000905",".SH","中证500");
         //thsBlockStocksComponent.indexBLockDetail();
         //historyBlockInfoComponent.initHistoryBlockInfo();
         //thsBlockStocksComponent.indexBLockDetail();

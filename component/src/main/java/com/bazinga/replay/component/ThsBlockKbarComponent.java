@@ -589,7 +589,7 @@ public class ThsBlockKbarComponent {
     public int thsLogin(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("antt012", "445371");
+            int ret = JDIBridge.THS_iFinDLogin("lsyjx002", "091303");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);
@@ -600,7 +600,7 @@ public class ThsBlockKbarComponent {
     public int thsLoginOut(){
         try {
             System.load("E://iFinDJava.dll");
-            int ret = JDIBridge.THS_iFinDLogin("antt012", "445371");
+            int ret = JDIBridge.THS_iFinDLogin("lsyjx002", "091303");
             return ret;
         }catch (Exception e){
             log.error("同花顺登录失败",e);
