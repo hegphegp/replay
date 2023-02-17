@@ -120,7 +120,7 @@ public class BaseTestCase {
         //无敌数据
         Date date = new Date();
         //Date date = DateUtil.parseDate("2023-01-13 15:30:30", DateUtil.DEFAULT_FORMAT);
-        newStockComponent.catchNewStock();
+        /*newStockComponent.catchNewStock();
         plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(date);
         stockReplayDailyComponent.calPreDateAvgPrice(date);
@@ -155,7 +155,7 @@ public class BaseTestCase {
         stockAttributeReplayComponent.saveStockAttributeReplay(date);
         stockPlankDailyComponent.handleStopTradeStock(date);
         stockBollingComponent.calCurrentDayBoll(date);
-        thsBlockStocksComponent.indexBLockDetail("000300",".SH","沪深300");
+        thsBlockStocksComponent.indexBLockDetail("000300",".SH","沪深300");*/
         historyBlockInfoComponent.initHistoryBlockInfo();
         indexKbarCurrentComponent.indexStockKbarSend(date);
         indexKbarCurrentComponent.stockIndexSend();
