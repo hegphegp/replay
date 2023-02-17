@@ -103,7 +103,7 @@ public class HuShen300MABuyComponent {
 
     public void calMaInfos(){
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20211201",DateUtil.yyyyMMdd));
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20211221",DateUtil.yyyyMMdd));
         tradeDatePoolQuery.setTradeDateTo(DateUtil.parseDate("20230214",DateUtil.yyyyMMdd));
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
@@ -129,21 +129,23 @@ public class HuShen300MABuyComponent {
                 limitQueue80.offer(stockKbar);
                 limitQueue90.offer(stockKbar);
                 limitQueue100.offer(stockKbar);
-                BigDecimal ma3 = calMaInfo(limitQueue3, 3);
-                BigDecimal ma80 = calMaInfo(limitQueue3, 80);
-                BigDecimal ma90 = calMaInfo(limitQueue3,90);
-                BigDecimal ma100 = calMaInfo(limitQueue3,100);
-                if(ma3!=null){
-                    saveStockAvgLine(ma3,stockKbar,3);
-                }
-                if(ma80!=null){
-                    saveStockAvgLine(ma80,stockKbar,80);
-                }
-                if(ma90!=null){
-                    saveStockAvgLine(ma90,stockKbar,90);
-                }
-                if(ma100!=null){
-                    saveStockAvgLine(ma100,stockKbar,100);
+                if(stockKbar.getKbarDate().startsWith(yyyyMMdd)) {
+                    BigDecimal ma3 = calMaInfo(limitQueue3, 3);
+                    BigDecimal ma80 = calMaInfo(limitQueue80, 80);
+                    BigDecimal ma90 = calMaInfo(limitQueue90, 90);
+                    BigDecimal ma100 = calMaInfo(limitQueue100, 100);
+                    if (ma3 != null) {
+                        saveStockAvgLine(ma3, stockKbar, 3);
+                    }
+                    if (ma80 != null) {
+                        saveStockAvgLine(ma80, stockKbar, 80);
+                    }
+                    if (ma90 != null) {
+                        saveStockAvgLine(ma90, stockKbar, 90);
+                    }
+                    if (ma100 != null) {
+                        saveStockAvgLine(ma100, stockKbar, 100);
+                    }
                 }
             }
             preTradeDatePoints = tradePoints;
@@ -155,7 +157,7 @@ public class HuShen300MABuyComponent {
         line.setStockCode(stockKbar.getStockCode());
         line.setStockName(stockKbar.getStockName());
         line.setKbarDate(stockKbar.getKbarDate());
-        line.setUniqueKey(stockKbar.getUniqueKey());
+        line.setUniqueKey(stockKbar.getUniqueKey()+"_"+days);
         line.setDayType(days);
         line.setAveragePrice(avgPrice);
         line.setCreateTime(new Date());

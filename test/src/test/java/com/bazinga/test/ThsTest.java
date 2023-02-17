@@ -140,6 +140,8 @@ public class ThsTest {
     private PlankAndOpenTimeComponent plankAndOpenTimeComponent;
     @Autowired
     private StrongerStockThanSzInfoComponent strongerStockThanSzInfoComponent;
+    @Autowired
+    private HuShen300MABuyComponent huShen300MABuyComponent;
 
 
 
@@ -241,10 +243,11 @@ public class ThsTest {
     //沪深300 5sk线相关
     @Test
     public void test4() {
-        thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
+        //thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
         //huShen300SecondKbarComponent.huShen300QuoteToKbar();
         //huShen300SecondKbarComponent.calMacdSave();
         //huShen300SecondKbarComponent.macdExcel();
+        huShen300MABuyComponent.calMaInfos();
     }
 
     //沪深300 3mink线相关
