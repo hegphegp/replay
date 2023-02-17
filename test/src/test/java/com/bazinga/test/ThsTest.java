@@ -248,6 +248,7 @@ public class ThsTest {
         //huShen300SecondKbarComponent.calMacdSave();
         //huShen300SecondKbarComponent.macdExcel();
         huShen300MABuyComponent.calMaInfos();
+        huShen300MABuyComponent.maExcel();
     }
 
     //沪深300 3mink线相关
