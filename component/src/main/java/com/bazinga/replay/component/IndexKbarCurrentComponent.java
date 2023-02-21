@@ -217,6 +217,12 @@ public class IndexKbarCurrentComponent {
         sendHttpStockKbar(stockKbar399300);;
     }
 
+    public void indexStockKbarManualSend(String stockCode,String stockName,String tradeDate,
+                                         BigDecimal open,BigDecimal close,BigDecimal high,BigDecimal low,Long volume,BigDecimal amount){
+        StockKbar stockKbar = thsBlockKbarComponent.getManualBlockKbarThsDay(stockCode,stockName,tradeDate,open,high,low,close,volume,amount);
+        sendHttpStockKbar(stockKbar);
+    }
+
     public void sendHttpStockKbar(StockKbar stockKbar){
         if(stockKbar==null){
             return;

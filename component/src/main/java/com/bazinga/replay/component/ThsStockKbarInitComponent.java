@@ -87,7 +87,7 @@ public class ThsStockKbarInitComponent {
             if(thsStockKbar==null){
                 System.out.println(circulateInfo.getStockCode()+"===="+circulateInfo.getStockName()+"===="+tradeDateStr+"====遗漏数据日期");
                 String dateyyyy_MM_dd = DateUtil.dateStringFormat(tradeDateStr, DateUtil.yyyyMMdd, DateUtil.yyyy_MM_dd);
-                initCurrentStockKbar(circulateInfo.getStockCode(),circulateInfo.getStockName(),dateyyyy_MM_dd,"2023-02-15");
+                initCurrentStockKbar(circulateInfo.getStockCode(),circulateInfo.getStockName(),dateyyyy_MM_dd,dateyyyy_MM_dd);
             }
         }
         thsLoginComponent.thsLoginOut();

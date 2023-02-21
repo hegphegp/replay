@@ -105,7 +105,7 @@ public class HuShen3003MinKbarComponent {
     public List<HuShen300MacdBuyDTO> getMacdBuyDTOFour(){
         List<HuShen300MacdBuyDTO> buys = Lists.newArrayList();
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20220101",DateUtil.yyyyMMdd));
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20220601",DateUtil.yyyyMMdd));
         tradeDatePoolQuery.setTradeDateTo(DateUtil.parseDate("20230214",DateUtil.yyyyMMdd));
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);

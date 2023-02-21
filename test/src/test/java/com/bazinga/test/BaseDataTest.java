@@ -51,15 +51,15 @@ public class BaseDataTest {
     @Test
     public void thsCirculateDaily() {
         //Date preTradeDate = commonComponent.preTradeDate(new Date());
-        Date preTradeDate = DateUtil.parseDate("20221229", DateUtil.yyyyMMdd);
+        Date preTradeDate = DateUtil.parseDate("20230215", DateUtil.yyyyMMdd);
         thsCirculateInitComponent.initAMarketChangeCirculateInfo(DateUtil.format(preTradeDate,DateUtil.yyyyMMdd), DateUtil.format(new Date(),DateUtil.yyyyMMdd));
     }
 
     @Test
     public void thsStockKbarDaily() {
         TradeDatePoolQuery query = new TradeDatePoolQuery();
-        query.setTradeDateFrom(DateUtil.parseDate("20230103",DateUtil.yyyyMMdd));
-        query.addOrderBy("trade_date", Sort.SortType.ASC);
+        query.setTradeDateTo(DateUtil.parseDate("20220607",DateUtil.yyyyMMdd));
+        query.addOrderBy("trade_date", Sort.SortType.DESC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(query);
         for (TradeDatePool tradeDatePool:tradeDatePools) {
             String format = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);

@@ -39,6 +39,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Date;
@@ -120,7 +121,7 @@ public class BaseTestCase {
         //无敌数据
         Date date = new Date();
         //Date date = DateUtil.parseDate("2023-01-13 15:30:30", DateUtil.DEFAULT_FORMAT);
-        /*newStockComponent.catchNewStock();
+        newStockComponent.catchNewStock();
         plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(date);
         stockReplayDailyComponent.calPreDateAvgPrice(date);
@@ -155,8 +156,8 @@ public class BaseTestCase {
         stockAttributeReplayComponent.saveStockAttributeReplay(date);
         stockPlankDailyComponent.handleStopTradeStock(date);
         stockBollingComponent.calCurrentDayBoll(date);
-        thsBlockStocksComponent.indexBLockDetail("000300",".SH","沪深300");*/
-        historyBlockInfoComponent.initHistoryBlockInfo();
+        thsBlockStocksComponent.indexBLockDetail("000300",".SH","沪深300");
+        //historyBlockInfoComponent.initHistoryBlockInfo();
         indexKbarCurrentComponent.indexStockKbarSend(date);
         indexKbarCurrentComponent.stockIndexSend();
         thsCurrentQuoteSaveComponent.saveHS300FutureQuoteIndex(DateUtil.format(new Date(),DateUtil.yyyy_MM_dd));
@@ -444,6 +445,8 @@ public class BaseTestCase {
         Date preTradeDate = commonComponent.preTradeDate(new Date());
         indexKbarCurrentComponent.indexStockKbarSend(preTradeDate);
 
+        /*indexKbarCurrentComponent.indexStockKbarManualSend("IXIC","纳斯达克指数","20230220",
+                new BigDecimal("0"),new BigDecimal(""),new BigDecimal(""),new BigDecimal(""),0l,new BigDecimal(""));*/
 
         //indexKbarCurrentComponent.stockIndexSend();
         //indexKbarCurrentComponent.indexKbarCurrentNew();

@@ -361,6 +361,34 @@ public class ThsBlockKbarComponent {
         return null;
     }
 
+    public StockKbar getManualBlockKbarThsDay(String blockCode,String blockName,String tradeDate
+            ,BigDecimal open,BigDecimal high,BigDecimal low,BigDecimal close,Long volume,BigDecimal amount){
+        StockKbar stockKbar = new StockKbar();
+        stockKbar.setStockCode(blockCode);
+        stockKbar.setStockName(blockName);
+        stockKbar.setKbarDate(tradeDate);
+        stockKbar.setUniqueKey(stockKbar.getStockCode() + "_" + stockKbar.getKbarDate());
+        stockKbar.setOpenPrice(open);
+        stockKbar.setClosePrice(close);
+        stockKbar.setHighPrice(high);
+        stockKbar.setLowPrice(low);
+        stockKbar.setAdjOpenPrice(open);
+        stockKbar.setAdjClosePrice(close);
+        stockKbar.setAdjHighPrice(high);
+        stockKbar.setAdjLowPrice(low);
+        if(amount!=null) {
+            stockKbar.setTradeAmount(amount);
+        }else{
+            stockKbar.setTradeAmount(new BigDecimal(0));
+        }
+        if(volume!=null) {
+            stockKbar.setTradeQuantity(volume);
+        }else{
+            stockKbar.setTradeQuantity(0L);
+        }
+        return stockKbar;
+    }
+
 
     public BigDecimal getBlockKbarThsCurrent(String blockCode,String diff,String blockName,String tradeDate){
         int ret = thsLogin();

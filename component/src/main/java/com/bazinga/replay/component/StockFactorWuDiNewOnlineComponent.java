@@ -62,8 +62,7 @@ public class StockFactorWuDiNewOnlineComponent {
 
     public void factorTest(String start,String end,String factor,String excelYear){
         List<TradeDatePool> tradeDatePools = getTradeDatePools();
-        //getStockFactorLastInfo(tradeDatePools,factor,start,end);
-
+        getStockFactorLastInfo(tradeDatePools,factor,start,end);
         List<StockFactorLevelTestDTO> allBuys = Lists.newArrayList();
         for (TradeDatePool tradeDatePool:tradeDatePools){
             /*boolean before = tradeDatePool.getTradeDate().before(DateUtil.parseDate(start, DateUtil.yyyyMMdd));
@@ -141,15 +140,15 @@ public class StockFactorWuDiNewOnlineComponent {
             if(byRedisKey!=null){
                 continue;
             }
-            THREAD_POOL_QUOTE_FACTOR.execute(() -> {
+            //THREAD_POOL_QUOTE_FACTOR.execute(() -> {
                 getPlankTimePairs(tradeDatePool, factor);
-            });
+           // });
         }
-        try {
+        /*try {
             Thread.sleep(10000000000l);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     public void getPlankTimePairs(TradeDatePool tradeDatePool,String factor ){
@@ -181,10 +180,10 @@ public class StockFactorWuDiNewOnlineComponent {
                 if(circulateInfo==null){
                     continue;
                 }
-                boolean stStock = isBlockStStock(circulateInfo.getStockCode(), dateyyyyMMdd);
+                /*boolean stStock = isBlockStStock(circulateInfo.getStockCode(), dateyyyyMMdd);
                 if(stStock){
                     continue;
-                }
+                }*/
                 List<ThsStockKbar> stockKbars = getStockKBarsDelete30Days(stockFactor.getStockCode());
                 if(CollectionUtils.isEmpty(stockKbars)){
                     continue;
@@ -254,14 +253,14 @@ public class StockFactorWuDiNewOnlineComponent {
             return null;
         }
         BigDecimal endRate = null;
+        if(stockKbar.getZeroPrice()!=null && stockKbar.getZeroPrice().compareTo(new BigDecimal("0.01"))>0){
+            endRate = PriceUtil.getPricePercentRate(stockKbar.getClosePrice().subtract(stockKbar.getZeroPrice()),stockKbar.getZeroPrice());
+            return endRate;
+        }
         if(stockKbar.getAdjFactor()!=null&&stockKbar.getAdjFactor().equals(preStockKbar.getAdjFactor())){
             endRate = PriceUtil.getPricePercentRate(stockKbar.getClosePrice().subtract(preStockKbar.getClosePrice()),preStockKbar.getClosePrice());
         }else{
-            if(stockKbar.getZeroPrice()!=null && stockKbar.getZeroPrice().compareTo(new BigDecimal("0.1"))>0){
-                endRate = PriceUtil.getPricePercentRate(stockKbar.getClosePrice().subtract(stockKbar.getZeroPrice()),stockKbar.getZeroPrice());
-            }else {
-                endRate = PriceUtil.getPricePercentRate(stockKbar.getAdjClosePrice().subtract(preStockKbar.getAdjClosePrice()), preStockKbar.getAdjClosePrice());
-            }
+            endRate = PriceUtil.getPricePercentRate(stockKbar.getAdjClosePrice().subtract(preStockKbar.getAdjClosePrice()), preStockKbar.getAdjClosePrice());
         }
         return endRate;
     }
@@ -271,15 +270,15 @@ public class StockFactorWuDiNewOnlineComponent {
             return null;
         }
         BigDecimal openRate = null;
+        if(stockKbar.getZeroPrice()!=null && stockKbar.getZeroPrice().compareTo(new BigDecimal("0.01"))>0){
+            openRate = PriceUtil.getPricePercentRate(stockKbar.getOpenPrice().subtract(stockKbar.getZeroPrice()), stockKbar.getZeroPrice());
+            return openRate;
+        }
         if(stockKbar.getAdjFactor()!=null&&stockKbar.getAdjFactor().equals(preStockKbar.getAdjFactor())){
             openRate = PriceUtil.getPricePercentRate(stockKbar.getOpenPrice().subtract(preStockKbar.getClosePrice()),preStockKbar.getClosePrice());
 
         }else{
-            if(stockKbar.getZeroPrice()!=null && stockKbar.getZeroPrice().compareTo(new BigDecimal("0.1"))>0){
-                openRate = PriceUtil.getPricePercentRate(stockKbar.getOpenPrice().subtract(stockKbar.getZeroPrice()), stockKbar.getZeroPrice());
-            }else {
-                openRate = PriceUtil.getPricePercentRate(stockKbar.getAdjOpenPrice().subtract(preStockKbar.getAdjClosePrice()), preStockKbar.getAdjClosePrice());
-            }
+            openRate = PriceUtil.getPricePercentRate(stockKbar.getAdjOpenPrice().subtract(preStockKbar.getAdjClosePrice()), preStockKbar.getAdjClosePrice());
         }
         return openRate;
     }
@@ -432,7 +431,7 @@ public class StockFactorWuDiNewOnlineComponent {
 
 
 
-    public void     calBeforeRate(List<ThsStockKbar> stockKbars,StockFactorLevelTestDTO buy){
+    public void calBeforeRate(List<ThsStockKbar> stockKbars,StockFactorLevelTestDTO buy){
         List<ThsStockKbar> reverse = Lists.reverse(stockKbars);
         boolean flag = false;
         int i=0;

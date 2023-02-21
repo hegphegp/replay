@@ -157,7 +157,7 @@ public class ThsTest {
         //replayFenBanRateComponent.plankFenBan();
         //stockFactorDuanXianTwoComponent.factorTest();
         //线上使用版本
-        //tockFactorWuDiNewTwoComponent.factorTest();
+        //stockFactorWuDiNewTwoComponent.factorTest();
 
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
 
@@ -213,7 +213,7 @@ public class ThsTest {
         //macdCalComponent.macdExcel();
         /*indexDValueComponent.calIndexDValue();*/
         //indexDValueComponent.dvalueExcel();
-        //northSouthMoneyComponent.northMoney("","北向资金");
+        northSouthMoneyComponent.northMoney("","北向资金");
        // indexDValueComponent.dvalueExcel();
         //northSouthMoneyComponent.northMoney("","北向资金");
         //northSouthMoneyComponent.indexPercent("999999","上证指数成交额比例");
@@ -247,7 +247,7 @@ public class ThsTest {
         //huShen300SecondKbarComponent.huShen300QuoteToKbar();
         //huShen300SecondKbarComponent.calMacdSave();
         //huShen300SecondKbarComponent.macdExcel();
-        huShen300MABuyComponent.calMaInfos();
+        //huShen300MABuyComponent.calMaInfos();
         huShen300MABuyComponent.maExcel();
     }
 
@@ -281,16 +281,15 @@ public class ThsTest {
     }
     @Test
     public void test11(){
-        stockFactorWuDiNewOnlineComponent.factorTest("20190101","20200101","index2a","2018");
+        stockFactorWuDiNewOnlineComponent.factorTest("20221001","20230217","index2a","2023");
     }
 
     @Test
     public void test12(){
-        Date date = DateUtil.parseDate("20230214", DateUtil.yyyyMMdd);
-        sendReplayInfoAutoComponent.sendStockKbarReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
-        //sendReplayInfoAutoComponent.sendStockCommonReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
+        Date date = DateUtil.parseDate("20230217", DateUtil.yyyyMMdd);
+        sendReplayInfoAutoComponent.sendStockCommonReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
         sendReplayInfoAutoComponent.sendIndexDetail(DateUtil.format(date,DateUtil.yyyy_MM_dd));
-        //sendReplayInfoAutoComponent.sendPlankExchangeDaily(DateUtil.format(date,DateUtil.yyyy_MM_dd));
+        sendReplayInfoAutoComponent.sendPlankExchangeDaily(DateUtil.format(date,DateUtil.yyyy_MM_dd));
 
         sendReplayInfoAutoComponent.sendHistoryBlockStocks(DateUtil.format(date,DateUtil.yyyyMMdd));
         sendReplayInfoAutoComponent.sendStockBolling(DateUtil.format(date,DateUtil.yyyyMMdd));
