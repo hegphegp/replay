@@ -104,6 +104,9 @@ public class FutureQuoteIndexQuery extends PagingQuery implements Serializable {
      */
     private BigDecimal avgSellPrice;
 
+
+    private BigDecimal avgPrice;
+
     /**
      * 成交额
      */

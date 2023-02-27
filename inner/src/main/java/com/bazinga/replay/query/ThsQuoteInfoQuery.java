@@ -53,6 +53,10 @@ public class ThsQuoteInfoQuery extends PagingQuery implements Serializable {
 
     private Long timeStamp;
 
+    private Long timeStampFrom;
+
+    private Long timeStampTo;
+
     /**
      * 当前价格
      */

@@ -8,6 +8,7 @@ import com.bazinga.replay.dto.MacdIndexDTO;
 import com.bazinga.replay.dto.ThirdSecondTransactionDataDTO;
 import com.bazinga.replay.model.StockIndex;
 import com.bazinga.replay.model.ThsQuoteInfo;
+import com.bazinga.replay.model.ThsStockKbar;
 import com.bazinga.replay.model.TradeDatePool;
 import com.bazinga.replay.query.ThsQuoteInfoQuery;
 import com.bazinga.replay.query.TradeDatePoolQuery;
@@ -108,6 +109,8 @@ public class ThsTest {
     @Autowired
     private StockFactorWuDiNewTwoComponent stockFactorWuDiNewTwoComponent;
     @Autowired
+    private StockFactorWuDiNewOnlineComponent stockFactorWuDiNewOnlineComponent;
+    @Autowired
     private StockFactorDuanXianTwoComponent stockFactorDuanXianTwoComponent;
     @Autowired
     private ThsQuoteSaveComponent thsQuoteSaveComponent;
@@ -127,23 +130,41 @@ public class ThsTest {
     private GatherAmountComponent gatherAmountComponent;
     @Autowired
     private ThreePlankBuyBlockComponent threePlankBuyBlockComponent;
+    @Autowired
+    private ThreePlankBuyHotBlockComponent threePlankBuyHotBlockComponent;
+    @Autowired
+    private BlockFollowStaticCurrent4PlankComponent blockFollowStaticCurrent4PlankComponent;
+    @Autowired
+    private SendReplayInfoAutoComponent sendReplayInfoAutoComponent;
+    @Autowired
+    private PlankAndOpenTimeComponent plankAndOpenTimeComponent;
+    @Autowired
+    private StrongerStockThanSzInfoComponent strongerStockThanSzInfoComponent;
+    @Autowired
+    private HuShen300MABuyComponent huShen300MABuyComponent;
 
 
 
     @Test
     public void test1() {
+        plankAndOpenTimeComponent.plankAndOpenTime();
+        //System.out.println(1111);
+        //threePlankBuyHotBlockComponent.threePlankHotBlockBuyTest();
+        //threePlankBuyHotBlockComponent.getAlLPlanks();
         //threePlankBuyBlockComponent.threePlankBuyTest();
         //gatherAmountComponent.gatherAmountBuy();
-        /*blockFollowStaticCurrentComponent.blockFollowStaticInfo();
-        replayFenBanRateComponent.plankFenBan();*/
+        //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+        //replayFenBanRateComponent.plankFenBan();
         //stockFactorDuanXianTwoComponent.factorTest();
+        //线上使用版本
         //stockFactorWuDiNewTwoComponent.factorTest();
+
         //historyTransactionDataComponent.getFiveMinData("000001","20220121");
 
-        //stockFactorTestThreeComponent.factorTest();
+       // stockFactorTestThreeComponent.factorTest();
         //indexKbarCurrentComponent.indexKbarCurrent();
-        indexKbarCurrentComponent.indexStockKbarSend();
-        indexKbarCurrentComponent.stockIndexSend();
+        /*indexKbarCurrentComponent.indexStockKbarSend();
+        indexKbarCurrentComponent.stockIndexSend();*/
         /*thsStockIndexComponent.shMACDIndex("20221021","3993ok
         00","沪深300",".SZ");
         thsStockIndexComponent.shMACDIndex("20221021","000001","上证指数",".SH");*/
@@ -154,8 +175,10 @@ public class ThsTest {
         //stockFactorTestOneComponent.factorTest();
         //firstPlankBuyTimeLevelComponent.strongPlank();
        // strongPlankDefineComponent.strongPlank();
+        //blockFollowStaticCurrent4PlankComponent.blockFollowStaticInfo();
         //用于板块跟随回测 用于线上使用
         //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+
         //blockFollowStaticCurrentHistoryComponent.blockFollowStaticInfo();
        /* strongPlankDefineComponent.strongPlank();
         stockBlockLevelComponent.stockFirstBlockInfo();
@@ -190,7 +213,7 @@ public class ThsTest {
         //macdCalComponent.macdExcel();
         /*indexDValueComponent.calIndexDValue();*/
         //indexDValueComponent.dvalueExcel();
-        //northSouthMoneyComponent.northMoney("","北向资金");
+        northSouthMoneyComponent.northMoney("","北向资金");
        // indexDValueComponent.dvalueExcel();
         //northSouthMoneyComponent.northMoney("","北向资金");
         //northSouthMoneyComponent.indexPercent("999999","上证指数成交额比例");
@@ -223,29 +246,61 @@ public class ThsTest {
         //thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
         //huShen300SecondKbarComponent.huShen300QuoteToKbar();
         //huShen300SecondKbarComponent.calMacdSave();
-        huShen300SecondKbarComponent.macdExcel();
+        //huShen300SecondKbarComponent.macdExcel();
+        //huShen300MABuyComponent.calMaInfos();
+        huShen300MABuyComponent.maExcel();
+
+       /* List<ThsQuoteInfo> afterStockQuotes = huShen300MABuyComponent.getAfterStockQuotes(1677049198900l, 1677049200400l);
+        System.out.println(111);*/
     }
 
     //沪深300 3mink线相关
     @Test
     public void test5() {
         //huShen3003MinKbarComponent.huShen300QuoteToKbar();
-       //huShen3003MinKbarComponent.calMacdSave();
-        huShen3003MinKbarComponent.macdExcel();
+       //huShen3003MinKbarComponent.calBiasSave();
+        //huShen3003MinKbarComponent.macdExcel();
+        huShen3003MinKbarComponent.quoteExcel();
     }
 
 
     //沪深300 1mink线相关
     @Test
     public void test6() {
-        //huShen3001MinKbarComponent.huShen300QuoteToKbar();
+        huShen3001MinKbarComponent.huShen300QuoteToKbar();
         //huShen3001MinKbarComponent.calBiasSave();
-        huShen3001MinKbarComponent.biasExcel();
+        //huShen3001MinKbarComponent.biasExcel();
     }
 
     @Test
     public void test7(){
         thsDataComponent.getOpenPicture("600704","2021-06-25");
     }
+    @Test
+    public void test10(){
+        //用于4板块跟随回测 用于线上使用
+        blockFollowStaticCurrent4PlankComponent.blockFollowStaticInfo();
+        //用于3板块跟随回测 用于线上使用
+        //blockFollowStaticCurrentComponent.blockFollowStaticInfo();
+    }
+    @Test
+    public void test11(){
+        stockFactorWuDiNewOnlineComponent.factorTest("20221001","20230217","index2a","2023");
+    }
 
+    @Test
+    public void test12(){
+        Date date = DateUtil.parseDate("20230217", DateUtil.yyyyMMdd);
+        sendReplayInfoAutoComponent.sendStockCommonReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendIndexDetail(DateUtil.format(date,DateUtil.yyyy_MM_dd));
+        sendReplayInfoAutoComponent.sendPlankExchangeDaily(DateUtil.format(date,DateUtil.yyyy_MM_dd));
+
+        sendReplayInfoAutoComponent.sendHistoryBlockStocks(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockBolling(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockAttributeReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
+    }
+    @Test
+    public void test13(){
+        strongerStockThanSzInfoComponent.strongerStockTest();
+    }
 }

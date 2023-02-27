@@ -266,6 +266,16 @@
             and create_time <= #{createTimeTo, jdbcType=TIMESTAMP}
             ]]>
         </if>
+        <if test="timeStampFrom != null">
+            <![CDATA[
+            and time_stamp >= #{timeStampFrom, jdbcType=BIGINT}
+            ]]>
+        </if>
+        <if test="timeStampTo != null">
+            <![CDATA[
+            and time_stamp <= #{timeStampTo, jdbcType=BIGINT}
+            ]]>
+        </if>
         <if test="updateTimeFrom != null">
             <![CDATA[
             and update_time >= #{updateTimeFrom, jdbcType=TIMESTAMP}

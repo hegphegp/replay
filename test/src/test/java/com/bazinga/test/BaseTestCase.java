@@ -39,6 +39,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Date;
@@ -105,12 +106,21 @@ public class BaseTestCase {
     private ThsBlockStocksComponent thsBlockStocksComponent;
     @Autowired
     private IndexKbarCurrentComponent indexKbarCurrentComponent;
+    @Autowired
+    private ThsCurrentQuoteSaveComponent thsCurrentQuoteSaveComponent;
+    @Autowired
+    private ThsBlockKbarComponent thsBlockKbarComponent;
+    @Autowired
+    private SendReplayInfoAutoComponent sendReplayInfoAutoComponent;
+    @Autowired
+    private CommonComponent commonComponent;
 
 
     @Test
     public void test1() {
         //无敌数据
         Date date = new Date();
+        //Date date = DateUtil.parseDate("2023-01-13 15:30:30", DateUtil.DEFAULT_FORMAT);
         newStockComponent.catchNewStock();
         plankChenJiaoEComponent.exportData();
         stockReplayDailyComponent.stockReplayDaily(date);
@@ -146,10 +156,21 @@ public class BaseTestCase {
         stockAttributeReplayComponent.saveStockAttributeReplay(date);
         stockPlankDailyComponent.handleStopTradeStock(date);
         stockBollingComponent.calCurrentDayBoll(date);
-        thsBlockStocksComponent.indexBLockDetail();
+        thsBlockStocksComponent.indexBLockDetail("000300",".SH","沪深300");
         historyBlockInfoComponent.initHistoryBlockInfo();
-        indexKbarCurrentComponent.indexStockKbarSend();
+        indexKbarCurrentComponent.indexStockKbarSend(date);
         indexKbarCurrentComponent.stockIndexSend();
+        thsCurrentQuoteSaveComponent.saveHS300FutureQuoteIndex(DateUtil.format(new Date(),DateUtil.yyyy_MM_dd));
+
+        //复盘数据发到线上
+        sendReplayInfoAutoComponent.sendStockKbarReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockCommonReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendIndexDetail(DateUtil.format(date,DateUtil.yyyy_MM_dd));
+        sendReplayInfoAutoComponent.sendPlankExchangeDaily(DateUtil.format(date,DateUtil.yyyy_MM_dd));
+
+        sendReplayInfoAutoComponent.sendHistoryBlockStocks(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockBolling(DateUtil.format(date,DateUtil.yyyyMMdd));
+        sendReplayInfoAutoComponent.sendStockAttributeReplay(DateUtil.format(date,DateUtil.yyyyMMdd));
         /*blockKbarComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));
         hotBlockDropInfoComponent.thsBlockKbar(DateTimeUtils.getDate000000(date));*/
     }
@@ -181,17 +202,21 @@ public class BaseTestCase {
 
     @Test
     public void test9() {
-        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
+        historyBlockInfoComponent.initHistoryBlockInfo();
+        //historyBlockInfoComponent.compareHistoryBlockStocks();
+        //indexKbarCurrentComponent.indexStockKbarSend(DateUtil.parseDate("20230109",DateUtil.yyyyMMdd));
+        //thsBlockStocksComponent.indexBLockDetail();
+        /*stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         String dateyyyyMMhh = DateUtil.format(new Date(), DateUtil.yyyyMMdd);
         //String dateyyyyMMhh = "20221209";
         thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"399300","沪深300",".SZ");
-        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");
+        thsStockIndexComponent.shMACDIndex(dateyyyyMMhh,"000001","上证指数",".SH");*/
     }
 
     @Test
     public void test11() {
-        historyBlockInfoComponent.getPreBlockStocks("20221125","20221129");
+        historyBlockInfoComponent.getPreBlockStocks("20230110","20230111");
     }
     @Test
     public void test10(){
@@ -207,7 +232,12 @@ public class BaseTestCase {
 
     @Test
     public void test7() {
+        //thsBlockStocksComponent.initIndexBLockDetail("000905",".SH","中证500");
+        //thsBlockStocksComponent.indexBLockDetail();
         historyBlockInfoComponent.initHistoryBlockInfo();
+        //thsBlockStocksComponent.indexBLockDetail();
+        //thsCurrentQuoteSaveComponent.saveHS300FutureQuoteIndex("2022-12-15");
+        //historyBlockInfoComponent.initHistoryBlockInfo();
         /*stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
@@ -305,6 +335,11 @@ public class BaseTestCase {
         stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
         stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);*/
 
+        /*stockKbarComponent.initSpecialStockAndSaveKbarData("880863","昨日涨停",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("999999","上证指数",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399905","中证500指数",100);
+        stockKbarComponent.initSpecialStockAndSaveKbarData("399300","沪深300指数",100);*/
+
 
 
     }
@@ -354,7 +389,67 @@ public class BaseTestCase {
 
         stockKbarComponent.batchKbarDataInit();
 
-    }
 
+    }
+    @Test
+    public void test29() {
+        String start = "2022-12-30";
+        String end = "2023-01-06";
+        /*thsBlockKbarComponent.getBlockKbarThs("883949",".TI","陆股通清仓",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("399905",".SZ","中证500",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883913",".TI","龙虎榜指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("399903",".SZ","中证100",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883900",".TI","昨日涨停表现",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883905",".TI","昨日换手前十",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883920",".TI","近期解禁",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883963",".TI","国家队减持",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("399001",".SZ","深圳成指",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883917",".TI","行业龙头",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883404",".TI","同花顺情绪指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883939",".TI","陆股通持续净买入",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("000852",".SH","中证1000",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883901",".TI","昨日资金前十",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883902",".TI","昨日成交前十",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883918",".TI","昨日炸板股",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883906",".TI","昨日高振幅",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883962",".TI","国家队增持",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883400",".TI","昨日ST首板股表现",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883911",".TI","创历史新高",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("399006",".SZ","创业板指",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883979",".TI","昨日首板表现",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883912",".TI","深股通成交前十",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("000001",".SH","上证指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("USDCNH",".FX","人民币离岸汇率",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("000016",".SH","上证50",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("IXIC",".GI","纳斯达克指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883908",".TI","沪股通成交前十",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883904",".TI","增发募集指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883910",".TI","同花顺热股",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("883958",".TI","昨日连板",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("HSI",".HK","恒生指数",start,end);
+        thsBlockKbarComponent.getBlockKbarThs("399300",".SZ","沪深300",start,end);*/
+
+
+
+        thsStockIndexComponent.shMACDIndex("20230105","000001","上证指数",".SH");
+        thsStockIndexComponent.shMACDIndex("20230105","399006","创业板指",".SZ");
+        thsStockIndexComponent.shMACDIndex("20230105","399300","沪深300",".SZ");
+        thsStockIndexComponent.shMACDIndex("20230105","399905","中证500",".SZ");
+        thsStockIndexComponent.shMACDIndex("20230105","000016","上证50",".SH");
+        thsStockIndexComponent.shMACDIndex("20230105","399001","深圳成指",".SZ");
+        thsStockIndexComponent.shMACDIndex("20230105","000852","中证1000",".SH");
+        thsStockIndexComponent.shMACDIndex("20230105","399903","中证100",".SZ");
+    }
+    @Test
+    public void test30(){
+        Date preTradeDate = commonComponent.preTradeDate(new Date());
+        indexKbarCurrentComponent.indexStockKbarSend(preTradeDate);
+
+        /*indexKbarCurrentComponent.indexStockKbarManualSend("IXIC","纳斯达克指数","20230220",
+                new BigDecimal("0"),new BigDecimal(""),new BigDecimal(""),new BigDecimal(""),0l,new BigDecimal(""));*/
+
+        //indexKbarCurrentComponent.stockIndexSend();
+        //indexKbarCurrentComponent.indexKbarCurrentNew();
+    }
 
 }

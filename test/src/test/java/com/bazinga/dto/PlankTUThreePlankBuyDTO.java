@@ -10,5 +10,7 @@ public class PlankTUThreePlankBuyDTO {
     private Long firstPlankTime;
     private Long firstBuyTime;
     private String buyTime;
+    private boolean continueBeautifulPlank;
+    private int planks;
 
 }

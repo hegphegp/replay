@@ -192,5 +192,50 @@ public class HistoryBlockInfoComponent {
         return blocks;
     }
 
+    public void compareHistoryBlockStocks(){
+        List<String> blockStocks = getBlockStocks("886001", "20230215");
+        List<String> hisBlockStocks = getBlockStocks("886001", "20230214");
+        for (String stockCode:blockStocks){
+            if(!hisBlockStocks.contains(stockCode)){
+                System.out.println(stockCode);
+            }
+        }
+        if (blockStocks.contains("002276")){
+            System.out.println("====="+1111);
+        }
+
+        if (hisBlockStocks.contains("002276")){
+            System.out.println("====="+2222);
+        }
+
+    }
+
+
+    public List<String> getBlockStocks(String blockCode,String tradeDate){
+        List<String> list = Lists.newArrayList();
+        HistoryBlockStocksQuery query = new HistoryBlockStocksQuery();
+        query.setBlockCode(blockCode);
+        query.setTradeDate(tradeDate);
+        List<HistoryBlockStocks> historyBlockStocksList = historyBlockStocksService.listByCondition(query);
+        if(org.springframework.util.CollectionUtils.isEmpty(historyBlockStocksList)){
+            return null;
+        }
+        HistoryBlockStocks historyBlockStocks = historyBlockStocksList.get(0);
+        String stocks = historyBlockStocks.getStocks();
+        if(org.apache.commons.lang3.StringUtils.isBlank(stocks)){
+            return null;
+        }
+        String[] split = stocks.split(",");
+        List<String> stockList = Lists.newArrayList(split);
+        for (String stockCode:stockList){
+            boolean shMain = MarketUtil.isShMain(stockCode);
+            boolean chuangYe = MarketUtil.isChuangYe(stockCode);
+            boolean szMain = MarketUtil.isSzMain(stockCode);
+            if(shMain||chuangYe||szMain){
+                list.add(stockCode);
+            }
+        }
+        return list;
+    }
 
 }
