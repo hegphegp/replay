@@ -249,6 +249,9 @@ public class ThsTest {
         //huShen300SecondKbarComponent.macdExcel();
         //huShen300MABuyComponent.calMaInfos();
         huShen300MABuyComponent.maExcel();
+
+       /* List<ThsQuoteInfo> afterStockQuotes = huShen300MABuyComponent.getAfterStockQuotes(1677049198900l, 1677049200400l);
+        System.out.println(111);*/
     }
 
     //沪深300 3mink线相关
@@ -256,7 +259,8 @@ public class ThsTest {
     public void test5() {
         //huShen3003MinKbarComponent.huShen300QuoteToKbar();
        //huShen3003MinKbarComponent.calBiasSave();
-        huShen3003MinKbarComponent.macdExcel();
+        //huShen3003MinKbarComponent.macdExcel();
+        huShen3003MinKbarComponent.quoteExcel();
     }
 
 

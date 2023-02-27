@@ -1074,4 +1074,48 @@ public class HuShen3003MinKbarComponent {
         return list;
     }
 
+
+    public void quoteExcel(){
+        List<ThsQuoteInfo> thsQuoteInfos = getThsQuoteInfo();
+        List<Object[]> datas = Lists.newArrayList();
+
+        for (ThsQuoteInfo dto:thsQuoteInfos) {
+            List<Object> list = new ArrayList<>();
+            list.add(dto.getQuoteDate());
+            list.add(dto.getQuoteDate());
+            Date date = new Date(dto.getTimeStamp());
+            String format = DateUtil.format(date, DateUtil.HHmmss_DEFALT);
+            list.add(format);
+            list.add(dto.getVol());
+            list.add(dto.getAmt());
+            list.add(dto.getCurrentPrice());
+            list.add(dto.getPreClosePrice());
+            Object[] objects = list.toArray();
+            datas.add(objects);
+        }
+
+        String[] rowNames = {"index","买入日期","具体时间","量","成交额","当前价","前一日收盘价"};
+        PoiExcelUtil poiExcelUtil = new PoiExcelUtil("沪深主连行情",rowNames,datas);
+        try {
+            poiExcelUtil.exportExcelUseExcelTitle("沪深主连行情");
+        }catch (Exception e){
+            log.info(e.getMessage());
+        }
+    }
+
+    public List<ThsQuoteInfo> getThsQuoteInfo(){
+        List<ThsQuoteInfo> list = Lists.newArrayList();
+        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("2023-02-22",DateUtil.yyyy_MM_dd));
+        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
+        for (TradeDatePool tradeDatePool:tradeDatePools) {
+            String yyyyMMdd = DateUtil.format(tradeDatePool.getTradeDate(), DateUtil.yyyyMMdd);
+            ThsQuoteInfoQuery query = new ThsQuoteInfoQuery();
+            query.setQuoteDate(yyyyMMdd);
+            List<ThsQuoteInfo> thsQuoteInfos = thsQuoteInfoService.listByCondition(query);
+            list.addAll(thsQuoteInfos);
+        }
+        return list;
+    }
 }

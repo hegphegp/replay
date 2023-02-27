@@ -157,7 +157,7 @@ public class BaseTestCase {
         stockPlankDailyComponent.handleStopTradeStock(date);
         stockBollingComponent.calCurrentDayBoll(date);
         thsBlockStocksComponent.indexBLockDetail("000300",".SH","沪深300");
-        //historyBlockInfoComponent.initHistoryBlockInfo();
+        historyBlockInfoComponent.initHistoryBlockInfo();
         indexKbarCurrentComponent.indexStockKbarSend(date);
         indexKbarCurrentComponent.stockIndexSend();
         thsCurrentQuoteSaveComponent.saveHS300FutureQuoteIndex(DateUtil.format(new Date(),DateUtil.yyyy_MM_dd));

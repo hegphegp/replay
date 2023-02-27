@@ -18,6 +18,13 @@ public class HuShen300MABuyDTO {
     private BigDecimal maxIndex;
     private BigDecimal minIndex;
     private BigDecimal buyIndex;
+
+    private int beforeAcrossSecond;
+    private int redCount;
+    private int greenCount;
+
+    private BigDecimal highProfitValue;
+
     private BigDecimal profitValue;
     private BigDecimal profit;
 }
