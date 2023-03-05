@@ -150,6 +150,8 @@ public class ThsTest {
     private StockMABuyTestComponent stockMABuyTestComponent;
     @Autowired
     private StockMABuyTestTwoComponent stockMABuyTestTwoComponent;
+    @Autowired
+    private IndexSpecialKbarComponent indexSpecialKbarComponent;
 
 
 
@@ -246,7 +248,7 @@ public class ThsTest {
     @Test
     public void test3() {
         //thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
-        //huShen300SecondKbarComponent.huShen300QuoteToKbar();
+        huShen300SecondKbarComponent.huShen300QuoteToKbar();
         //huShen300SecondKbarComponent.calMacdSave();
 
     }

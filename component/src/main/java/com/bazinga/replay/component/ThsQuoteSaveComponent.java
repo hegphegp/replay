@@ -75,6 +75,72 @@ public class ThsQuoteSaveComponent {
 
     }
 
+    public void saveQuoteQiHuo(String start,String end,String stockCode,String diff,String stockName){
+        int ret = thsLogin();
+        TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate(start,DateUtil.yyyy_MM_dd));
+        tradeDatePoolQuery.setTradeDateTo(DateUtil.parseDate(end,DateUtil.yyyy_MM_dd));
+        tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
+        List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
+        for (TradeDatePool tradeDatePool:tradeDatePools){
+            System.out.println(DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.yyyy_MM_dd)+ "===  开始了");
+            quoteHuShenQiHuo(DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.yyyy_MM_dd),stockCode,diff,stockName);
+            System.out.println(DateUtil.format(tradeDatePool.getTradeDate(),DateUtil.yyyy_MM_dd)+ "=========  结束了");
+        }
+        thsLoginOut();
+
+    }
+
+    public void quoteHuShenQiHuo(String tradeDate,String stockCode,String diff,String stockName){
+        String quote_str = THS_Snapshot(stockCode+"."+diff,"preClose;latest;amt;latestVolume;ms;amount","",tradeDate+" 09:15:00",tradeDate+" 15:00:00");
+        if(!StringUtils.isEmpty(quote_str)){
+            JSONObject jsonObject = JSONObject.parseObject(quote_str);
+            JSONArray tables = jsonObject.getJSONArray("tables");
+            if(tables==null||tables.size()==0){
+                return;
+            }
+            JSONObject tableJson = tables.getJSONObject(0);
+            JSONArray timeArray = tableJson.getJSONArray("time");
+            if(timeArray==null||timeArray.size()==0){
+                return;
+            }
+            List<String> times = timeArray.toJavaList(String.class);
+            JSONObject tableInfo = tableJson.getJSONObject("table");
+            List<BigDecimal> amts = tableInfo.getJSONArray("amt").toJavaList(BigDecimal.class);
+            List<BigDecimal> amounts = tableInfo.getJSONArray("amount").toJavaList(BigDecimal.class);
+            List<BigDecimal> vols = tableInfo.getJSONArray("latestVolume").toJavaList(BigDecimal.class);
+            List<BigDecimal> latests = tableInfo.getJSONArray("latest").toJavaList(BigDecimal.class);
+            List<BigDecimal> preCloses = tableInfo.getJSONArray("preClose").toJavaList(BigDecimal.class);
+            List<String> miss = tableInfo.getJSONArray("ms").toJavaList(String.class);
+            int i = 0;
+            for (String time:times){
+                Date date = DateUtil.parseDate(time, DateUtil.DEFAULT_FORMAT);
+                ThsQuoteInfo quote = new ThsQuoteInfo();
+                quote.setStockCode(stockCode+diff);
+                quote.setStockName(stockName);
+                quote.setQuoteDate(DateUtil.format(date,DateUtil.yyyyMMdd));
+                quote.setQuoteTime(DateUtil.format(date,DateUtil.HHmmss));
+                quote.setCurrentPrice(latests.get(i));
+                quote.setPreClosePrice(preCloses.get(i));
+                Long timeStamp = formatTimeStamp(quote.getQuoteDate(), quote.getQuoteTime(), miss.get(i));
+                quote.setTimeStamp(timeStamp);
+                if(amts.get(i)==null) {
+                    quote.setAmt(BigDecimal.ZERO);
+                }else{
+                    quote.setAmt(amts.get(i));
+                }
+                quote.setAmount(amounts.get(i));
+                if(vols.get(i)==null) {
+                    quote.setVol(0l);
+                }else{
+                    quote.setVol(vols.get(i).longValue());
+                }
+                thsQuoteInfoService.save(quote);
+                i++;
+            }
+        }
+    }
+
     public void quoteHuShen300QiHuo(String tradeDate){
         String quote_str = THS_Snapshot("IFZL.CFE","preClose;latest;amt;latestVolume;ms;amount","",tradeDate+" 09:15:00",tradeDate+" 15:00:00");
         if(!StringUtils.isEmpty(quote_str)){
