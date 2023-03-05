@@ -254,12 +254,12 @@ public class ThsTest {
     //沪深300 5sk线相关
     @Test
     public void test4() {
-        //thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
+        thsQuoteSaveComponent.saveQuoteHuShen300QiHuo();
         //huShen300SecondKbarComponent.huShen300QuoteToKbar();
         //huShen300SecondKbarComponent.calMacdSave();
         //huShen300SecondKbarComponent.macdExcel();
         //huShen300MABuyComponent.calMaInfos();
-        huShen300MABuyComponent.maExcel();
+        //huShen300MABuyComponent.maExcel();
 
        /* List<ThsQuoteInfo> afterStockQuotes = huShen300MABuyComponent.getAfterStockQuotes(1677049198900l, 1677049200400l);
         System.out.println(111);*/

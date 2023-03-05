@@ -1,7 +1,6 @@
 package com.bazinga.component;
 
 
-import com.alibaba.fastjson.JSONObject;
 import com.bazinga.base.Sort;
 import com.bazinga.constant.CommonConstant;
 import com.bazinga.dto.HuShen300MacdBuyDTO;
@@ -23,7 +22,6 @@ import com.bazinga.util.DateUtil;
 import com.bazinga.util.PriceUtil;
 import com.bazinga.util.ThreadPoolUtils;
 import com.google.common.collect.Lists;
-import jnr.ffi.annotations.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +30,10 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -41,7 +42,7 @@ import java.util.concurrent.ExecutorService;
  */
 @Component
 @Slf4j
-public class HuShen300SecondKbarComponent {
+public class IndexSpecialKbarComponent {
     @Autowired
     private ThsDataComponent thsDataComponent;
     @Autowired
