@@ -27,6 +27,24 @@ public class ThsStockKbarComponent {
         return thsStockKbars;
     }
 
+    public List<ThsStockKbar> getAllStockKBars(String stockCode){
+        try {
+            ThsStockKbarQuery query = new ThsStockKbarQuery();
+            query.setStockCode(stockCode);
+            query.addOrderBy("kbar_date", Sort.SortType.ASC);
+            List<ThsStockKbar> stockKbars = thsStockKbarService.listByCondition(query);
+            List<ThsStockKbar> result = Lists.newArrayList();
+            for (ThsStockKbar stockKbar:stockKbars){
+                if(stockKbar.getTradeQuantity()>0){
+                    result.add(stockKbar);
+                }
+            }
+            return result;
+        }catch (Exception e){
+            return null;
+        }
+    }
+
     public List<ThsStockKbar> getStockKBarsDeleteNewDays(String stockCode){
         try {
             ThsStockKbarQuery query = new ThsStockKbarQuery();
