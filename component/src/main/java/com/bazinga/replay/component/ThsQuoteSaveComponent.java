@@ -63,7 +63,7 @@ public class ThsQuoteSaveComponent {
     public void saveQuoteHuShen300QiHuo(){
         int ret = thsLogin();
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
-        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("2023-02-15",DateUtil.yyyy_MM_dd));
+        tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("2023-02-23",DateUtil.yyyy_MM_dd));
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
         List<TradeDatePool> tradeDatePools = tradeDatePoolService.listByCondition(tradeDatePoolQuery);
         for (TradeDatePool tradeDatePool:tradeDatePools){

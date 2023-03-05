@@ -142,12 +142,23 @@ public class ThsTest {
     private StrongerStockThanSzInfoComponent strongerStockThanSzInfoComponent;
     @Autowired
     private HuShen300MABuyComponent huShen300MABuyComponent;
+    @Autowired
+    private RiskstatisticTestComponent riskstatisticTestComponent;
+    @Autowired
+    private ThsStockAvgLineComponent thsStockAvgLineComponent;
+    @Autowired
+    private StockMABuyTestComponent stockMABuyTestComponent;
+    @Autowired
+    private StockMABuyTestTwoComponent stockMABuyTestTwoComponent;
 
 
 
     @Test
     public void test1() {
-        plankAndOpenTimeComponent.plankAndOpenTime();
+
+        //thsStockAvgLineComponent.calAvgLine();
+        //riskstatisticTestComponent.riskStatisticTest();
+        //plankAndOpenTimeComponent.plankAndOpenTime();
         //System.out.println(1111);
         //threePlankBuyHotBlockComponent.threePlankHotBlockBuyTest();
         //threePlankBuyHotBlockComponent.getAlLPlanks();
@@ -213,7 +224,7 @@ public class ThsTest {
         //macdCalComponent.macdExcel();
         /*indexDValueComponent.calIndexDValue();*/
         //indexDValueComponent.dvalueExcel();
-        northSouthMoneyComponent.northMoney("","北向资金");
+        //northSouthMoneyComponent.northMoney("","北向资金");
        // indexDValueComponent.dvalueExcel();
         //northSouthMoneyComponent.northMoney("","北向资金");
         //northSouthMoneyComponent.indexPercent("999999","上证指数成交额比例");
@@ -302,5 +313,14 @@ public class ThsTest {
     @Test
     public void test13(){
         strongerStockThanSzInfoComponent.strongerStockTest();
+    }
+
+    /**
+     * 无敌股票ma
+     */
+    @Test
+    public void test14(){
+        stockMABuyTestTwoComponent.maExcel();
+        //stockMABuyTestComponent.maExcel();
     }
 }

@@ -202,7 +202,8 @@ public class BaseTestCase {
 
     @Test
     public void test9() {
-        historyBlockInfoComponent.initHistoryBlockInfo();
+        //historyBlockInfoComponent.initHistoryBlockInfo();
+        stockKbarComponent.calCurrentDayAvgLine(new Date());
         //historyBlockInfoComponent.compareHistoryBlockStocks();
         //indexKbarCurrentComponent.indexStockKbarSend(DateUtil.parseDate("20230109",DateUtil.yyyyMMdd));
         //thsBlockStocksComponent.indexBLockDetail();
@@ -393,8 +394,9 @@ public class BaseTestCase {
     }
     @Test
     public void test29() {
-        String start = "2022-12-30";
-        String end = "2023-01-06";
+        String start = "2021-01-01";
+        String end = "2023-02-24";
+        thsBlockKbarComponent.getBlockKbarThs("IFZL",".CFE","沪深主连",start,end);
         /*thsBlockKbarComponent.getBlockKbarThs("883949",".TI","陆股通清仓",start,end);
         thsBlockKbarComponent.getBlockKbarThs("399905",".SZ","中证500",start,end);
         thsBlockKbarComponent.getBlockKbarThs("883913",".TI","龙虎榜指数",start,end);
@@ -431,14 +433,14 @@ public class BaseTestCase {
 
 
 
-        thsStockIndexComponent.shMACDIndex("20230105","000001","上证指数",".SH");
+        /*thsStockIndexComponent.shMACDIndex("20230105","000001","上证指数",".SH");
         thsStockIndexComponent.shMACDIndex("20230105","399006","创业板指",".SZ");
         thsStockIndexComponent.shMACDIndex("20230105","399300","沪深300",".SZ");
         thsStockIndexComponent.shMACDIndex("20230105","399905","中证500",".SZ");
         thsStockIndexComponent.shMACDIndex("20230105","000016","上证50",".SH");
         thsStockIndexComponent.shMACDIndex("20230105","399001","深圳成指",".SZ");
         thsStockIndexComponent.shMACDIndex("20230105","000852","中证1000",".SH");
-        thsStockIndexComponent.shMACDIndex("20230105","399903","中证100",".SZ");
+        thsStockIndexComponent.shMACDIndex("20230105","399903","中证100",".SZ");*/
     }
     @Test
     public void test30(){
