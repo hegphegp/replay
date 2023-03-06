@@ -182,6 +182,7 @@ public class IndexKbarCurrentComponent {
         StockKbar stockKbar883958 = thsBlockKbarComponent.getBlockKbarThsDay("883958",".TI","昨日连板",yyyy_MM_dd, yyyy_MM_dd, yyyyMMdd);
         StockKbar stockKbarHSI = thsBlockKbarComponent.getBlockKbarThsDay("HSI",".HK","恒生指数",yyyy_MM_dd, yyyy_MM_dd, yyyyMMdd);
         StockKbar stockKbar399300 = thsBlockKbarComponent.getBlockKbarThsDay("399300",".SZ","沪深300",yyyy_MM_dd, yyyy_MM_dd, yyyyMMdd);
+        StockKbar stockKbarIFZL = thsBlockKbarComponent.getBlockKbarThsDay("IFZL",".CFE","沪深主连",yyyy_MM_dd, yyyy_MM_dd, yyyyMMdd);
         sendHttpStockKbar(stockKbar883949);
         sendHttpStockKbar(stockKbar399905);
         sendHttpStockKbar(stockKbar883913);
@@ -214,7 +215,8 @@ public class IndexKbarCurrentComponent {
         sendHttpStockKbar(stockKbar883910);
         sendHttpStockKbar(stockKbar883958);
         sendHttpStockKbar(stockKbarHSI);
-        sendHttpStockKbar(stockKbar399300);;
+        sendHttpStockKbar(stockKbar399300);
+        sendHttpStockKbar(stockKbarIFZL);
     }
 
     public void indexStockKbarManualSend(String stockCode,String stockName,String tradeDate,

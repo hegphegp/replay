@@ -395,7 +395,7 @@ public class BaseTestCase {
     @Test
     public void test29() {
         String start = "2021-01-01";
-        String end = "2023-02-24";
+        String end = "2023-03-05";
         thsBlockKbarComponent.getBlockKbarThs("IFZL",".CFE","沪深主连",start,end);
         /*thsBlockKbarComponent.getBlockKbarThs("883949",".TI","陆股通清仓",start,end);
         thsBlockKbarComponent.getBlockKbarThs("399905",".SZ","中证500",start,end);
@@ -444,6 +444,7 @@ public class BaseTestCase {
     }
     @Test
     public void test30(){
+
         Date preTradeDate = commonComponent.preTradeDate(new Date());
         indexKbarCurrentComponent.indexStockKbarSend(preTradeDate);
 

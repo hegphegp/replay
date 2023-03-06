@@ -8,10 +8,7 @@ import com.bazinga.dto.MacdBuyDTO;
 import com.bazinga.queue.LimitQueue;
 import com.bazinga.replay.component.ThsDataComponent;
 import com.bazinga.replay.dto.MacdIndexDTO;
-import com.bazinga.replay.model.StockIndex;
-import com.bazinga.replay.model.StockKbar;
-import com.bazinga.replay.model.ThsQuoteInfo;
-import com.bazinga.replay.model.TradeDatePool;
+import com.bazinga.replay.model.*;
 import com.bazinga.replay.query.StockIndexQuery;
 import com.bazinga.replay.query.StockKbarQuery;
 import com.bazinga.replay.query.ThsQuoteInfoQuery;
@@ -54,11 +51,11 @@ public class IndexSpecialKbarComponent {
     @Autowired
     private ThsQuoteInfoService thsQuoteInfoService;
     @Autowired
-    private StockKbarService stockKbarService;
+    private SpecialStockKbarService specialStockKbarService;
 
     public static final ExecutorService THREAD_POOL_QUOTE = ThreadPoolUtils.create(16, 32, 512, "QuoteThreadPool");
 
-    public void getSecondKbar(int second,String stockCode){
+    public void getSecondKbar(int second,String stockCode,String stockName,int type){
         TradeDatePoolQuery tradeDatePoolQuery = new TradeDatePoolQuery();
         tradeDatePoolQuery.setTradeDateFrom(DateUtil.parseDate("20180101",DateUtil.yyyyMMdd));
         tradeDatePoolQuery.addOrderBy("trade_date", Sort.SortType.ASC);
@@ -75,12 +72,12 @@ public class IndexSpecialKbarComponent {
             if (CollectionUtils.isEmpty(thsQuoteInfos)) {
                 continue;
             }
-            calSecondKbar(thsQuoteInfos, second, yyyyMMdd);
+            calSecondKbar(thsQuoteInfos, second, yyyyMMdd,stockCode,stockName,type);
 
         }
     }
 
-    public void calSecondKbar(List<ThsQuoteInfo> quotes,int seconds,String tradeDate){
+    public void calSecondKbar(List<ThsQuoteInfo> quotes,int seconds,String tradeDate,String stockCode,String stockName,int type){
         List<Date> kbarSeconds = getKbarSeconds(seconds);
         Date preDatePoint = DateUtil.parseDate("092859",DateUtil.HHmmss);
         for (Date datePoint:kbarSeconds){
@@ -136,42 +133,24 @@ public class IndexSpecialKbarComponent {
                 high = preEndQuoteInfo.getCurrentPrice();
                 low = preEndQuoteInfo.getCurrentPrice();
             }
-            StockKbar stockKbar = new StockKbar();
-            stockKbar.setStockCode("IFZLCFE");
-            stockKbar.setStockName("沪深300期货");
-            stockKbar.setKbarDate(tradeDate+datePointStr);
-            stockKbar.setUniqueKey(stockKbar.getStockCode()+"_"+stockKbar.getKbarDate());
+            SpecialStockKbar stockKbar = new SpecialStockKbar();
+            stockKbar.setStockCode(stockCode);
+            stockKbar.setStockName(stockName);
+            stockKbar.setKbarDate(tradeDate);
+            stockKbar.setKbarTime(datePointStr);
+            stockKbar.setUniqueKey(stockKbar.getStockCode()+"_"+stockKbar.getKbarDate()+"_"+datePointStr+"_"+type);
             stockKbar.setOpenPrice(start);
             stockKbar.setClosePrice(end);
             stockKbar.setHighPrice(high);
             stockKbar.setLowPrice(low);
+            stockKbar.setKbarType(type);
             stockKbar.setTradeQuantity(quantity);
             stockKbar.setTradeAmount(amount);
             stockKbar.setCreateTime(new Date());
-            stockKbarService.save(stockKbar);
+            specialStockKbarService.save(stockKbar);
         }
     }
 
-
-    public void saveGatherKbar(List<ThsQuoteInfo> quotes){
-        ThsQuoteInfo thsQuoteInfo = quotes.get(0);
-        if(thsQuoteInfo.getQuoteTime().equals("092500")){
-            StockKbar stockKbar = new StockKbar();
-            stockKbar.setStockCode("127046");
-            stockKbar.setStockName("中证500期货");
-            stockKbar.setKbarDate("20211110"+"093000");
-            stockKbar.setUniqueKey(stockKbar.getStockCode()+"_"+stockKbar.getKbarDate());
-            stockKbar.setOpenPrice(thsQuoteInfo.getCurrentPrice());
-            stockKbar.setClosePrice(thsQuoteInfo.getCurrentPrice());
-            stockKbar.setHighPrice(thsQuoteInfo.getCurrentPrice());
-            stockKbar.setLowPrice(thsQuoteInfo.getCurrentPrice());
-
-            stockKbar.setTradeQuantity(thsQuoteInfo.getVol());
-            stockKbar.setTradeAmount(thsQuoteInfo.getAmt());
-            stockKbar.setCreateTime(new Date());
-            stockKbarService.save(stockKbar);
-        }
-    }
 
     public  BigDecimal getPricePercentRate(BigDecimal price, BigDecimal basePrice) {
         return price.divide(basePrice,6, RoundingMode.HALF_UP).multiply(CommonConstant.DECIMAL_HUNDRED);
